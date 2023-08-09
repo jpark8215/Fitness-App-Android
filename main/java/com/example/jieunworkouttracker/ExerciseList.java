@@ -304,32 +304,76 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
             empty.setVisibility(View.GONE);
         }
 
-        //fetchExerciseLogs returns the data in reverse order. So we start at the end of the cursor and work our way
-        //backwards. This way the data appear is the correct order.
-        for (cursor.moveToLast(); !cursor.isBeforeFirst(); cursor.moveToPrevious()) {
-            ExerciseItem exerciseItem = new ExerciseItem();
-            //uses the cursor to populate the item WORKOUT_ID value
-            exerciseItem.setId(cursor.getString(cursor.getColumnIndex("log_id")));
-            //uses the cursor to populate the item Exercise Names
-            exerciseItem.setTitle(cursor.getString(cursor.getColumnIndex("exercise")));
+        // Ensure the cursor is not null and contains data
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                ExerciseItem exerciseItem = new ExerciseItem();
 
-            exerciseItem.setButton1(cursor.getString(cursor.getColumnIndex("set1")));
-            exerciseItem.setButton2(cursor.getString(cursor.getColumnIndex("set2")));
-            exerciseItem.setButton3(cursor.getString(cursor.getColumnIndex("set3")));
-            exerciseItem.setButton4(cursor.getString(cursor.getColumnIndex("set4")));
-            exerciseItem.setButton5(cursor.getString(cursor.getColumnIndex("set5")));
+                // Retrieve column indexes for better code readability
+                int logIdIndex = cursor.getColumnIndex("log_id");
+                int exerciseIndex = cursor.getColumnIndex("exercise");
+                int set1Index = cursor.getColumnIndex("set1");
+                int set2Index = cursor.getColumnIndex("set2");
+                int set3Index = cursor.getColumnIndex("set3");
+                int set4Index = cursor.getColumnIndex("set4");
+                int set5Index = cursor.getColumnIndex("set5");
+                int weightIndex = cursor.getColumnIndex("weight");
 
-            //Sets all of the buttons to the default colour
-            exerciseItem.setButton1Colour(R.drawable.button_shape_default);
-            exerciseItem.setButton2Colour(R.drawable.button_shape_default);
-            exerciseItem.setButton3Colour(R.drawable.button_shape_default);
-            exerciseItem.setButton4Colour(R.drawable.button_shape_default);
-            exerciseItem.setButton5Colour(R.drawable.button_shape_default);
+                // Populate exerciseItem properties using the retrieved data
+                exerciseItem.setId(cursor.getString(logIdIndex));
+                exerciseItem.setTitle(cursor.getString(exerciseIndex));
+                exerciseItem.setButton1(cursor.getString(set1Index));
+                exerciseItem.setButton2(cursor.getString(set2Index));
+                exerciseItem.setButton3(cursor.getString(set3Index));
+                exerciseItem.setButton4(cursor.getString(set4Index));
+                exerciseItem.setButton5(cursor.getString(set5Index));
 
-            exerciseWeight = cursor.getDouble(cursor.getColumnIndex("weight"));
-            exerciseItem.setWeight(exerciseWeight);
-            ExerciseItem.add(exerciseItem);
+                // Sets all of the buttons to the default colour
+                exerciseItem.setButton1Colour(R.drawable.button_shape_default);
+                exerciseItem.setButton2Colour(R.drawable.button_shape_default);
+                exerciseItem.setButton3Colour(R.drawable.button_shape_default);
+                exerciseItem.setButton4Colour(R.drawable.button_shape_default);
+                exerciseItem.setButton5Colour(R.drawable.button_shape_default);
+
+                // Retrieve and set the weight
+                exerciseWeight = cursor.getDouble(weightIndex);
+                exerciseItem.setWeight(exerciseWeight);
+
+                // Add the populated ExerciseItem to the list
+                ExerciseItem.add(exerciseItem);
+            } while (cursor.moveToNext());
+
+            // Close the cursor when done
+            cursor.close();
         }
+
+
+//        //fetchExerciseLogs returns the data in reverse order. So we start at the end of the cursor and work our way
+//        //backwards. This way the data appear is the correct order.
+//        for (cursor.moveToLast(); !cursor.isBeforeFirst(); cursor.moveToPrevious()) {
+//            ExerciseItem exerciseItem = new ExerciseItem();
+//            //uses the cursor to populate the item WORKOUT_ID value
+//            exerciseItem.setId(cursor.getString(cursor.getColumnIndex("log_id")));
+//            //uses the cursor to populate the item Exercise Names
+//            exerciseItem.setTitle(cursor.getString(cursor.getColumnIndex("exercise")));
+//
+//            exerciseItem.setButton1(cursor.getString(cursor.getColumnIndex("set1")));
+//            exerciseItem.setButton2(cursor.getString(cursor.getColumnIndex("set2")));
+//            exerciseItem.setButton3(cursor.getString(cursor.getColumnIndex("set3")));
+//            exerciseItem.setButton4(cursor.getString(cursor.getColumnIndex("set4")));
+//            exerciseItem.setButton5(cursor.getString(cursor.getColumnIndex("set5")));
+//
+//            //Sets all of the buttons to the default colour
+//            exerciseItem.setButton1Colour(R.drawable.button_shape_default);
+//            exerciseItem.setButton2Colour(R.drawable.button_shape_default);
+//            exerciseItem.setButton3Colour(R.drawable.button_shape_default);
+//            exerciseItem.setButton4Colour(R.drawable.button_shape_default);
+//            exerciseItem.setButton5Colour(R.drawable.button_shape_default);
+//
+//            exerciseWeight = cursor.getDouble(cursor.getColumnIndex("weight"));
+//            exerciseItem.setWeight(exerciseWeight);
+//            ExerciseItem.add(exerciseItem);
+//        }
 
 
 
@@ -503,26 +547,23 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
 
                     //If the user has given an exercise name then we will insert the exercise into the database
                 } else {
-                    switch (v.getId()) {
-                        case R.id.btn_add:
+                    if (v.getId() == R.id.btn_add) {
+                        final String exerciseName = exerciseEditText.getText().toString();
+                        Double exerciseWeight = 0.0;
 
-                            final String exerciseName = exerciseEditText.getText().toString();
-                            Double exerciseWeight = 0.0;
+                        //Edit text field only accepts numbers
+                        //Was crashing when weight was left blank - so we make sure it has a value in it
+                        if (weightEditText.getText().toString().trim().length() > 0) {
+                            exerciseWeight = Double.parseDouble(weightEditText.getText().toString());
+                        }
 
-                            //Edit text field only accepts numbers
-                            //Was crashing when weight was left blank - so we make sure it has a value in it
-                            if (weightEditText.getText().toString().trim().length() > 0) {
-                                exerciseWeight = Double.parseDouble(weightEditText.getText().toString());
-                            }
-
-                            Intent intent = getIntent();
-                            dbManager.insertExercise(intent.getStringExtra("id"), exerciseName, exerciseWeight);
-                            Intent main = new Intent(v.getContext(), ExerciseList.class);
-                            main.putExtra("title", intent.getStringExtra("title"));
-                            main.putExtra("id", intent.getStringExtra("id"));
-                            main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(main);
-                            break;
+                        Intent intent = getIntent();
+                        dbManager.insertExercise(intent.getStringExtra("id"), exerciseName, exerciseWeight);
+                        Intent main = new Intent(v.getContext(), ExerciseList.class);
+                        main.putExtra("title", intent.getStringExtra("title"));
+                        main.putExtra("id", intent.getStringExtra("id"));
+                        main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(main);
                     }
                 }
             }

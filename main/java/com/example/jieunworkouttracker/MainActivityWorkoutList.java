@@ -370,25 +370,20 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
 
                     //If the user has given an exercise name then we will insert the exercise into the database
                 } else {
-                    switch (v.getId()) {
-                        case R.id.btn_add:
-
-                            final String workoutName = workoutEditText.getText().toString();
-                            dbManager.insertWorkout(workoutName);
+                    if (v.getId() == R.id.btn_add) {
+                        final String workoutName = workoutEditText.getText().toString();
+                        dbManager.insertWorkout(workoutName);
 
 
+                        //Shows the new workout by clearing the recyclerview and re-adding all the items
+                        //Works better this way as we don't have to re-create the entire activity
+                        listItem.clear();
+                        loadWorkoutData();
+                        adapter.notifyDataSetChanged();
+                        dialog.dismiss();
 
-
-                            //Shows the new workout by clearing the recyclerview and re-adding all the items
-                            //Works better this way as we don't have to re-create the entire activity
-                            listItem.clear();
-                            loadWorkoutData();
-                            adapter.notifyDataSetChanged();
-                            dialog.dismiss();
-
-                            //Will automatically scroll down to the position of the new workout which was added
-                            recyclerView.scrollToPosition(adapter.getItemCount() - 1);
-
+                        //Will automatically scroll down to the position of the new workout which was added
+                        recyclerView.scrollToPosition(adapter.getItemCount() - 1);
                     }
                 }
             }

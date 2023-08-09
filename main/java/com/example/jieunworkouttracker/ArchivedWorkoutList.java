@@ -282,37 +282,69 @@ public class ArchivedWorkoutList extends AppCompatActivity implements RecyclerVi
         startActivity(intent);
     }
 
-    private void loadWorkoutData(){
+    private void loadWorkoutData() {
         Cursor cursor = dbManager.fetchArchivedWorkouts();
 
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 
-
-        //If the cursor has a value in it then hide the empty textview
-        //In English. If there is a workout returned, then remove the text saying no workouts found
-        if (cursor.getCount() > 0) {
+        // If the cursor has a value in it then hide the empty textview
+        // In English, if there is a workout returned, then remove the text saying no workouts found
+        if (cursor != null && cursor.getCount() > 0) {
             TextView empty = findViewById(R.id.empty);
             empty.setVisibility(View.GONE);
+
+            List<Item> listItem = new ArrayList<>();
+            // Iterate through the cursor and populate the list
+            while (cursor.moveToNext()) {
+                Item item = new Item();
+                // Uses the cursor to populate the item WORKOUT_ID value
+                int workoutIdIndex = cursor.getColumnIndex("workout_id");
+                item.setId(cursor.getString(workoutIdIndex));
+                // Uses the cursor to populate the item Workout Names
+                int workoutIndex = cursor.getColumnIndex("workout");
+                item.setTitle(cursor.getString(workoutIndex));
+                listItem.add(item);
+            }
+
+            // Close the cursor when done
+            cursor.close();
+
+            adapter = new RecyclerViewAdaptor(listItem, this, this, this);
+            recyclerView.setAdapter(adapter);
         }
-
-        for( cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext() ) {
-            Item item = new Item();
-            //uses the cursor to populate the item WORKOUT_ID value
-            item.setId(cursor.getString(cursor.getColumnIndex("workout_id")));
-            //uses the cursor to populate the item Workout Names
-            item.setTitle(cursor.getString(cursor.getColumnIndex("workout")));
-            listItem.add(item);
-        }
-
-
-
-
-        adapter = new RecyclerViewAdaptor(listItem, this, this, this);
-        recyclerView.setAdapter(adapter);
-
     }
+
+//    private void loadWorkoutData(){
+//        Cursor cursor = dbManager.fetchArchivedWorkouts();
+//
+//        recyclerView = findViewById(R.id.recycler_view);
+//        recyclerView.setHasFixedSize(true);
+//        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+//
+//
+//        //If the cursor has a value in it then hide the empty textview
+//        //In English. If there is a workout returned, then remove the text saying no workouts found
+//        if (cursor.getCount() > 0) {
+//            TextView empty = findViewById(R.id.empty);
+//            empty.setVisibility(View.GONE);
+//        }
+//
+//        for( cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext() ) {
+//            Item item = new Item();
+//            //uses the cursor to populate the item WORKOUT_ID value
+//            item.setId(cursor.getString(cursor.getColumnIndex("workout_id")));
+//            //uses the cursor to populate the item Workout Names
+//            item.setTitle(cursor.getString(cursor.getColumnIndex("workout")));
+//            listItem.add(item);
+//        }
+//
+//
+//        adapter = new RecyclerViewAdaptor(listItem, this, this, this);
+//        recyclerView.setAdapter(adapter);
+//
+//    }
 
     private void toggleFabMode(View v) {
         rotate = ViewAnimation.rotateFab(v, !rotate);
@@ -368,25 +400,20 @@ public class ArchivedWorkoutList extends AppCompatActivity implements RecyclerVi
 
                     //If the user has given an exercise name then we will insert the exercise into the database
                 } else {
-                    switch (v.getId()) {
-                        case R.id.btn_add:
-
-                            final String workoutName = workoutEditText.getText().toString();
-                            dbManager.insertWorkout(workoutName);
+                    if (v.getId() == R.id.btn_add) {
+                        final String workoutName = workoutEditText.getText().toString();
+                        dbManager.insertWorkout(workoutName);
 
 
+                        //Shows the new workout by clearing the recyclerview and re-adding all the items
+                        //Works better this way as we don't have to re-create the entire activity
+                        listItem.clear();
+                        loadWorkoutData();
+                        adapter.notifyDataSetChanged();
+                        dialog.dismiss();
 
-
-                            //Shows the new workout by clearing the recyclerview and re-adding all the items
-                            //Works better this way as we don't have to re-create the entire activity
-                            listItem.clear();
-                            loadWorkoutData();
-                            adapter.notifyDataSetChanged();
-                            dialog.dismiss();
-
-                            //Will automatically scroll down to the position of the new workout which was added
-                            recyclerView.scrollToPosition(adapter.getItemCount() - 1);
-
+                        //Will automatically scroll down to the position of the new workout which was added
+                        recyclerView.scrollToPosition(adapter.getItemCount() - 1);
                     }
                 }
             }
