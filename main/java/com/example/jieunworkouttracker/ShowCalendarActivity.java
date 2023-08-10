@@ -80,7 +80,7 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
 
         setContentView(R.layout.activity_menu_drawer_simple_light);
 
-        //Use view stubs to programatically change the include view at runtime
+        //Use view stubs to programmatically change the include view at runtime
         ViewStub stub = findViewById(R.id.main_view_stub);
         stub.setLayoutResource(R.layout.activity_calendar);
         stub.inflate();
@@ -112,10 +112,16 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
             CalendarItem calendarItem = new CalendarItem();
 
             //uses the cursor to populate the calendar WORKOUT_ID value
-            calendarItem.setWorkoutId(cursor.getString(cursor.getColumnIndex("workout_id")));
+            int workoutIdColumnIndex = cursor.getColumnIndex("workout_id");
+            if (workoutIdColumnIndex != -1) {
+                calendarItem.setWorkoutId(cursor.getString(workoutIdColumnIndex));
+            }
+
             //uses the cursor to populate the calendar DATE value
-            calendarItem.setDate(cursor.getString(cursor.getColumnIndex("date")));
-            listItem.add(calendarItem);
+            int dateColumnIndex = cursor.getColumnIndex("date");
+            if (dateColumnIndex != -1) {
+                calendarItem.setDate(cursor.getString(dateColumnIndex));
+            }            listItem.add(calendarItem);
 
 
             //String log_id = calendarItem.getLogId();
@@ -301,7 +307,7 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
 
 
         String strDate = dateClicked.toString();
-        strDate = strDate.substring(0,10) + "%" + strDate.substring(30,34);
+        strDate = strDate.substring(0, 10) + "%" + strDate.substring(24, 28);
 
         Log.d("*********strDate", strDate);
 
@@ -315,12 +321,40 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         for( dbCursor.moveToFirst(); !dbCursor.isAfterLast(); dbCursor.moveToNext() ) {
             CalendarItem item = new CalendarItem();
             //uses the cursor to populate the item WORKOUT_ID value
-            item.setWorkoutId(dbCursor.getString(dbCursor.getColumnIndex("workout_id")));
+            int workoutIdColumnIndex = dbCursor.getColumnIndex("workout_id");
+            if (workoutIdColumnIndex != -1) {
+                item.setWorkoutId(dbCursor.getString(workoutIdColumnIndex));
+            }
+
             //uses the cursor to populate the item Workout Names
-            Cursor dbCursor2 = dbManager.fetchWorkoutNameOnSelectedDateForCalendar(dbCursor.getString(dbCursor.getColumnIndex("workout_id")));
-            item.setTitle(dbCursor2.getString(dbCursor2.getColumnIndex("workout")));
-            item.setDate(dbCursor.getString(dbCursor.getColumnIndex("date")));
-            workoutListItem.add(item);
+            if (workoutIdColumnIndex != -1) {
+                String workoutId = dbCursor.getString(workoutIdColumnIndex);
+                Cursor dbCursor2 = dbManager.fetchWorkoutNameOnSelectedDateForCalendar(workoutId);
+                item.setWorkoutId(workoutId);
+
+                if (dbCursor2 != null) {
+                    int workoutTitleColumnIndex = dbCursor2.getColumnIndex("workout");
+                    if (workoutTitleColumnIndex != -1) {
+                        String workoutTitle = dbCursor2.getString(workoutTitleColumnIndex);
+                        item.setTitle(workoutTitle);
+                    } else {
+                        // Handle the case where "workout" column doesn't exist in dbCursor2
+                        Log.e(LOG_TAG, "Column 'workout' not found in dbCursor2");
+                    }
+                    dbCursor2.close(); // Close the cursor when you're done with it
+                } else {
+                    // Handle the case where dbCursor2 is null
+                    Log.e(LOG_TAG, "dbCursor2 is null");
+                }
+            } else {
+                // Handle the case where "workout_id" column doesn't exist in dbCursor
+                Log.e(LOG_TAG, "Column 'workout_id' not found in dbCursor");
+            }
+
+            int dateColumnIndex = dbCursor.getColumnIndex("date");
+            if (dateColumnIndex != -1) {
+                item.setDate(dbCursor.getString(dateColumnIndex));
+            }            workoutListItem.add(item);
         }
 
         dbManager.close();

@@ -55,6 +55,7 @@
         android:layout_height="match_parent"
         android:background="@color/overlay_dark_30"
         android:clickable="true"
+        android:contentDescription="Selected Workout Calendar View"
         android:fitsSystemWindows="true" />
 
     <TextView
@@ -93,7 +94,8 @@
                     android:layout_height="?attr/actionBarSize"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:onClick="bottomNavigationHomeClick"
-                    android:tint="@color/colorPrimaryLight"
+                    android:contentDescription="Home View Button"
+                    app:tint="@color/colorPrimaryLight"
                     app:srcCompat="@drawable/ic_home_round" />
 
             </LinearLayout>
@@ -114,7 +116,8 @@
                     android:layout_height="?attr/actionBarSize"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:onClick="bottomNavigationCalendarClick"
-                    android:tint="@color/colorPrimaryLight"
+                    android:contentDescription="Calendar View Button"
+                    app:tint="@color/colorPrimaryLight"
                     app:srcCompat="@drawable/ic_calendar_round" />
 
             </LinearLayout>
@@ -175,6 +178,7 @@
                 android:layout_marginRight="@dimen/spacing_smlarge"
                 android:layout_marginBottom="@dimen/spacing_middle"
                 android:clickable="true"
+                android:contentDescription="Add Exercise Button"
                 android:tint="@color/grey_80"
                 app:fabSize="mini"
                 app:rippleColor="@android:color/black"
@@ -221,6 +225,7 @@
                 android:layout_marginRight="@dimen/spacing_smlarge"
                 android:layout_marginBottom="@dimen/spacing_middle"
                 android:clickable="true"
+                android:contentDescription="Start Workout Button"
                 android:tint="@color/grey_80"
                 app:fabSize="mini"
                 app:rippleColor="@android:color/black"
@@ -241,6 +246,7 @@
             android:layout_marginRight="@dimen/spacing_smlarge"
             android:layout_marginBottom="@dimen/spacing_mlarge"
             android:clickable="true"
+            android:contentDescription="Main Add Button"
             app:backgroundTint="@color/colorAccent"
             app:fabSize="normal"
             app:rippleColor="@android:color/white"

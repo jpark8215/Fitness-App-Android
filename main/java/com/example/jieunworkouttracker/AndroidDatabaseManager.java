@@ -255,7 +255,7 @@ public class AndroidDatabaseManager extends Activity implements OnItemClickListe
         // a query which returns a cursor with the list of tables in the database.We use this cursor to populate spinner in the first row
         alc = dbm.getData(Query);
 
-        //the first cursor has reults of the query
+        //the first cursor has results of the query
         final Cursor c=alc.get(0);
 
         //the second cursor has error messages
@@ -305,11 +305,11 @@ public class AndroidDatabaseManager extends Activity implements OnItemClickListe
 
         if(tablenamesadapter!=null)
         {
-            //set the adpater to select_table spinner
+            //set the adapter to select_table spinner
             select_table.setAdapter(tablenamesadapter);
         }
 
-        // when a table names is selecte display the table contents
+        // when a table names is select display the table contents
         select_table.setOnItemSelectedListener(new OnItemSelectedListener() {
 
             @Override
@@ -472,12 +472,12 @@ public class AndroidDatabaseManager extends Activity implements OnItemClickListe
 
                                                                     // when user confirms by clicking on yes we drop the table by executing deleteWorkout table query
                                                                     public void onClick(DialogInterface dialog, int which) {
-                                                                        String Query7 = "Delete  from "+indexInfo.table_name;
-                                                                        Log.d("deleteWorkout table query",Query7);
+                                                                        String Query7 = "Delete  from "+ indexInfo.table_name;
+                                                                        Log.d("Delete Wrkout tbl query", Query7);
                                                                         ArrayList<Cursor> aldeletet=dbm.getData(Query7);
                                                                         Cursor tempc=aldeletet.get(1);
                                                                         tempc.moveToLast();
-                                                                        Log.d("Delete table Mesage",tempc.getString(0));
+                                                                        Log.d("Delete table Message",tempc.getString(0));
                                                                         if(tempc.getString(0).equalsIgnoreCase("Success"))
                                                                         {
                                                                             tvmessage.setBackgroundColor(Color.parseColor("#2ecc71"));
@@ -487,6 +487,8 @@ public class AndroidDatabaseManager extends Activity implements OnItemClickListe
                                                                         }
                                                                         else
                                                                         {
+                                                                            Log.e("Error", "indexInfo or dbm is null or not properly initialized");
+
                                                                             tvmessage.setBackgroundColor(Color.parseColor("#e74c3c"));
                                                                             tvmessage.setText("Error:"+tempc.getString(0));
                                                                             spinnertable.setSelection(0);
@@ -869,7 +871,7 @@ public class AndroidDatabaseManager extends Activity implements OnItemClickListe
             Log.d("Edit Text Value",""+et.getText().toString());
 
             RelativeLayout.LayoutParams rll = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-            rll.addRule(RelativeLayout.BELOW,ll.getId()-1 );
+            rll.addRule(RelativeLayout.BELOW,ll.getId()- 1 );
             rll.setMargins(0, 20, 0, 0);
             lastrid=ll.getId();
             lp.addView(ll, rll);

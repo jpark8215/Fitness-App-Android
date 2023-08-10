@@ -61,12 +61,13 @@
                 android:padding="@dimen/spacing_medium">
 
                 <ImageButton
+                    android:id="@+id/fab_home"
                     android:layout_width="?attr/actionBarSize"
                     android:layout_height="?attr/actionBarSize"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:onClick="bottomNavigationHomeClick"
-                    android:tint="@color/colorPrimaryLight"
-                    app:srcCompat="@drawable/ic_home_round" />
+                    app:srcCompat="@drawable/ic_home_round"
+                    app:tint="@color/colorPrimaryLight" />
 
             </LinearLayout>
 
@@ -82,12 +83,14 @@
                 android:padding="@dimen/spacing_medium">
 
                 <ImageButton
+                    android:id="@+id/fab_calendar"
                     android:layout_width="?attr/actionBarSize"
                     android:layout_height="?attr/actionBarSize"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:onClick="bottomNavigationCalendarClick"
-                    android:tint="@color/colorPrimaryLight"
-                    app:srcCompat="@drawable/ic_calendar_round" />
+                    app:srcCompat="@drawable/ic_calendar_round"
+                    app:tint="@color/colorPrimaryLight" />
+
 
             </LinearLayout>
 

@@ -92,10 +92,11 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
 
         setContentView(R.layout.activity_menu_drawer_simple_light);
 
-        //Use view stubs to programatically change the include view at runtime
+        //Use view stubs to programmatically change the include view at runtime
         ViewStub stub = findViewById(R.id.main_view_stub);
         stub.setLayoutResource(R.layout.activity_main_workout_list);
         stub.inflate();
+
 
         //Sets up the toolbar and navigation menu
         initToolbar();
@@ -284,37 +285,80 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
         startActivity(intent);
     }
 
-    private void loadWorkoutData(){
+
+    private void loadWorkoutData() {
         Cursor cursor = dbManager.fetchActiveWorkouts();
 
-        recyclerView = findViewById(R.id.recycler_view);
+        recyclerView = findViewById(R.id.recycler_view); // Make sure the ID matches the one in activity_main_workout_list.xml
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 
+        // Make sure the ID matches the one in activity_main_workout_list.xml
+        TextView empty = findViewById(R.id.empty);
 
         //If the cursor has a value in it then hide the empty textview
         //In English. If there is a workout returned, then remove the text saying no workouts found
-        if (cursor.getCount() > 0) {
-            TextView empty = findViewById(R.id.empty);
+        if (cursor != null && cursor.getCount() > 0) {
             empty.setVisibility(View.GONE);
         }
 
-        for( cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext() ) {
+        // Your cursor iteration and item population logic remains unchanged
+        assert cursor != null;
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
             Item item = new Item();
-            //uses the cursor to populate the item WORKOUT_ID value
-            item.setId(cursor.getString(cursor.getColumnIndex("workout_id")));
-            //uses the cursor to populate the item Workout Names
-            item.setTitle(cursor.getString(cursor.getColumnIndex("workout")));
+// Uses the cursor to populate the item WORKOUT_ID value
+            int workoutIdIndex = cursor.getColumnIndex("workout_id");
+            if (workoutIdIndex != -1) {
+                String workoutId = cursor.getString(workoutIdIndex);
+                item.setId(workoutId);
+            }
+
+// Uses the cursor to populate the item Workout Names
+            int workoutNameIndex = cursor.getColumnIndex("workout");
+            if (workoutNameIndex != -1) {
+                String workoutName = cursor.getString(workoutNameIndex);
+                item.setTitle(workoutName);
+            }
+
             listItem.add(item);
         }
-
-
-
 
         adapter = new RecyclerViewAdaptor(listItem, this, this, this);
         recyclerView.setAdapter(adapter);
 
+        // Make sure to close the cursor after using it
+        cursor.close();
     }
+
+//    private void loadWorkoutData(){
+//        Cursor cursor = dbManager.fetchActiveWorkouts();
+//
+//        recyclerView = findViewById(R.id.recycler_view);
+//        recyclerView.setHasFixedSize(true);
+//        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+//
+//
+//        //If the cursor has a value in it then hide the empty textview
+//        //In English. If there is a workout returned, then remove the text saying no workouts found
+//        if (cursor.getCount() > 0) {
+//            TextView empty = findViewById(R.id.empty);
+//            empty.setVisibility(View.GONE);
+//        }
+//
+//        for( cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext() ) {
+//            Item item = new Item();
+//            //uses the cursor to populate the item WORKOUT_ID value
+//            item.setId(cursor.getString(cursor.getColumnIndex("workout_id")));
+//            //uses the cursor to populate the item Workout Names
+//            item.setTitle(cursor.getString(cursor.getColumnIndex("workout")));
+//            listItem.add(item);
+//        }
+//
+//
+//        adapter = new RecyclerViewAdaptor(listItem, this, this, this);
+//        recyclerView.setAdapter(adapter);
+//
+//    }
 
     private void toggleFabMode(View v) {
         rotate = ViewAnimation.rotateFab(v, !rotate);

@@ -1,6 +1,8 @@
 package com.example.jieunworkouttracker;
 
 
+import static com.github.mikephil.charting.charts.Chart.LOG_TAG;
+
 import android.app.Dialog;
 import android.content.Intent;
 import android.database.Cursor;
@@ -279,16 +281,52 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         //backwards. This way the data appear is the correct order.
         for (cursor.moveToLast(); !cursor.isBeforeFirst(); cursor.moveToPrevious()) {
             ExerciseItem exerciseItem = new ExerciseItem();
-            //uses the cursor to populate the item WORKOUT_ID value
-            exerciseItem.setId(cursor.getString(cursor.getColumnIndex("log_id")));
-            //uses the cursor to populate the item Exercise Names
-            exerciseItem.setTitle(cursor.getString(cursor.getColumnIndex("exercise")));
 
-            exerciseItem.setButton1(cursor.getString(cursor.getColumnIndex("set1")));
-            exerciseItem.setButton2(cursor.getString(cursor.getColumnIndex("set2")));
-            exerciseItem.setButton3(cursor.getString(cursor.getColumnIndex("set3")));
-            exerciseItem.setButton4(cursor.getString(cursor.getColumnIndex("set4")));
-            exerciseItem.setButton5(cursor.getString(cursor.getColumnIndex("set5")));
+
+// Get the column indices
+            int logIdColumnIndex = cursor.getColumnIndex("log_id");
+            int exerciseColumnIndex = cursor.getColumnIndex("exercise");
+            int set1ColumnIndex = cursor.getColumnIndex("set1");
+            int set2ColumnIndex = cursor.getColumnIndex("set2");
+            int set3ColumnIndex = cursor.getColumnIndex("set3");
+            int set4ColumnIndex = cursor.getColumnIndex("set4");
+            int set5ColumnIndex = cursor.getColumnIndex("set5");
+
+// Check if the columns exist in the cursor
+            if (logIdColumnIndex != -1) {
+                exerciseItem.setId(cursor.getString(logIdColumnIndex));
+            } else {
+                // Handle the case where "log_id" column doesn't exist in the cursor
+                Log.e(LOG_TAG, "Column 'log_id' not found in the cursor");
+            }
+
+            if (exerciseColumnIndex != -1) {
+                exerciseItem.setTitle(cursor.getString(exerciseColumnIndex));
+            } else {
+                // Handle the case where "exercise" column doesn't exist in the cursor
+                Log.e(LOG_TAG, "Column 'exercise' not found in the cursor");
+            }
+
+            if (set1ColumnIndex != -1) {
+                exerciseItem.setButton1(cursor.getString(set1ColumnIndex));
+            }
+
+            if (set2ColumnIndex != -1) {
+                exerciseItem.setButton2(cursor.getString(set2ColumnIndex));
+            }
+
+            if (set3ColumnIndex != -1) {
+                exerciseItem.setButton3(cursor.getString(set3ColumnIndex));
+            }
+
+            if (set4ColumnIndex != -1) {
+                exerciseItem.setButton4(cursor.getString(set4ColumnIndex));
+            }
+
+            if (set5ColumnIndex != -1) {
+                exerciseItem.setButton5(cursor.getString(set5ColumnIndex));
+            }
+
 
             //Sets all of the buttons to the default colour
             exerciseItem.setButton1Colour(R.drawable.button_shape_default);
@@ -297,7 +335,14 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
             exerciseItem.setButton4Colour(R.drawable.button_shape_default);
             exerciseItem.setButton5Colour(R.drawable.button_shape_default);
 
-            exerciseWeight = cursor.getDouble(cursor.getColumnIndex("weight"));
+            int weightColumnIndex = cursor.getColumnIndex("weight");
+
+            if (weightColumnIndex != -1) {
+                exerciseWeight = cursor.getDouble(weightColumnIndex);
+            } else {
+                // Handle the case where "weight" column doesn't exist in the cursor
+                Log.e(LOG_TAG, "Column 'weight' not found in the cursor");
+            }
             exerciseItem.setWeight(exerciseWeight);
             ExerciseItem.add(exerciseItem);
         }
