@@ -7,14 +7,14 @@
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="123dp"
         android:layout_margin="4dp"
         android:elevation="4dp"
         app:cardCornerRadius="15dp">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="123dp"
             android:layout_margin="5dp"
             android:layout_marginBottom="5dp"
             android:orientation="vertical">
@@ -49,7 +49,7 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="72dp"
                 android:orientation="horizontal"
                 android:padding="5dp">
 
@@ -139,6 +139,14 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/reverse_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="Long click to reverse"
+                android:layout_marginTop="2dp"
+                android:textSize="10sp" />
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>

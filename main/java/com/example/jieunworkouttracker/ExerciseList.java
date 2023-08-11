@@ -100,7 +100,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
 
         setContentView(R.layout.activity_menu_drawer_simple_light);
 
-        //Use view stubs to programatically change the include view at runtime
+        //Use view stubs to programmatically change the include view at runtime
         ViewStub stub = findViewById(R.id.main_view_stub);
         stub.setLayoutResource(R.layout.activity_exercise_list);
         stub.inflate();
@@ -335,6 +335,8 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
                 exerciseItem.setButton4Colour(R.drawable.button_shape_default);
                 exerciseItem.setButton5Colour(R.drawable.button_shape_default);
 
+
+
                 // Retrieve and set the weight
                 exerciseWeight = cursor.getDouble(weightIndex);
                 exerciseItem.setWeight(exerciseWeight);
@@ -347,43 +349,12 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
             cursor.close();
         }
 
-
-//        //fetchExerciseLogs returns the data in reverse order. So we start at the end of the cursor and work our way
-//        //backwards. This way the data appear is the correct order.
-//        for (cursor.moveToLast(); !cursor.isBeforeFirst(); cursor.moveToPrevious()) {
-//            ExerciseItem exerciseItem = new ExerciseItem();
-//            //uses the cursor to populate the item WORKOUT_ID value
-//            exerciseItem.setId(cursor.getString(cursor.getColumnIndex("log_id")));
-//            //uses the cursor to populate the item Exercise Names
-//            exerciseItem.setTitle(cursor.getString(cursor.getColumnIndex("exercise")));
-//
-//            exerciseItem.setButton1(cursor.getString(cursor.getColumnIndex("set1")));
-//            exerciseItem.setButton2(cursor.getString(cursor.getColumnIndex("set2")));
-//            exerciseItem.setButton3(cursor.getString(cursor.getColumnIndex("set3")));
-//            exerciseItem.setButton4(cursor.getString(cursor.getColumnIndex("set4")));
-//            exerciseItem.setButton5(cursor.getString(cursor.getColumnIndex("set5")));
-//
-//            //Sets all of the buttons to the default colour
-//            exerciseItem.setButton1Colour(R.drawable.button_shape_default);
-//            exerciseItem.setButton2Colour(R.drawable.button_shape_default);
-//            exerciseItem.setButton3Colour(R.drawable.button_shape_default);
-//            exerciseItem.setButton4Colour(R.drawable.button_shape_default);
-//            exerciseItem.setButton5Colour(R.drawable.button_shape_default);
-//
-//            exerciseWeight = cursor.getDouble(cursor.getColumnIndex("weight"));
-//            exerciseItem.setWeight(exerciseWeight);
-//            ExerciseItem.add(exerciseItem);
-//        }
-
-
-
-
         adapter = new ExerciseRecyclerViewAdaptor(ExerciseItem, this, this, this);
         recyclerView.setAdapter(adapter);
 
-
-
     }
+
+
 
 
     @Override
@@ -409,7 +380,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
 
     @Override
     protected void onPause() {
-        //When the user nagivates away from this screen we will minimise the floating action menu
+        //When the user navigates away from this screen we will minimise the floating action menu
         //floatingActionsMenu.collapse();
 
 
@@ -645,7 +616,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
                     }
 
 
-                    //Remembers the poisiton of the reclcyer view when modify exercise or delete exercise is called
+                    //Remembers the position of the recycler view when modify exercise or delete exercise is called
                     final Parcelable recyclerViewState;
                     recyclerViewState = recyclerView.getLayoutManager().onSaveInstanceState();
 
@@ -673,7 +644,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
                 //Deletes the selected exercise
                 dbManager.deleteExercise(_id);
 
-                //Remembers the poisiton of the reclcyer view when modify exercise or delete exercise is called
+                //Remembers the position of the recycler view when modify exercise or delete exercise is called
                 final Parcelable recyclerViewState;
                 recyclerViewState = recyclerView.getLayoutManager().onSaveInstanceState();
 

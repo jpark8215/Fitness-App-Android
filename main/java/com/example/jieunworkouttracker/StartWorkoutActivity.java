@@ -124,7 +124,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         setContentView(R.layout.activity_menu_drawer_simple_light);
 
 
-        //Use view stubs to programatically change the include view at runtime
+        //Use view stubs to programmatically change the include view at runtime
         ViewStub stub = findViewById(R.id.main_view_stub);
         stub.setLayoutResource(R.layout.activity_start_workout);
         stub.inflate();
@@ -378,21 +378,21 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         for (cursor.moveToLast(); !cursor.isBeforeFirst(); cursor.moveToPrevious()) {
             ExerciseItem exerciseItem = new ExerciseItem();
             //uses the cursor to populate the item LOG_ID value
-            exerciseItem.setId(cursor.getString(cursor.getColumnIndex("log_id")));
+            exerciseItem.setId(cursor.getString(cursor.getColumnIndexOrThrow("log_id")));
             //uses the cursor to populate the item Exercise Names
-            exerciseItem.setTitle(cursor.getString(cursor.getColumnIndex("exercise")));
+            exerciseItem.setTitle(cursor.getString(cursor.getColumnIndexOrThrow("exercise")));
 
-            exerciseItem.setButton1(cursor.getString(cursor.getColumnIndex("set1")));
-            exerciseItem.setButton2(cursor.getString(cursor.getColumnIndex("set2")));
-            exerciseItem.setButton3(cursor.getString(cursor.getColumnIndex("set3")));
-            exerciseItem.setButton4(cursor.getString(cursor.getColumnIndex("set4")));
-            exerciseItem.setButton5(cursor.getString(cursor.getColumnIndex("set5")));
+            exerciseItem.setButton1(cursor.getString(cursor.getColumnIndexOrThrow("set1")));
+            exerciseItem.setButton2(cursor.getString(cursor.getColumnIndexOrThrow("set2")));
+            exerciseItem.setButton3(cursor.getString(cursor.getColumnIndexOrThrow("set3")));
+            exerciseItem.setButton4(cursor.getString(cursor.getColumnIndexOrThrow("set4")));
+            exerciseItem.setButton5(cursor.getString(cursor.getColumnIndexOrThrow("set5")));
 
-            intSet1Improvement = cursor.getInt(cursor.getColumnIndex("set1_improvement"));
-            intSet2Improvement = cursor.getInt(cursor.getColumnIndex("set2_improvement"));
-            intSet3Improvement = cursor.getInt(cursor.getColumnIndex("set3_improvement"));
-            intSet4Improvement = cursor.getInt(cursor.getColumnIndex("set4_improvement"));
-            intSet5Improvement = cursor.getInt(cursor.getColumnIndex("set5_improvement"));
+            intSet1Improvement = cursor.getInt(cursor.getColumnIndexOrThrow("set1_improvement"));
+            intSet2Improvement = cursor.getInt(cursor.getColumnIndexOrThrow("set2_improvement"));
+            intSet3Improvement = cursor.getInt(cursor.getColumnIndexOrThrow("set3_improvement"));
+            intSet4Improvement = cursor.getInt(cursor.getColumnIndexOrThrow("set4_improvement"));
+            intSet5Improvement = cursor.getInt(cursor.getColumnIndexOrThrow("set5_improvement"));
 
 
             //All of the switch statements to determine which colour button to display for the sets
@@ -466,7 +466,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
 
 
-            exerciseWeight = cursor.getDouble(cursor.getColumnIndex("weight"));
+            exerciseWeight = cursor.getDouble(cursor.getColumnIndexOrThrow("weight"));
             exerciseItem.setWeight(exerciseWeight);
             ExerciseItem.add(exerciseItem);
 
@@ -806,13 +806,13 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
         //Fetches all of the exercise logs in this workout so we can record the workout duration
         Cursor cursor = dbManager.fetchExerciseLogs(id, strNumberOfExercises);
-        //Works out how many seconds have elasped. It records it in milliseconds so we divide by 1000 to convert it to seconds
+        //Works out how many seconds have elapsed. It records it in milliseconds so we divide by 1000 to convert it to seconds
         Long workoutDuration = (SystemClock.elapsedRealtime() - simpleChronometer.getBase()) / 1000;
 
         //Records the duration in the database
         int i = 0;
         for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-            dbManager.recordExerciseLogDuration(cursor.getString(cursor.getColumnIndex("log_id")), workoutDuration);
+            dbManager.recordExerciseLogDuration(cursor.getString(cursor.getColumnIndexOrThrow("log_id")), workoutDuration);
             i++;
         }
 
