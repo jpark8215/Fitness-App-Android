@@ -41,13 +41,13 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
     private RecyclerView recyclerView;
 
     // Item List
-    private List<com.example.jieunworkouttracker.ExerciseItem> ExerciseItem = new ArrayList();
+    private final List<com.example.jieunworkouttracker.ExerciseItem> ExerciseItem = new ArrayList();
 
     // Custom Recycler View Adaptor
     private ExerciseRecyclerViewAdaptor adapter;
 
     private Double exerciseWeight;
-    private NumberFormat nf = new DecimalFormat("##.##");
+    private final NumberFormat nf = new DecimalFormat("##.##");
 
     private String id;
     private String title;
@@ -55,7 +55,7 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
 
     private View parent_view;
     private View back_drop;
-    private boolean rotate = false;
+    private final boolean rotate = false;
     private View lyt_add_exercise;
     private View lyt_start_workout;
 

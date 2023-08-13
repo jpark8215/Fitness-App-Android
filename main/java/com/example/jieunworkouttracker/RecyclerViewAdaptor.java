@@ -14,11 +14,11 @@ import java.util.List;
 
 public class RecyclerViewAdaptor extends RecyclerView.Adapter<RecyclerViewAdaptor.ViewHolder> {
 
-    private List<Item> list;
-    private Context context;
+    private final List<Item> list;
+    private final Context context;
 
-    private OnItemLongSelectedListener itemLongSelectedListener;
-    private OnItemSelectedListener itemSelectedListener;
+    private final OnItemLongSelectedListener itemLongSelectedListener;
+    private final OnItemSelectedListener itemSelectedListener;
 
     public RecyclerViewAdaptor(List<Item> list,
                                Context context,

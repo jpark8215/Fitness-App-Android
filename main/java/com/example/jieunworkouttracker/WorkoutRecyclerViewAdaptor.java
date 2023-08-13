@@ -17,13 +17,19 @@ import java.util.List;
 public class
 WorkoutRecyclerViewAdaptor extends RecyclerView.Adapter<WorkoutRecyclerViewAdaptor.ViewHolder> {
 
-    private List<ExerciseItem> list;
-    private Context context;
+    private final List<ExerciseItem> list;
+    private final Context context;
 
-    private OnItemLongSelectedListener itemLongSelectedListener;
-    private OnButtonClickListener buttonClickListener;
+    private final OnItemLongSelectedListener itemLongSelectedListener;
+    private final OnButtonClickListener buttonClickListener;
 
-    private static String LOG_TAG = "WorkoutRecyclerViewAdaptor";
+    private static final String LOG_TAG = "WorkoutRecyclerViewAdaptor";
+
+//    private boolean isWeightInPounds = false; // Default weight unit is kg
+//    public void setWeightUnitInPounds(boolean isInPounds) {
+//        isWeightInPounds = isInPounds;
+//        notifyDataSetChanged(); // Refresh the RecyclerView to update the displayed weight units
+//    }
 
     public WorkoutRecyclerViewAdaptor(List<ExerciseItem> list,
                                       Context context,
@@ -53,6 +59,11 @@ WorkoutRecyclerViewAdaptor extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
         holder.button4.setText(myList.getButton4());
         holder.button5.setText(myList.getButton5());
         holder.textViewWeight.setText(myList.getWeight().toString() + "kg");
+
+//        // Convert weight to the desired unit
+//        String weightUnit = isWeightInPounds ? "lbs" : "kg";
+//        holder.textViewWeight.setText(myList.getWeight().toString() + weightUnit);
+
 
         //Sets the background colour of the buttons
         holder.button1.setBackgroundResource(myList.getButton1colour());

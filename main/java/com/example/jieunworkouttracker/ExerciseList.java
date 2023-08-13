@@ -19,6 +19,7 @@ import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -38,25 +39,21 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerViewAdaptor.OnItemLongSelectedListener, ExerciseRecyclerViewAdaptor.OnButtonClickListener  {
-
-    private DBManager dbManager;
-
-    private RecyclerView recyclerView;
-
-    // Item List
-    private List<ExerciseItem> ExerciseItem = new ArrayList();
-
-    // Custom Recycler View Adaptor
-    private ExerciseRecyclerViewAdaptor adapter;
-
-    private Double exerciseWeight;
-    private NumberFormat nf = new DecimalFormat("##.##");
+public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerViewAdaptor.OnItemLongSelectedListener, ExerciseRecyclerViewAdaptor.OnButtonClickListener {
 
     //Public variables which are used across classes/voids
     public String id;
     public String title;
+    private DBManager dbManager;
+    private RecyclerView recyclerView;
+    // Item List
+    private final List<ExerciseItem> ExerciseItem = new ArrayList();
+    // Custom Recycler View Adaptor
+    private ExerciseRecyclerViewAdaptor adapter;
+    private ToggleButton toggleWeightUnit;
 
+    private Double exerciseWeight;
+    private final NumberFormat nf = new DecimalFormat("##.#");
     private View parent_view;
     private View back_drop;
     private boolean rotate = false;
@@ -88,7 +85,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
         boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
 
         // If dark mode is enabled then do the following
-        if (darkModeEnabled){
+        if (darkModeEnabled) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             setTheme(R.style.DarkAppTheme_NoActionBar);
             // Otherwise do this
@@ -116,8 +113,6 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
         initNavigationMenu();
 
 
-
-
         parent_view = findViewById(android.R.id.content);
         back_drop = findViewById(R.id.back_drop);
         lyt_add_exercise = findViewById(R.id.lyt_add_exercise);
@@ -126,7 +121,6 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
 
         //Loads the Exercise logs data using recyclerview and the custom adapter
         loadExerciseData();
-
 
 
         fab_add = findViewById(R.id.fab_add);
@@ -185,6 +179,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
                 startWorkout(v);
             }
         });
+
 
     }
 
@@ -280,7 +275,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
     }
 
 
-    public void loadExerciseData(){
+    public void loadExerciseData() {
         //We pass the database manager the id AND title variable in case the user has entered in two workouts which
         //have the same name. We obviously only want to return the one they clicked on rather than everything
         //with that duplicate workout name
@@ -336,7 +331,6 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
                 exerciseItem.setButton5Colour(R.drawable.button_shape_default);
 
 
-
                 // Retrieve and set the weight
                 exerciseWeight = cursor.getDouble(weightIndex);
                 exerciseItem.setWeight(exerciseWeight);
@@ -355,14 +349,11 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
     }
 
 
-
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
         dbManager.close();
     }
-
 
 
     @Override
@@ -392,7 +383,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
 
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         //Refreshes the data when the activity is resumed.
         //Mainly used for when an exercise is updated.
@@ -413,15 +404,16 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
         Integer intItemId = Integer.parseInt(itemId);
 
         //Validation to make sure reps can never be less than zero
-        if (intReps < 0) { intReps = 0;}
+        if (intReps < 0) {
+            intReps = 0;
+        }
 
         //We pass through the itemId, set selected and number of reps
-        dbManager.updateExerciseLogs(intItemId, setSelected ,intReps);
+        dbManager.updateExerciseLogs(intItemId, setSelected, intReps);
 
         // Save state - used when user clicks on an item far down the recycler view list
         // It remembers the state or position
         recyclerViewState = recyclerView.getLayoutManager().onSaveInstanceState();
-
 
 
         //Triggers the refresh of data in the recyclerview
@@ -437,7 +429,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
     }
 
 
-    public void bottomNavigationHomeClick(View view){
+    public void bottomNavigationHomeClick(View view) {
         Intent intent = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
         startActivity(intent);
     }
@@ -460,17 +452,17 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
         }
     }
 
-    private void addExercise(View v){
+    private void addExercise(View v) {
         //minimises the floating action button
         toggleFabMode(fab_add);
         showCustomAddDialog();
     }
 
-    private void modifyExercise(String itemId, String itemTitle, Double itemWeight){
+    private void modifyExercise(String itemId, String itemTitle, Double itemWeight) {
         showCustomModifyDialog(itemId, itemTitle, itemWeight);
     }
 
-    private void startWorkout(View v){
+    private void startWorkout(View v) {
         //minimises the floating action button
         toggleFabMode(fab_add);
 
@@ -478,12 +470,13 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
         dbManager.insertExerciseLogs(id, strNumberOfExercises);
 
         //Passes through the workout title and id
-        //Starts the startworkoutactivity class
+        //Starts the Startworkoutactivity class
         Intent modify_intent = new Intent(v.getContext(), StartWorkoutActivity.class);
         modify_intent.putExtra("id", id);
         modify_intent.putExtra("title", title);
         startActivity(modify_intent);
     }
+
 
     private void showCustomAddDialog() {
         final Dialog dialog = new Dialog(this);
@@ -491,17 +484,18 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
         dialog.setContentView(R.layout.dialog_add_light);
         dialog.setCancelable(true);
 
+
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
         lp.copyFrom(dialog.getWindow().getAttributes());
         lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
 
-        // ((TextView) dialog.findViewById(R.id.title)).setText("title");
         final EditText exerciseEditText = dialog.findViewById(R.id.name_edittext);
         final EditText weightEditText = dialog.findViewById(R.id.weight_edittext);
-        TextView txtTitle  = dialog.findViewById(R.id.txt_title);
-        Button btnAdd = dialog.findViewById(R.id.btn_add);
+        final ToggleButton toggleWeightUnit = dialog.findViewById(R.id.toggle_weight_unit);
 
+        TextView txtTitle = dialog.findViewById(R.id.txt_title);
+        Button btnAdd = dialog.findViewById(R.id.btn_add);
 
         btnAdd.setText("Add Exercise");
         txtTitle.setText("Add an Exercise");
@@ -510,32 +504,36 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                //Does a validation check to make sure the user has entered in a value for the exercise name
                 if (TextUtils.isEmpty(exerciseEditText.getText())) {
                     Toast.makeText(ExerciseList.this,
                             "You must give an exercise name", Toast.LENGTH_LONG).show();
-
-                    //If the user has given an exercise name then we will insert the exercise into the database
                 } else {
-                    if (v.getId() == R.id.btn_add) {
-                        final String exerciseName = exerciseEditText.getText().toString();
-                        Double exerciseWeight = 0.0;
+                    final String exerciseName = exerciseEditText.getText().toString();
+                    Double exerciseWeight = 0.0;
 
-                        //Edit text field only accepts numbers
-                        //Was crashing when weight was left blank - so we make sure it has a value in it
-                        if (weightEditText.getText().toString().trim().length() > 0) {
-                            exerciseWeight = Double.parseDouble(weightEditText.getText().toString());
+                    // Edit text field only accepts numbers
+                    // Check if weight is provided and convert if lbs is selected
+                    // Update the weightTextView based on toggleWeightUnit state
+
+                    if (weightEditText.getText().toString().trim().length() > 0) {
+                        exerciseWeight = Double.parseDouble(weightEditText.getText().toString());
+
+                        // Convert kilograms to pounds if lbs is selected
+                        if (!toggleWeightUnit.isChecked()) {
+                            exerciseWeight = Double.parseDouble(nf.format(exerciseWeight / 2.20462));
                         }
-
-                        Intent intent = getIntent();
-                        dbManager.insertExercise(intent.getStringExtra("id"), exerciseName, exerciseWeight);
-                        Intent main = new Intent(v.getContext(), ExerciseList.class);
-                        main.putExtra("title", intent.getStringExtra("title"));
-                        main.putExtra("id", intent.getStringExtra("id"));
-                        main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(main);
                     }
+
+
+                    Intent intent = getIntent();
+                    dbManager.insertExercise(intent.getStringExtra("id"), exerciseName, exerciseWeight);
+                    Intent main = new Intent(v.getContext(), ExerciseList.class);
+                    main.putExtra("title", intent.getStringExtra("title"));
+                    main.putExtra("id", intent.getStringExtra("id"));
+                    main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(main);
+
+                    dialog.dismiss();
                 }
             }
         });
@@ -550,6 +548,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
         dialog.show();
         dialog.getWindow().setAttributes(lp);
     }
+
 
     private void showCustomModifyDialog(final String itemId, String itemTitle, Double itemWeight) {
         final Dialog dialog = new Dialog(this);
@@ -564,73 +563,66 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
 
         final EditText exerciseEditText = dialog.findViewById(R.id.name_edittext);
         final EditText weightEditText = dialog.findViewById(R.id.weight_edittext);
-        TextView txtTitle  = dialog.findViewById(R.id.txt_title);
+        final ToggleButton toggleWeightUnit = dialog.findViewById(R.id.toggle_weight_unit);
+        TextView txtTitle = dialog.findViewById(R.id.txt_title);
         Button btnUpdate = dialog.findViewById(R.id.btn_update);
         Button btnDelete = dialog.findViewById(R.id.btn_delete);
         Button btnArchive = dialog.findViewById(R.id.btn_archive);
         Button btnPlaceholder = dialog.findViewById(R.id.btn_placeholder);
 
-        //Hides the archive and placeholder buttons
+        // Hides the archive and placeholder buttons
         btnArchive.setVisibility(View.GONE);
         btnPlaceholder.setVisibility(View.GONE);
 
-
         txtTitle.setText("Modify Exercise");
         exerciseEditText.setText(itemTitle);
+
+        // Convert the stored weight to the selected unit
+        if (!toggleWeightUnit.isChecked()) {
+            // Convert kg to lbs
+            itemWeight = Double.parseDouble(nf.format(itemWeight / 2.20462));
+        }
+
         weightEditText.setText(itemWeight.toString());
 
-        //Sets the cursor position to the end of text, rather than at the start
-        exerciseEditText.setSelection( exerciseEditText.getText().length());
-        weightEditText.setSelection( weightEditText.getText().length());
-
-
-
+        // Sets the cursor position to the end of text, rather than at the start
+        exerciseEditText.setSelection(exerciseEditText.getText().length());
+        weightEditText.setSelection(weightEditText.getText().length());
 
         btnUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                //Does a validation check to make sure the user has entered in a value for the exercise name
                 if (TextUtils.isEmpty(exerciseEditText.getText())) {
                     Toast.makeText(ExerciseList.this,
                             "You must give an exercise name", Toast.LENGTH_LONG).show();
-
-                    //If the user has given an exercise name then we will update the exercise name in the database
                 } else {
-                    String newWorkoutName = exerciseEditText.getText().toString();
+                    String newExerciseName = exerciseEditText.getText().toString();
                     Long _id = Long.parseLong(itemId);
 
-                    //Updates with the new value
-                    String newExerciseName = exerciseEditText.getText().toString();
+                    // Update exercise name
                     dbManager.updateExerciseName(_id, newExerciseName);
 
-
-                    //If there is a weight given then update the database
-                    if (weightEditText.getText().toString().trim().length() > 0)  {
+                    // If there is a weight given, update the database
+                    if (weightEditText.getText().toString().trim().length() > 0) {
                         Double newExerciseWeight = Double.parseDouble(weightEditText.getText().toString());
+
+                        // Convert the entered weight to kg if lbs is selected
+                        if (!toggleWeightUnit.isChecked()) {
+                            newExerciseWeight = Double.parseDouble(nf.format(newExerciseWeight / 2.20462));
+                        }
+
                         dbManager.updateExerciseWeight(_id, newExerciseWeight);
                     } else {
-                        //If no weight value was given then update with a default value of 0
+                        // If no weight value was given, update with a default value of 0
                         Double newExerciseWeight = 0.0;
                         dbManager.updateExerciseWeight(_id, newExerciseWeight);
                     }
 
-
-                    //Remembers the position of the recycler view when modify exercise or delete exercise is called
-                    final Parcelable recyclerViewState;
-                    recyclerViewState = recyclerView.getLayoutManager().onSaveInstanceState();
-
-                    //Shows the update made by clearing the recyclerview and re-adding all the items
-                    //Works better this way as we don't have to re-create the entire activity
+                    // Refresh the recycler view
                     ExerciseItem.clear();
                     loadExerciseData();
                     adapter.notifyDataSetChanged();
 
-                    //places the user back at the same position in the recycler view rather than scrolling all the way back up to the top
-                    recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
-
-
-                    //Closes the dialog
                     dialog.dismiss();
                 }
             }
@@ -641,25 +633,15 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
             public void onClick(View v) {
                 Long _id = Long.parseLong(itemId);
 
-                //Deletes the selected exercise
+                // Delete the selected exercise
                 dbManager.deleteExercise(_id);
 
-                //Remembers the position of the recycler view when modify exercise or delete exercise is called
-                final Parcelable recyclerViewState;
-                recyclerViewState = recyclerView.getLayoutManager().onSaveInstanceState();
-
-                //Shows the update made by clearing the recyclerview and re-adding all the items
-                //Works better this way as we don't have to re-create the entire activity
+                // Refresh the recycler view
                 ExerciseItem.clear();
                 loadExerciseData();
                 adapter.notifyDataSetChanged();
 
-                //places the user back at the same position in the recycler view rather than scrolling all the way back up to the top
-                recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
-
-                //Closes the dialog
                 dialog.dismiss();
-
             }
         });
 
@@ -673,4 +655,5 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
         dialog.show();
         dialog.getWindow().setAttributes(lp);
     }
+
 }

@@ -9,6 +9,7 @@ import android.widget.SectionIndexer;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Adapter that merges multiple child adapters and views into a single
@@ -290,9 +291,7 @@ public class MergeAdapter extends BaseAdapter implements SectionIndexer {
                 Object[] curSections = ((SectionIndexer) piece).getSections();
 
                 if (curSections != null) {
-                    for (Object section : curSections) {
-                        sections.add(section);
-                    }
+                    Collections.addAll(sections, curSections);
                 }
             }
         }

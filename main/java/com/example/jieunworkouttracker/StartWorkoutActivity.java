@@ -54,7 +54,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
     private RecyclerView recyclerView;
 
     // Item List
-    private List<com.example.jieunworkouttracker.ExerciseItem> ExerciseItem = new ArrayList();
+    private final List<com.example.jieunworkouttracker.ExerciseItem> ExerciseItem = new ArrayList();
 
     // Custom Recycler View Adaptor
     private WorkoutRecyclerViewAdaptor adapter;
@@ -318,7 +318,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
 
 
-    private ServiceConnection mServiceConnection = new ServiceConnection() {
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
@@ -731,7 +731,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
     public void pauseWorkout() {
         //If workout isn't already paused then do the following
-        if (isPaused == false) {
+        if (!isPaused) {
 
             //minimises the floating action button
             toggleFabMode(fab_add);
@@ -760,7 +760,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         }
 
         //If workout is already paused then do the following
-        else if (isPaused == true) {
+        else if (isPaused) {
 
             //minimises the floating action button
             toggleFabMode(fab_add);

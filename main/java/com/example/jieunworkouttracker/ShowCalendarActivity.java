@@ -38,12 +38,12 @@ import java.util.Locale;
 
 public class ShowCalendarActivity extends AppCompatActivity implements CalendarRecyclerViewAdaptor.OnItemSelectedListener {
 
-    private static String LOG_TAG = "Calendar";
+    private static final String LOG_TAG = "Calendar";
     private DBManager dbManager;
 
     // Item List
-    private List<CalendarItem> listItem = new ArrayList();
-    private List<CalendarItem> workoutListItem = new ArrayList();
+    private final List<CalendarItem> listItem = new ArrayList();
+    private final List<CalendarItem> workoutListItem = new ArrayList();
 
     // Custom Recycler View Adaptor
     private CalendarRecyclerViewAdaptor adapter;
@@ -51,7 +51,7 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
     private CompactCalendarView compactCalendarView;
     private RecyclerView recyclerView;
 
-    private SimpleDateFormat dateFormatForMonth = new SimpleDateFormat("MMM - yyyy", Locale.getDefault());
+    private final SimpleDateFormat dateFormatForMonth = new SimpleDateFormat("MMM - yyyy", Locale.getDefault());
 
     private ActionBar actionBar;
     private Toolbar toolbar;

@@ -42,7 +42,7 @@ public class ArchivedWorkoutList extends AppCompatActivity implements RecyclerVi
     private RecyclerView recyclerView;
 
     // Item List
-    private List<Item> listItem = new ArrayList();
+    private final List<Item> listItem = new ArrayList();
 
 
     // Custom Recycler View Adaptor

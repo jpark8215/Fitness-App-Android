@@ -45,13 +45,13 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
     private RecyclerView recyclerView;
 
     // Item List
-    private List<ExerciseItem> ExerciseItem = new ArrayList();
+    private final List<ExerciseItem> ExerciseItem = new ArrayList();
 
     // Custom Recycler View Adaptor
     private ExerciseRecyclerViewAdaptor adapter;
 
     private Double exerciseWeight;
-    private NumberFormat nf = new DecimalFormat("##.##");
+    private final NumberFormat nf = new DecimalFormat("##.##");
 
     //Public variables which are used across classes/voids
     public String id;

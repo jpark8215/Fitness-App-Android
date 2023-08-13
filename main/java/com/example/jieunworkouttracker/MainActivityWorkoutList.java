@@ -18,6 +18,7 @@ import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -42,11 +43,12 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
     private RecyclerView recyclerView;
 
     // Item List
-    private List<Item> listItem = new ArrayList();
+    private final List<Item> listItem = new ArrayList();
 
 
     // Custom Recycler View Adaptor
     private RecyclerViewAdaptor adapter;
+
 
 
     private View parent_view;
@@ -394,6 +396,9 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
 
         final EditText workoutEditText = dialog.findViewById(R.id.name_edittext);
         final EditText weightEditText = dialog.findViewById(R.id.weight_edittext);
+        final ToggleButton toggleWeightUnit = dialog.findViewById(R.id.toggle_weight_unit);
+
+
         TextView txtTitle  = dialog.findViewById(R.id.txt_title);
         Button btnAdd = dialog.findViewById(R.id.btn_add);
 
@@ -402,6 +407,7 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
         txtTitle.setText("Add a Workout");
         workoutEditText.setHint("Workout");
         weightEditText.setVisibility(View.GONE);
+        toggleWeightUnit.setVisibility(View.GONE);
 
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -458,6 +464,8 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
 
         final EditText workoutEditText = dialog.findViewById(R.id.name_edittext);
         final EditText weightEditText = dialog.findViewById(R.id.weight_edittext);
+        final ToggleButton toggleWeightUnit = dialog.findViewById(R.id.toggle_weight_unit);
+
         TextView txtTitle  = dialog.findViewById(R.id.txt_title);
         Button btnUpdate = dialog.findViewById(R.id.btn_update);
         Button btnDelete = dialog.findViewById(R.id.btn_delete);
@@ -476,6 +484,7 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
         workoutEditText.setSelection(workoutEditText.getText().length());
 
         weightEditText.setVisibility(View.GONE);
+        toggleWeightUnit.setVisibility(View.GONE);
 
         btnUpdate.setOnClickListener(new View.OnClickListener() {
             @Override

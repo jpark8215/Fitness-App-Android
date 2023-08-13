@@ -48,8 +48,8 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
     private DBManager dbManager;
 
     // Item List
-    private List<Item> listItem = new ArrayList();
-    private List<String> exerciseNames = new ArrayList();
+    private final List<Item> listItem = new ArrayList();
+    private final List<String> exerciseNames = new ArrayList();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

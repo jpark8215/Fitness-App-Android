@@ -13,11 +13,11 @@ import java.util.List;
 
 public class CalendarRecyclerViewAdaptor extends RecyclerView.Adapter<CalendarRecyclerViewAdaptor.ViewHolder> {
 
-    private List<CalendarItem> list;
-    private Context context;
+    private final List<CalendarItem> list;
+    private final Context context;
 
-    private OnItemLongSelectedListener itemLongSelectedListener;
-    private OnItemSelectedListener itemSelectedListener;
+    private final OnItemLongSelectedListener itemLongSelectedListener;
+    private final OnItemSelectedListener itemSelectedListener;
 
     public CalendarRecyclerViewAdaptor(List<CalendarItem> list,
                                        Context context,

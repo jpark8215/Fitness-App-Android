@@ -14,7 +14,7 @@ public class DBManager {
 
     private DatabaseHelper dbHelper;
 
-    private Context context;
+    private final Context context;
 
     private SQLiteDatabase database;
 
@@ -161,7 +161,7 @@ public class DBManager {
 
     public String getExerciseId( String name){
 
-        String exerciseId = new String();
+        String exerciseId = "";
         String[] columns = new String[] {"EXERCISES.EXERCISE_ID"};
         Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_EXERCISES, columns, "EXERCISES.EXERCISE = ?", new String[]{name}, null, null, null);
 
@@ -281,7 +281,7 @@ public class DBManager {
         //For exercises it is passing across the log id when a list item is long selected.
         //We First work out which exercise correlates to the log id selected and then we update that exercise name
         String[] columns = new String[] {DatabaseHelper.LOG_ID, DatabaseHelper.EXERCISE_ID};
-        String exerciseId = new String();
+        String exerciseId = "";
         Cursor cursor = database.query( DatabaseHelper.TABLE_NAME_LOGS, columns, "LOGS.LOG_ID = ?", new String[]{Long.toString(_id)}, null, null, null, null);
 
 
@@ -359,7 +359,7 @@ public class DBManager {
         //For exercises it is passing across the log id when a list item is long selected.
         //We First work out which exercise correlates to the log id selected and then we delete that exercise id
         String[] columns = new String[] {DatabaseHelper.LOG_ID, DatabaseHelper.EXERCISE_ID};
-        String exerciseId = new String();
+        String exerciseId = "";
         Cursor cursor = database.query( DatabaseHelper.TABLE_NAME_LOGS, columns, "LOGS.LOG_ID = ?", new String[]{Long.toString(_id)}, null, null, null, null);
 
 

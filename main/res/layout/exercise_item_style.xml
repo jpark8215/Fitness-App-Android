@@ -41,7 +41,6 @@
                     android:gravity="end"
                     android:maxLines="1"
                     android:padding="3dp"
-                    android:text="50kg"
                     android:textSize="17sp"
                     android:textStyle="bold" />
 
