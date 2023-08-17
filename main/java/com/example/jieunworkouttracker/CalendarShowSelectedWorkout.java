@@ -47,7 +47,7 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
     private ExerciseRecyclerViewAdaptor adapter;
 
     private Double exerciseWeight;
-    private final NumberFormat nf = new DecimalFormat("##.##");
+    private final NumberFormat nf = new DecimalFormat("##.#");
 
     private String id;
     private String title;
@@ -92,7 +92,7 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
         }
         setContentView(R.layout.activity_menu_drawer_simple_light);
 
-        //Use view stubs to programatically change the include view at runtime
+        //Use view stubs to programmatically change the include view at runtime
         ViewStub stub = findViewById(R.id.main_view_stub);
         stub.setLayoutResource(R.layout.activity_exercise_list);
         stub.inflate();
@@ -246,31 +246,77 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
         }
 
         int i = 0;
-        int intSet1Improvement;
-        int intSet2Improvement;
-        int intSet3Improvement;
-        int intSet4Improvement;
-        int intSet5Improvement;
+        int intSet1Improvement = 0;
+        int intSet2Improvement = 0;
+        int intSet3Improvement = 0;
+        int intSet4Improvement = 0;
+        int intSet5Improvement = 0;
 
         for( cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext() ) {
             ExerciseItem exerciseItem = new ExerciseItem();
             //uses the cursor to populate the item WORKOUT_ID value
-            exerciseItem.setId(cursor.getString(cursor.getColumnIndex("log_id")));
+            int idColumnIndex = cursor.getColumnIndex("log_id");
+            if (idColumnIndex != -1) {
+                exerciseItem.setId(cursor.getString(idColumnIndex));
+            }
+
             //uses the cursor to populate the item Exercise Names
-            exerciseItem.setTitle(cursor.getString(cursor.getColumnIndex("exercise")));
+            int exerciseColumnIndex = cursor.getColumnIndex("exercise");
+            if (exerciseColumnIndex != -1) {
+                exerciseItem.setTitle(cursor.getString(exerciseColumnIndex));
+            }
 
-            exerciseItem.setButton1(cursor.getString(cursor.getColumnIndex("set1")));
-            exerciseItem.setButton2(cursor.getString(cursor.getColumnIndex("set2")));
-            exerciseItem.setButton3(cursor.getString(cursor.getColumnIndex("set3")));
-            exerciseItem.setButton4(cursor.getString(cursor.getColumnIndex("set4")));
-            exerciseItem.setButton5(cursor.getString(cursor.getColumnIndex("set5")));
+            int set1ColumnIndex = cursor.getColumnIndex("set1");
+            if (set1ColumnIndex != -1) {
+                exerciseItem.setButton1(cursor.getString(set1ColumnIndex));
+            }
+
+            int set2ColumnIndex = cursor.getColumnIndex("set2");
+            if (set2ColumnIndex != -1) {
+                exerciseItem.setButton2(cursor.getString(set2ColumnIndex));
+            }
+
+            int set3ColumnIndex = cursor.getColumnIndex("set3");
+            if (set3ColumnIndex != -1) {
+                exerciseItem.setButton3(cursor.getString(set3ColumnIndex));
+            }
+
+            int set4ColumnIndex = cursor.getColumnIndex("set4");
+            if (set4ColumnIndex != -1) {
+                exerciseItem.setButton4(cursor.getString(set4ColumnIndex));
+            }
+
+            int set5ColumnIndex = cursor.getColumnIndex("set5");
+            if (set5ColumnIndex != -1) {
+                exerciseItem.setButton5(cursor.getString(set5ColumnIndex));
+            }
 
 
-            intSet1Improvement = cursor.getInt(cursor.getColumnIndex("set1_improvement"));
-            intSet2Improvement = cursor.getInt(cursor.getColumnIndex("set2_improvement"));
-            intSet3Improvement = cursor.getInt(cursor.getColumnIndex("set3_improvement"));
-            intSet4Improvement = cursor.getInt(cursor.getColumnIndex("set4_improvement"));
-            intSet5Improvement = cursor.getInt(cursor.getColumnIndex("set5_improvement"));
+            int set1ImprovementColumnIndex = cursor.getColumnIndex("set1_improvement");
+            if (set1ImprovementColumnIndex != -1) {
+                intSet1Improvement = cursor.getInt(set1ImprovementColumnIndex);
+            }
+
+            int set2ImprovementColumnIndex = cursor.getColumnIndex("set2_improvement");
+            if (set2ImprovementColumnIndex != -1) {
+                intSet2Improvement = cursor.getInt(set2ImprovementColumnIndex);
+            }
+
+            int set3ImprovementColumnIndex = cursor.getColumnIndex("set3_improvement");
+            if (set3ImprovementColumnIndex != -1) {
+                intSet3Improvement = cursor.getInt(set3ImprovementColumnIndex);
+            }
+
+            int set4ImprovementColumnIndex = cursor.getColumnIndex("set4_improvement");
+            if (set4ImprovementColumnIndex != -1) {
+                intSet4Improvement = cursor.getInt(set4ImprovementColumnIndex);
+            }
+
+            int set5ImprovementColumnIndex = cursor.getColumnIndex("set5_improvement");
+            if (set5ImprovementColumnIndex != -1) {
+                intSet5Improvement = cursor.getInt(set5ImprovementColumnIndex);
+            }
+
 
 
             //All of the switch statements to determine which colour button to display for the sets
@@ -343,7 +389,10 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
             }
 
 
-            exerciseWeight = cursor.getDouble(cursor.getColumnIndex("weight"));
+            int weightColumnIndex = cursor.getColumnIndex("weight");
+            if (weightColumnIndex != -1) {
+                exerciseWeight = cursor.getDouble(weightColumnIndex);
+            }
             exerciseItem.setWeight(exerciseWeight);
             ExerciseItem.add(exerciseItem);
             i++;

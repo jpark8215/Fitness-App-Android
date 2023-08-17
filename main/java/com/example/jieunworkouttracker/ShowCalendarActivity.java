@@ -326,30 +326,27 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
                 item.setWorkoutId(dbCursor.getString(workoutIdColumnIndex));
             }
 
-            //uses the cursor to populate the item Workout Names
             if (workoutIdColumnIndex != -1) {
                 String workoutId = dbCursor.getString(workoutIdColumnIndex);
                 Cursor dbCursor2 = dbManager.fetchWorkoutNameOnSelectedDateForCalendar(workoutId);
                 item.setWorkoutId(workoutId);
 
-                if (dbCursor2 != null) {
+                if (dbCursor2 != null && dbCursor2.moveToFirst()) { // Check if dbCursor2 is not null and has data
                     int workoutTitleColumnIndex = dbCursor2.getColumnIndex("workout");
                     if (workoutTitleColumnIndex != -1) {
                         String workoutTitle = dbCursor2.getString(workoutTitleColumnIndex);
                         item.setTitle(workoutTitle);
                     } else {
-                        // Handle the case where "workout" column doesn't exist in dbCursor2
                         Log.e(LOG_TAG, "Column 'workout' not found in dbCursor2");
                     }
-                    dbCursor2.close(); // Close the cursor when you're done with it
+                    dbCursor2.close();
                 } else {
-                    // Handle the case where dbCursor2 is null
-                    Log.e(LOG_TAG, "dbCursor2 is null");
+                    Log.e(LOG_TAG, "No workout data found for workout_id: " + workoutId);
                 }
             } else {
-                // Handle the case where "workout_id" column doesn't exist in dbCursor
                 Log.e(LOG_TAG, "Column 'workout_id' not found in dbCursor");
             }
+
 
             int dateColumnIndex = dbCursor.getColumnIndex("date");
             if (dateColumnIndex != -1) {

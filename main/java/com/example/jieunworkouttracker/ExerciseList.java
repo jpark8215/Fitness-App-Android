@@ -564,6 +564,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
         final EditText exerciseEditText = dialog.findViewById(R.id.name_edittext);
         final EditText weightEditText = dialog.findViewById(R.id.weight_edittext);
         final ToggleButton toggleWeightUnit = dialog.findViewById(R.id.toggle_weight_unit);
+
         TextView txtTitle = dialog.findViewById(R.id.txt_title);
         Button btnUpdate = dialog.findViewById(R.id.btn_update);
         Button btnDelete = dialog.findViewById(R.id.btn_delete);

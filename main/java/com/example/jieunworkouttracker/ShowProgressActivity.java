@@ -75,7 +75,7 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
 
 
 
-        //Use view stubs to programatically change the include view at runtime
+        //Use view stubs to programmatically change the include view at runtime
         ViewStub stub = findViewById(R.id.main_view_stub);
         stub.setLayoutResource(R.layout.activity_progress);
         stub.inflate();
@@ -148,12 +148,7 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         chart.getAxisRight().setGranularity(1f);
         //chart.getAxisRight().setEnabled(false);
 
-
-
         chart.getAxisLeft().setDrawGridLines(false);
-
-
-
 
         // add a nice and smooth animation
         chart.animateY(500);
@@ -265,19 +260,31 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         Cursor cursor = dbManager.getExerciseLogProgress(exercisesId);
         ArrayList<BarEntry> values = new ArrayList<>();
 
-        for( cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext() ) {
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
             ProgressItem progressItem = new ProgressItem();
-            //uses the cursor to populate the progressItem weight value
-            progressItem.setWeight(cursor.getString(cursor.getColumnIndex("weight")));
-            //uses the cursor to populate the progressItem date value
-            progressItem.setDate(cursor.getString(cursor.getColumnIndex("date")));
 
-            //Converts the date to a day of the year number
+            int weightColumnIndex = cursor.getColumnIndex("weight");
+            if (weightColumnIndex != -1) {
+                String exerciseWeight = cursor.getString(weightColumnIndex);
+                progressItem.setWeight(exerciseWeight);
+            }
+
+            int dateColumnIndex = cursor.getColumnIndex("date");
+            if (dateColumnIndex != -1) {
+                String exerciseDate = cursor.getString(dateColumnIndex);
+                progressItem.setDate(exerciseDate);
+            }
+
             String dayOfTheYear = convertDate(progressItem.getDate());
 
-            //adds the values to the bar chart
-            values.add(new BarEntry(Integer.parseInt(dayOfTheYear), Integer.parseInt(progressItem.getWeight())));
+            values.add(new BarEntry(Integer.parseInt(dayOfTheYear), Float.parseFloat(progressItem.getWeight())));
+
+            // Log the debug information
+            Log.d("Debug", "Fetching logs for exerciseId: " + exercisesId);
+            logCursor(cursor);
         }
+
+
         dbManager.close();
         cursor.close();
 
@@ -298,6 +305,23 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
 
     }
 
+    private void logCursor(Cursor cursor) {
+        StringBuilder cursorData = new StringBuilder();
+        cursorData.append("Cursor data:\n");
+
+        int columns = cursor.getColumnCount();
+        while (cursor.moveToNext()) {
+            for (int i = 0; i < columns; i++) {
+                String columnName = cursor.getColumnName(i);
+                String columnValue = cursor.getString(i);
+                cursorData.append(columnName).append(": ").append(columnValue).append("\n");
+            }
+            cursorData.append("\n");
+        }
+
+        Log.d("Cursor Data", cursorData.toString());
+    }
+
     private String convertDate(String dateToConvert){
 
         //Splits the date to convert out into Year, Month and Date
@@ -314,8 +338,14 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         int dayNumber = Integer.parseInt(strDay);
 
         //Converts the date to a numbered day of the year
-        LocalDate date = LocalDate.of(year, monthNumber, dayNumber);
-        int dayOfYear = date.getDayOfYear();
+        LocalDate date = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            date = LocalDate.of(year, monthNumber, dayNumber);
+        }
+        int dayOfYear = 0;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            dayOfYear = date.getDayOfYear();
+        }
 
         //Converts it back to a string
         dateToConvert = Integer.toString(dayOfYear);

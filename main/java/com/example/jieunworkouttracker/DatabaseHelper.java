@@ -43,8 +43,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
 
-
-
     // Database Information
     static final String DB_NAME = "GAMESTUDI WORKOUTS.DB";
 
@@ -56,7 +54,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + " INTEGER PRIMARY KEY AUTOINCREMENT, " + WORKOUT + " TEXT NOT NULL, " + ARCHIVE + " INTEGER);";
 
 
-
     //Create EXERCISES table query
     private static final String CREATE_EXERCISES_TABLE = "create table " + TABLE_NAME_EXERCISES + "(" + EXERCISE_ID
             + " INTEGER PRIMARY KEY AUTOINCREMENT, " + WORKOUT_ID + " INTEGER NOT NULL, " + EXERCISE + " TEXT);";
@@ -66,18 +63,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + " INTEGER PRIMARY KEY AUTOINCREMENT, " + EXERCISE_ID + " INTEGER NOT NULL, " + WORKOUT_ID + " INTEGER NOT NULL, " + SET1 + " INTEGER, " + SET1_IMPROVEMENT + " INTEGER, " + SET2 + " INTEGER, " + SET2_IMPROVEMENT + " INTEGER, " + SET3 + " INTEGER, " + SET3_IMPROVEMENT + " INTEGER, " + SET4 + " INTEGER, " + SET4_IMPROVEMENT + " INTEGER, " + SET5 + " INTEGER, " + SET5_IMPROVEMENT + " INTEGER, " + WEIGHT + " DOUBLE, " + DATE + " DATE, " + DATETIME + " DEFAULT CURRENT_TIMESTAMP, " + DURATION + " TIME, " + NOTES + " TEXT);";
 
     //TODO - check this out
-    //private static final String CREATE_LOG_TABLE = String.Format("cerate table %s$1 ", TABLE_NAME_LOGS)
+    //private static final String CREATE_LOG_TABLE = String.Format("create table %s$1 ", TABLE_NAME_LOGS)
 
     public DatabaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
+
     }
+
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+
         db.execSQL(CREATE_WORKOUTS_TABLE);
         db.execSQL(CREATE_EXERCISES_TABLE);
         db.execSQL(CREATE_LOGS_TABLE);
+
     }
+
 
 
     @Override
@@ -101,6 +103,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
     }
+
+
 
     //CAN DELETE THIS LATER ON .. IS REQUIRED DURING TESTING/BUILD PHASE TO SEE LIVE DATABASE
     //RESULTS WITHOUT HAVING TO DOWNLOAD DB FILE AND OPEN IN ANOTHER APPLICATION

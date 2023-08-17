@@ -44,6 +44,7 @@ public class AndroidDatabaseManager extends Activity implements OnItemClickListe
         public static Cursor maincursor;
         public static int cursorpostion=0;
         public static ArrayList<String> value_string;
+
         public static ArrayList<String> tableheadernames;
         public static ArrayList<String> emptytablecolumnnames;
         public static boolean isEmpty;
@@ -234,7 +235,7 @@ public class AndroidDatabaseManager extends Activity implements OnItemClickListe
                             refreshTable(1);
                         }
                     }else{
-                        tvmessage.setText("Queru Executed successfully");
+                        tvmessage.setText("Query Executed successfully");
                         refreshTable(1);
                     }
 
@@ -388,7 +389,7 @@ public class AndroidDatabaseManager extends Activity implements OnItemClickListe
                     //getting contents of the table which user selected from the select_table spinner
                     ArrayList<Cursor> alc2=dbm.getData(Query2);
                     final Cursor c2=alc2.get(0);
-                    //saving cursor to the static indexinfo class which can be resued by the other functions
+                    //saving cursor to the static indexinfo class which can be reused by the other functions
                     indexInfo.maincursor=c2;
 
                     // if the cursor returned form the database is not null we display the data in table layout
@@ -1051,14 +1052,14 @@ public class AndroidDatabaseManager extends Activity implements OnItemClickListe
             String Query8 = "select * from "+indexInfo.table_name;
             ArrayList<Cursor> alc3=dbm.getData(Query8);
             c3=alc3.get(0);
-            //saving cursor to the static indexinfo class which can be resued by the other functions
+            //saving cursor to the static indexinfo class which can be reused by the other functions
             indexInfo.maincursor=c3;
         }
         if(d==1)
         {
             c3=indexInfo.maincursor;
         }
-        // if the cursor returened form tha database is not null we display the data in table layout
+        // if the cursor returned form tha database is not null we display the data in table layout
         if(c3!=null)
         {
             int counts = c3.getCount();
@@ -1194,7 +1195,7 @@ public class AndroidDatabaseManager extends Activity implements OnItemClickListe
             {
                 int tobestartindex=(indexInfo.currentpage-2)*10;
 
-                //if the tbale layout has the first 10 tuples then toast that this is the first page
+                //if the table layout has the first 10 tuples then toast that this is the first page
                 if(indexInfo.currentpage==1)
                 {
                     Toast.makeText(getApplicationContext(), "This is the first page", Toast.LENGTH_LONG).show();

@@ -1,5 +1,6 @@
 package com.example.jieunworkouttracker;
 
+
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -45,11 +46,8 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
     // Item List
     private final List<Item> listItem = new ArrayList();
 
-
     // Custom Recycler View Adaptor
     private RecyclerViewAdaptor adapter;
-
-
 
     private View parent_view;
     private View back_drop;
@@ -60,11 +58,12 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
     private CardView cv_add_workout;
     private Parcelable recyclerViewState;
 
-
     private ActionBar actionBar;
     private Toolbar toolbar;
     private TextView txtTitle;
     private Chronometer simpleChronometer;
+
+
 
     @Override
     protected void onPause() {
@@ -152,8 +151,8 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
             }
         });
 
-
     }
+
 
     private void initToolbar() {
         toolbar = findViewById(R.id.toolbar);
@@ -503,7 +502,7 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
                     //Updates with the new value
                     dbManager.updateWorkout(_id, newWorkoutName);
 
-                    //Remembers the poisiton of the reclcyer view when modify workout or delete workout is called
+                    //Remembers the position of the recycler view when modify workout or delete workout is called
                     final Parcelable recyclerViewState;
                     recyclerViewState = recyclerView.getLayoutManager().onSaveInstanceState();
 
@@ -531,7 +530,7 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
                 //Deletes the selected Workout
                 dbManager.deleteWorkout(_id);
 
-                //Remembers the poisiton of the reclcyer view when modify workout or delete workout is called
+                //Remembers the position of the recycler view when modify workout or delete workout is called
                 final Parcelable recyclerViewState;
                 recyclerViewState = recyclerView.getLayoutManager().onSaveInstanceState();
 
@@ -559,7 +558,7 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
                 //Deletes the selected Workout
                 dbManager.archiveWorkout(_id);
 
-                //Remembers the position of the reclcyer view when modify workout or delete workout is called
+                //Remembers the position of the recycler view when modify workout or delete workout is called
                 final Parcelable recyclerViewState;
                 recyclerViewState = recyclerView.getLayoutManager().onSaveInstanceState();
 

@@ -18,6 +18,7 @@ import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -380,6 +381,8 @@ public class ArchivedWorkoutList extends AppCompatActivity implements RecyclerVi
 
         final EditText workoutEditText = dialog.findViewById(R.id.name_edittext);
         final EditText weightEditText = dialog.findViewById(R.id.weight_edittext);
+        final ToggleButton toggleWeightUnit = dialog.findViewById(R.id.toggle_weight_unit);
+
         TextView txtTitle  = dialog.findViewById(R.id.txt_title);
         Button btnAdd = dialog.findViewById(R.id.btn_add);
 
@@ -388,6 +391,7 @@ public class ArchivedWorkoutList extends AppCompatActivity implements RecyclerVi
         txtTitle.setText("Add a Workout");
         workoutEditText.setHint("Workout");
         weightEditText.setVisibility(View.GONE);
+        toggleWeightUnit.setVisibility(View.GONE);
 
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -444,6 +448,8 @@ public class ArchivedWorkoutList extends AppCompatActivity implements RecyclerVi
 
         final EditText workoutEditText = dialog.findViewById(R.id.name_edittext);
         final EditText weightEditText = dialog.findViewById(R.id.weight_edittext);
+        final ToggleButton toggleWeightUnit = dialog.findViewById(R.id.toggle_weight_unit);
+
         TextView txtTitle  = dialog.findViewById(R.id.txt_title);
         Button btnUpdate = dialog.findViewById(R.id.btn_update);
         Button btnDelete = dialog.findViewById(R.id.btn_delete);
@@ -464,6 +470,8 @@ public class ArchivedWorkoutList extends AppCompatActivity implements RecyclerVi
         workoutEditText.setSelection(workoutEditText.getText().length());
 
         weightEditText.setVisibility(View.GONE);
+        toggleWeightUnit.setVisibility(View.GONE);
+
 
         btnUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -482,7 +490,7 @@ public class ArchivedWorkoutList extends AppCompatActivity implements RecyclerVi
                     //Updates with the new value
                     dbManager.updateWorkout(_id, newWorkoutName);
 
-                    //Remembers the poisiton of the reclcyer view when modify workout or delete workout is called
+                    //Remembers the position of the recycler view when modify workout or delete workout is called
                     final Parcelable recyclerViewState;
                     recyclerViewState = recyclerView.getLayoutManager().onSaveInstanceState();
 
@@ -510,7 +518,7 @@ public class ArchivedWorkoutList extends AppCompatActivity implements RecyclerVi
                 //Deletes the selected Workout
                 dbManager.deleteWorkout(_id);
 
-                //Remembers the poisiton of the reclcyer view when modify workout or delete workout is called
+                //Remembers the position of the recycler view when modify workout or delete workout is called
                 final Parcelable recyclerViewState;
                 recyclerViewState = recyclerView.getLayoutManager().onSaveInstanceState();
 
@@ -538,7 +546,7 @@ public class ArchivedWorkoutList extends AppCompatActivity implements RecyclerVi
                 //Deletes the selected Workout
                 dbManager.unarchiveWorkout(_id);
 
-                //Remembers the position of the reclcyer view when modify workout or delete workout is called
+                //Remembers the position of the recycler view when modify workout or delete workout is called
                 final Parcelable recyclerViewState;
                 recyclerViewState = recyclerView.getLayoutManager().onSaveInstanceState();
 
