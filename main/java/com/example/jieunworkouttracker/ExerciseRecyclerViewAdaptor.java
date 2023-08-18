@@ -104,7 +104,7 @@ public class ExerciseRecyclerViewAdaptor extends RecyclerView.Adapter<ExerciseRe
             @Override
             public void onClick(View v) {
                 if (buttonClickListener != null) {
-                    Log.d(LOG_TAG, " Button1 clicked");
+                    Log.d(LOG_TAG, " Button1");
                     String setSelected = "set1";
                     Integer intReps = Integer.parseInt(holder.button1.getText().toString());
                     intReps += 1;
@@ -119,7 +119,7 @@ public class ExerciseRecyclerViewAdaptor extends RecyclerView.Adapter<ExerciseRe
             @Override
             public void onClick(View v) {
                 if (buttonClickListener != null) {
-                    Log.d(LOG_TAG, " Button2 clicked");
+                    Log.d(LOG_TAG, " Button2");
                     String setSelected = "set2";
                     Integer intReps = Integer.parseInt(holder.button2.getText().toString());
                     intReps += 1;
@@ -134,7 +134,7 @@ public class ExerciseRecyclerViewAdaptor extends RecyclerView.Adapter<ExerciseRe
             @Override
             public void onClick(View v) {
                 if (buttonClickListener != null) {
-                    Log.d(LOG_TAG, " Button3 clicked");
+                    Log.d(LOG_TAG, " Button3");
                     String setSelected = "set3";
                     Integer intReps = Integer.parseInt(holder.button3.getText().toString());
                     intReps += 1;
@@ -149,7 +149,7 @@ public class ExerciseRecyclerViewAdaptor extends RecyclerView.Adapter<ExerciseRe
             @Override
             public void onClick(View v) {
                 if (buttonClickListener != null) {
-                    Log.d(LOG_TAG, " Button4 clicked");
+                    Log.d(LOG_TAG, " Button4");
                     String setSelected = "set4";
                     Integer intReps = Integer.parseInt(holder.button4.getText().toString());
                     intReps += 1;
@@ -164,7 +164,7 @@ public class ExerciseRecyclerViewAdaptor extends RecyclerView.Adapter<ExerciseRe
             @Override
             public void onClick(View v) {
                 if (buttonClickListener != null) {
-                    Log.d(LOG_TAG, " Button5 clicked");
+                    Log.d(LOG_TAG, " Button5");
                     String setSelected = "set5";
                     Integer intReps = Integer.parseInt(holder.button5.getText().toString());
                     intReps += 1;
@@ -182,7 +182,7 @@ public class ExerciseRecyclerViewAdaptor extends RecyclerView.Adapter<ExerciseRe
             @Override
             public boolean onLongClick(View v) {
                 if (buttonClickListener != null) {
-                    Log.d(LOG_TAG, " Button1 long clicked");
+                    Log.d(LOG_TAG, " Button1 long");
                     String setSelected = "set1";
                     Integer intReps = Integer.parseInt(holder.button1.getText().toString());
                     intReps -= 1;
@@ -197,7 +197,7 @@ public class ExerciseRecyclerViewAdaptor extends RecyclerView.Adapter<ExerciseRe
             @Override
             public boolean onLongClick(View v) {
                 if (buttonClickListener != null) {
-                    Log.d(LOG_TAG, " Button2 long clicked");
+                    Log.d(LOG_TAG, " Button2 long");
                     String setSelected = "set2";
                     Integer intReps = Integer.parseInt(holder.button2.getText().toString());
                     intReps -= 1;
@@ -212,7 +212,7 @@ public class ExerciseRecyclerViewAdaptor extends RecyclerView.Adapter<ExerciseRe
             @Override
             public boolean onLongClick(View v) {
                 if (buttonClickListener != null) {
-                    Log.d(LOG_TAG, " Button3 long clicked");
+                    Log.d(LOG_TAG, " Button3 long");
                     String setSelected = "set3";
                     Integer intReps = Integer.parseInt(holder.button3.getText().toString());
                     intReps -= 1;
@@ -227,7 +227,7 @@ public class ExerciseRecyclerViewAdaptor extends RecyclerView.Adapter<ExerciseRe
             @Override
             public boolean onLongClick(View v) {
                 if (buttonClickListener != null) {
-                    Log.d(LOG_TAG, " Button4 long clicked");
+                    Log.d(LOG_TAG, " Button4 long");
                     String setSelected = "set4";
                     Integer intReps = Integer.parseInt(holder.button4.getText().toString());
                     intReps -= 1;
@@ -242,7 +242,7 @@ public class ExerciseRecyclerViewAdaptor extends RecyclerView.Adapter<ExerciseRe
             @Override
             public boolean onLongClick(View v) {
                 if (buttonClickListener != null) {
-                    Log.d(LOG_TAG, " Button5 long clicked");
+                    Log.d(LOG_TAG, " Button5 long");
                     String setSelected = "set5";
                     Integer intReps = Integer.parseInt(holder.button5.getText().toString());
                     intReps -= 1;

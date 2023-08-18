@@ -1,7 +1,9 @@
 package com.example.jieunworkouttracker;
 
 
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -207,7 +209,9 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
                 super.onDrawerOpened(drawerView);
             }
         };
-        drawer.setDrawerListener(toggle);
+//        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
+
         toggle.syncState();
 
         // open drawer at start
@@ -502,29 +506,87 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
         exerciseEditText.setHint("Exercise");
 
         btnAdd.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//
+//                if (TextUtils.isEmpty(exerciseEditText.getText())) {
+//                    Toast.makeText(ExerciseList.this,
+//                            "You must give an exercise name", Toast.LENGTH_LONG).show();
+//                } else {
+//                    final String exerciseName = exerciseEditText.getText().toString();
+//                    Double exerciseWeight = 0.0;
+//
+//
+//                    // Edit text field only accepts numbers
+//                    // Check if weight is provided and convert if lbs is selected
+//                    // Update the weightTextView based on toggleWeightUnit state
+//
+//                    if (weightEditText.getText().toString().trim().length() > 0) {
+//                        exerciseWeight = Double.parseDouble(weightEditText.getText().toString());
+//
+//                        // Convert kilograms to pounds if lbs is selected
+//                        if (!toggleWeightUnit.isChecked()) {
+//                            exerciseWeight = Double.parseDouble(nf.format(exerciseWeight / 2.20462));
+//                        }
+//                    }
+//
+//
+//                    Intent intent = getIntent();
+//                    dbManager.insertExercise(intent.getStringExtra("id"), exerciseName, exerciseWeight);
+//                    Intent main = new Intent(v.getContext(), ExerciseList.class);
+//                    main.putExtra("title", intent.getStringExtra("title"));
+//                    main.putExtra("id", intent.getStringExtra("id"));
+//                    main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                    startActivity(main);
+//
+//                    dialog.dismiss();
+//                }
+//            }
+//        });
+
             @Override
             public void onClick(View v) {
-                if (TextUtils.isEmpty(exerciseEditText.getText())) {
-                    Toast.makeText(ExerciseList.this,
-                            "You must give an exercise name", Toast.LENGTH_LONG).show();
+                final String exerciseName = exerciseEditText.getText().toString();
+
+                // Check if the exercise name already exists in the database
+                if (dbManager.doesExerciseExist(exerciseName)) {
+                    // Exercise with the same name exists, ask the user if they want to proceed
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ExerciseList.this);
+                    builder.setTitle("Exercise Already Exists");
+                    builder.setMessage("An exercise with the same name already exists. Do you want to use the same exercise?");
+                    builder.setPositiveButton("Use Same Exercise", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            // User wants to use the same exercise, so directly add it
+                            Double exerciseWeight = 0.0;
+                            if (weightEditText.getText().toString().trim().length() > 0) {
+                                exerciseWeight = Double.parseDouble(weightEditText.getText().toString());
+                                if (!toggleWeightUnit.isChecked()) {
+                                    exerciseWeight = Double.parseDouble(nf.format(exerciseWeight / 2.20462));
+                                }
+                            }
+                            Intent intent = getIntent();
+                            dbManager.insertExercise(intent.getStringExtra("id"), exerciseName, exerciseWeight);
+                            Intent main = new Intent(v.getContext(), ExerciseList.class);
+                            main.putExtra("title", intent.getStringExtra("title"));
+                            main.putExtra("id", intent.getStringExtra("id"));
+                            main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(main);
+                            dialog.dismiss();
+                        }
+                    });
+                    builder.setNegativeButton("Cancel", null);
+                    builder.show();
                 } else {
-                    final String exerciseName = exerciseEditText.getText().toString();
+                    // Exercise name doesn't exist, proceed with adding it
                     Double exerciseWeight = 0.0;
-
-                    // Edit text field only accepts numbers
-                    // Check if weight is provided and convert if lbs is selected
-                    // Update the weightTextView based on toggleWeightUnit state
-
                     if (weightEditText.getText().toString().trim().length() > 0) {
                         exerciseWeight = Double.parseDouble(weightEditText.getText().toString());
-
-                        // Convert kilograms to pounds if lbs is selected
                         if (!toggleWeightUnit.isChecked()) {
                             exerciseWeight = Double.parseDouble(nf.format(exerciseWeight / 2.20462));
                         }
                     }
-
-
                     Intent intent = getIntent();
                     dbManager.insertExercise(intent.getStringExtra("id"), exerciseName, exerciseWeight);
                     Intent main = new Intent(v.getContext(), ExerciseList.class);
@@ -532,11 +594,12 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
                     main.putExtra("id", intent.getStringExtra("id"));
                     main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(main);
-
                     dialog.dismiss();
                 }
             }
         });
+// TODO above - log should have only one exercise. Added 8/17 checking exercise duplicates
+
 
         (dialog.findViewById(R.id.bt_close)).setOnClickListener(new View.OnClickListener() {
             @Override

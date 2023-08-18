@@ -37,7 +37,7 @@ import com.google.android.material.navigation.NavigationView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivityWorkoutList extends AppCompatActivity implements RecyclerViewAdaptor.OnItemSelectedListener, RecyclerViewAdaptor.OnItemLongSelectedListener {
+public class MainActivityWorkoutList extends AppCompatActivity implements RecyclerViewAdapter.OnItemSelectedListener, RecyclerViewAdapter.OnItemLongSelectedListener {
 
     private DBManager dbManager;
 
@@ -47,7 +47,7 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
     private final List<Item> listItem = new ArrayList();
 
     // Custom Recycler View Adaptor
-    private RecyclerViewAdaptor adapter;
+    private RecyclerViewAdapter adapter;
 
     private View parent_view;
     private View back_drop;
@@ -324,7 +324,7 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
             listItem.add(item);
         }
 
-        adapter = new RecyclerViewAdaptor(listItem, this, this, this);
+        adapter = new RecyclerViewAdapter(listItem, this, this, this);
         recyclerView.setAdapter(adapter);
 
         // Make sure to close the cursor after using it

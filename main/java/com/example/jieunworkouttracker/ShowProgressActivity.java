@@ -98,8 +98,6 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         spinner.setOnItemSelectedListener(this);
 
 
-
-
         dbManager = new DBManager(this);
         dbManager.open();
         Cursor cursor = dbManager.getAllExercises();
@@ -183,7 +181,8 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
                 super.onDrawerOpened(drawerView);
             }
         };
-        drawer.setDrawerListener(toggle);
+//        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         // open drawer at start

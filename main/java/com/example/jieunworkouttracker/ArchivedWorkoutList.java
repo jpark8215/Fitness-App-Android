@@ -36,7 +36,7 @@ import com.google.android.material.navigation.NavigationView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ArchivedWorkoutList extends AppCompatActivity implements RecyclerViewAdaptor.OnItemSelectedListener, RecyclerViewAdaptor.OnItemLongSelectedListener {
+public class ArchivedWorkoutList extends AppCompatActivity implements RecyclerViewAdapter.OnItemSelectedListener, RecyclerViewAdapter.OnItemLongSelectedListener {
 
     private DBManager dbManager;
 
@@ -47,7 +47,7 @@ public class ArchivedWorkoutList extends AppCompatActivity implements RecyclerVi
 
 
     // Custom Recycler View Adaptor
-    private RecyclerViewAdaptor adapter;
+    private RecyclerViewAdapter adapter;
 
 
     private View parent_view;
@@ -312,7 +312,7 @@ public class ArchivedWorkoutList extends AppCompatActivity implements RecyclerVi
             // Close the cursor when done
             cursor.close();
 
-            adapter = new RecyclerViewAdaptor(listItem, this, this, this);
+            adapter = new RecyclerViewAdapter(listItem, this, this, this);
             recyclerView.setAdapter(adapter);
         }
     }
