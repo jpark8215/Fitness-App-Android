@@ -84,7 +84,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu_drawer_simple_light);
 
-        //Use view stubs to programatically change the include view at runtime
+        //Use view stubs to programmatically change the include view at runtime
         ViewStub stub = findViewById(R.id.main_view_stub);
         stub.setLayoutResource(R.layout.activity_exercise_list);
         stub.inflate();
@@ -171,7 +171,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         actionBar.setTitle("");
 
         txtTitle = findViewById(R.id.txtTitle);
-        txtTitle.setText("Archvied " + title);
+        txtTitle.setText("Archived " + title);
 
         //Hides the chronometer as we don't need it for this activity
         simpleChronometer = findViewById(R.id.simpleChronometer);

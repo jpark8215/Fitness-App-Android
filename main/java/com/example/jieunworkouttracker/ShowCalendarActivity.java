@@ -155,12 +155,12 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
             //Log.d(LOG_TAG, "CURSOR - WORKOUT_ID: " + workout_id + " LOG_ID: " + log_id + " DATETIME " + date);
         }
 
-        Log.d(LOG_TAG, "TODAYS DATE: " + Calendar.getInstance().getTime());
+        Log.d(LOG_TAG, "TODAY'S DATE: " + Calendar.getInstance().getTime());
 
         String calendartest = Calendar.getInstance().getTime().toString();
         calendartest = calendartest.substring(0,10);
         Integer calendaryear = Calendar.getInstance().get(Calendar.YEAR);
-        Log.d(LOG_TAG, "TODAYS DATE TRANSFORMED: " + calendartest + " " + calendaryear);
+        Log.d(LOG_TAG, "TODAY'S DATE TRANSFORMED: " + calendartest + " " + calendaryear);
 
 
         //Shows workouts which were completed today

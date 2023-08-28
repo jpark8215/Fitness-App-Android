@@ -150,7 +150,6 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
                 addWorkout(v);
             }
         });
-
     }
 
 

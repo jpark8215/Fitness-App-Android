@@ -412,7 +412,7 @@ public class DBManager {
         database.delete(DatabaseHelper.TABLE_NAME_LOGS,DatabaseHelper.LOG_ID + "=" + _id, null);
     }
 
-//Added 8/16 checking exercise duplicates
+    //Added 8/16 checking exercise duplicates
     public boolean doesExerciseExist(String exerciseName) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor = null;

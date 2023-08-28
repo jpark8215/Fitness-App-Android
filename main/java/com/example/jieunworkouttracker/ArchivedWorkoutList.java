@@ -93,7 +93,7 @@ public class ArchivedWorkoutList extends AppCompatActivity implements RecyclerVi
 
         setContentView(R.layout.activity_menu_drawer_simple_light);
 
-        //Use view stubs to programatically change the include view at runtime
+        //Use view stubs to programmatically change the include view at runtime
         ViewStub stub = findViewById(R.id.main_view_stub);
         stub.setLayoutResource(R.layout.activity_main_workout_list);
         stub.inflate();
