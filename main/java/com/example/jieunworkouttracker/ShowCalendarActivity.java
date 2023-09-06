@@ -107,6 +107,10 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         Cursor cursor = dbManager.fetchAllExerciseLogsForCalendar();
         dbManager.close();
 
+
+
+
+
         //Adds all of the events to the calendar
         for( cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext() ) {
             CalendarItem calendarItem = new CalendarItem();
@@ -176,6 +180,7 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
                 showEvents(dateClicked);
 
             }
+
 
             @Override
             public void onMonthScroll(Date firstDayOfNewMonth) {
@@ -358,6 +363,8 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         adapter = new CalendarRecyclerViewAdaptor(workoutListItem, ShowCalendarActivity.this, null, ShowCalendarActivity.this);
         recyclerView.setAdapter(adapter);
     }
+
+
 
     public void bottomNavigationHomeClick(View view){
         Intent intent = new Intent(getApplicationContext(), MainActivityWorkoutList.class);

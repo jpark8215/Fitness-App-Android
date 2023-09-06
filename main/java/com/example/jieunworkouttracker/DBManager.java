@@ -155,11 +155,11 @@ public class DBManager {
         return cursor;
     }
 
-
     public Cursor fetchArchivedWorkouts() {
         String[] columns = new String[] { DatabaseHelper.WORKOUT_ID, DatabaseHelper.WORKOUT};
+
         Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_WORKOUTS, columns, "WORKOUTS.ARCHIVE = 1", null, null, null, null);
-        if (cursor != null) {
+        if (cursor != null ) {
             cursor.moveToFirst();
         }
         return cursor;

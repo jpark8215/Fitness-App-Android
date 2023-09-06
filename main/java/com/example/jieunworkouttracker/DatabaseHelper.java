@@ -44,7 +44,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     // Database Information
-    static final String DB_NAME = "GAMESTUDI WORKOUTS.DB";
+    static final String DB_NAME = "JIEUN WORKOUTS.DB";
 
     // database version
     static final int DB_VERSION = 23;

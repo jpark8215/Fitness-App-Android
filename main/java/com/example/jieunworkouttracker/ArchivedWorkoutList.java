@@ -296,9 +296,7 @@ public class ArchivedWorkoutList extends AppCompatActivity implements RecyclerVi
             TextView empty = findViewById(R.id.empty);
             empty.setVisibility(View.GONE);
 
-            List<Item> listItem = new ArrayList<>();
-            // Iterate through the cursor and populate the list
-            while (cursor.moveToNext()) {
+            for( cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext() ) {
                 Item item = new Item();
                 // Uses the cursor to populate the item WORKOUT_ID value
                 int workoutIdIndex = cursor.getColumnIndex("workout_id");
@@ -314,6 +312,15 @@ public class ArchivedWorkoutList extends AppCompatActivity implements RecyclerVi
 
             adapter = new RecyclerViewAdapter(listItem, this, this, this);
             recyclerView.setAdapter(adapter);
+            try {
+                if (adapter != null) {
+                    adapter.notifyDataSetChanged();
+                }
+            } catch (NullPointerException e) {
+                // Handle the exception, e.g., log an error message
+                e.printStackTrace();
+            }
+
         }
     }
 

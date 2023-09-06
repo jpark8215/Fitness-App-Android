@@ -150,6 +150,9 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
                 addWorkout(v);
             }
         });
+
+
+
     }
 
 
@@ -285,50 +288,62 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
         startActivity(intent);
     }
 
-
     private void loadWorkoutData() {
         Cursor cursor = dbManager.fetchActiveWorkouts();
 
-        recyclerView = findViewById(R.id.recycler_view); // Make sure the ID matches the one in activity_main_workout_list.xml
+        recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 
-        // Make sure the ID matches the one in activity_main_workout_list.xml
         TextView empty = findViewById(R.id.empty);
 
-        //If the cursor has a value in it then hide the empty textview
-        //In English. If there is a workout returned, then remove the text saying no workouts found
+        // Initialize the adapter if it's null
+        if (adapter == null) {
+            adapter = new RecyclerViewAdapter(listItem, this, this, this);
+            recyclerView.setAdapter(adapter);
+        }
+
+        // If the cursor has a value in it then hide the empty textview
         if (cursor != null && cursor.getCount() > 0) {
             empty.setVisibility(View.GONE);
-        }
 
-        // Your cursor iteration and item population logic remains unchanged
-        assert cursor != null;
-        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-            Item item = new Item();
-// Uses the cursor to populate the item WORKOUT_ID value
-            int workoutIdIndex = cursor.getColumnIndex("workout_id");
-            if (workoutIdIndex != -1) {
-                String workoutId = cursor.getString(workoutIdIndex);
-                item.setId(workoutId);
+            listItem.clear(); // Clear the list to avoid duplicates when refreshing
+            // Iterate through the cursor and populate the list
+            cursor.moveToFirst(); // Move to the first row
+
+            while (!cursor.isAfterLast()) {
+                Item item = new Item();
+
+                // Get column indices
+                int workoutIdIndex = cursor.getColumnIndex(DatabaseHelper.WORKOUT_ID);
+                int workoutNameIndex = cursor.getColumnIndex(DatabaseHelper.WORKOUT);
+
+                // Check if indices are valid
+                if (workoutIdIndex != -1 && workoutNameIndex != -1) {
+                    // Retrieve data from cursor
+                    String workoutId = cursor.getString(workoutIdIndex);
+                    String workoutName = cursor.getString(workoutNameIndex);
+
+                    // Populate the item
+                    item.setId(workoutId);
+                    item.setTitle(workoutName);
+
+                    // Add the item to the list
+                    listItem.add(item);
+                }
+
+                cursor.moveToNext(); // Move to the next row
             }
 
-// Uses the cursor to populate the item Workout Names
-            int workoutNameIndex = cursor.getColumnIndex("workout");
-            if (workoutNameIndex != -1) {
-                String workoutName = cursor.getString(workoutNameIndex);
-                item.setTitle(workoutName);
-            }
+            // Close the cursor when done
+            cursor.close();
 
-            listItem.add(item);
+            // Notify the adapter that the data has changed
+            adapter.notifyDataSetChanged();
         }
 
-        adapter = new RecyclerViewAdapter(listItem, this, this, this);
-        recyclerView.setAdapter(adapter);
-
-        // Make sure to close the cursor after using it
-        cursor.close();
     }
+
 
 //    private void loadWorkoutData(){
 //        Cursor cursor = dbManager.fetchActiveWorkouts();
