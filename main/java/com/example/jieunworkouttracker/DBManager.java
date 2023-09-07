@@ -433,4 +433,21 @@ public class DBManager {
         }
     }
 
+
+    // In DBManager.java
+    public boolean isDuplicateWorkout(String workoutName) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String query = "SELECT COUNT(*) FROM " + DatabaseHelper.TABLE_NAME_WORKOUTS + " WHERE " +
+                DatabaseHelper.WORKOUT + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{workoutName});
+        int count = 0;
+        if (cursor != null) {
+            cursor.moveToFirst();
+            count = cursor.getInt(0);
+            cursor.close();
+        }
+        return count > 0;
+    }
+
+
 }

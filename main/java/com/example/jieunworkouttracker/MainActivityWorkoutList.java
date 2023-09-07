@@ -1,7 +1,9 @@
 package com.example.jieunworkouttracker;
 
 
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -425,31 +427,84 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                //Does a validation check to make sure the user has entered in a value for the exercise name
                 if (TextUtils.isEmpty(workoutEditText.getText())) {
                     Toast.makeText(MainActivityWorkoutList.this,
                             "You must give a workout name", Toast.LENGTH_LONG).show();
-
-                    //If the user has given an exercise name then we will insert the exercise into the database
                 } else {
                     if (v.getId() == R.id.btn_add) {
                         final String workoutName = workoutEditText.getText().toString();
-                        dbManager.insertWorkout(workoutName);
 
+                        // Check if it's a duplicate
+                        if (dbManager.isDuplicateWorkout(workoutName)) {
+                            // It's a duplicate, ask for confirmation
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivityWorkoutList.this);
+                            builder.setTitle("Duplicate Workout Name");
+                            builder.setMessage("A workout with the same name already exists. Do you want to add another workout with the same name?");
+                            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    // User confirmed, add the workout
+                                    dbManager.insertWorkout(workoutName);
 
-                        //Shows the new workout by clearing the recyclerview and re-adding all the items
-                        //Works better this way as we don't have to re-create the entire activity
-                        listItem.clear();
-                        loadWorkoutData();
-                        adapter.notifyDataSetChanged();
-                        dialog.dismiss();
+                                    // Refresh the list
+                                    listItem.clear();
+                                    loadWorkoutData();
+                                    adapter.notifyDataSetChanged();
+                                    dialog.dismiss();
+                                    recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                                }
+                            });
+                            builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    // User declined, do nothing or show a message
+                                    dialog.dismiss();
+                                }
+                            });
+                            builder.show();
+                        } else {
+                            // Not a duplicate, insert the workout directly
+                            dbManager.insertWorkout(workoutName);
 
-                        //Will automatically scroll down to the position of the new workout which was added
-                        recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                            // Refresh the list
+                            listItem.clear();
+                            loadWorkoutData();
+                            adapter.notifyDataSetChanged();
+                            dialog.dismiss();
+                            recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                        }
                     }
                 }
             }
+
+
+//            @Override
+//            public void onClick(View v) {
+//
+//                //Does a validation check to make sure the user has entered in a value for the exercise name
+//                if (TextUtils.isEmpty(workoutEditText.getText())) {
+//                    Toast.makeText(MainActivityWorkoutList.this,
+//                            "You must give a workout name", Toast.LENGTH_LONG).show();
+//
+//                    //If the user has given an exercise name then we will insert the exercise into the database
+//                } else {
+//                    if (v.getId() == R.id.btn_add) {
+//                        final String workoutName = workoutEditText.getText().toString();
+//                        dbManager.insertWorkout(workoutName);
+//
+//
+//                        //Shows the new workout by clearing the recyclerview and re-adding all the items
+//                        //Works better this way as we don't have to re-create the entire activity
+//                        listItem.clear();
+//                        loadWorkoutData();
+//                        adapter.notifyDataSetChanged();
+//                        dialog.dismiss();
+//
+//                        //Will automatically scroll down to the position of the new workout which was added
+//                        recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+//                    }
+//                }
+//            }
         });
 
         (dialog.findViewById(R.id.bt_close)).setOnClickListener(new View.OnClickListener() {
@@ -502,38 +557,113 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
         btnUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                //Does a validation check to make sure the user has entered in a value for the workout name
+                // Validate if the user has entered a workout name
                 if (TextUtils.isEmpty(workoutEditText.getText())) {
                     Toast.makeText(MainActivityWorkoutList.this,
                             "You must give a workout name", Toast.LENGTH_LONG).show();
-
-                    //If the user has given a workout name then we will update the workout name in the database
                 } else {
                     String newWorkoutName = workoutEditText.getText().toString();
                     Long _id = Long.parseLong(itemId);
 
-                    //Updates with the new value
-                    dbManager.updateWorkout(_id, newWorkoutName);
+                    // Check if the new workout name already exists
+                    if (dbManager.isDuplicateWorkout(newWorkoutName)) {
+                        // Handle the case where the workout name already exists
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivityWorkoutList.this);
+                        builder.setTitle("Duplicate Workout Name");
+                        builder.setMessage("A workout with this name already exists. By clicking Update, you will have two exercises with the same name. Still Update?");
 
-                    //Remembers the position of the recycler view when modify workout or delete workout is called
-                    final Parcelable recyclerViewState;
-                    recyclerViewState = recyclerView.getLayoutManager().onSaveInstanceState();
+                        // Add buttons for user choice
+                        builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                // Update the workout name in the database
+                                dbManager.updateWorkout(_id, newWorkoutName);
 
-                    //Shows the update made by clearing the recyclerview and re-adding all the items
-                    //Works better this way as we don't have to re-create the entire activity
-                    listItem.clear();
-                    loadWorkoutData();
-                    adapter.notifyDataSetChanged();
+                                // Remember the position of the recycler view when modifying a workout
+                                final Parcelable recyclerViewState = recyclerView.getLayoutManager().onSaveInstanceState();
 
-                    //places the user back at the same position in the recycler view rather than scrolling all the way back up to the top
-                    recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
+                                // Show the update by clearing the recyclerview and re-adding all the items
+                                // This works better as we don't have to re-create the entire activity
+                                listItem.clear();
+                                loadWorkoutData();
+                                adapter.notifyDataSetChanged();
 
+                                // Place the user back at the same position in the recycler view rather than scrolling to the top
+                                recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
 
-                    //Closes the dialog
-                    dialog.dismiss();
+                                // Close the dialog
+                                dialog.dismiss();
+                            }
+                        });
+
+                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                // User chose to cancel the update, do nothing
+                                dialog.dismiss();
+                            }
+                        });
+
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    } else {
+                        // No duplicate found, update the workout name directly
+                        dbManager.updateWorkout(_id, newWorkoutName);
+
+                        // Remember the position of the recycler view when modifying a workout
+                        final Parcelable recyclerViewState = recyclerView.getLayoutManager().onSaveInstanceState();
+
+                        // Show the update by clearing the recyclerview and re-adding all the items
+                        // This works better as we don't have to re-create the entire activity
+                        listItem.clear();
+                        loadWorkoutData();
+                        adapter.notifyDataSetChanged();
+
+                        // Place the user back at the same position in the recycler view rather than scrolling to the top
+                        recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
+
+                        // Close the dialog
+                        dialog.dismiss();
+                    }
                 }
             }
+
+
+
+//            @Override
+//            public void onClick(View v) {
+//
+//                //Does a validation check to make sure the user has entered in a value for the workout name
+//                if (TextUtils.isEmpty(workoutEditText.getText())) {
+//                    Toast.makeText(MainActivityWorkoutList.this,
+//                            "You must give a workout name", Toast.LENGTH_LONG).show();
+//
+//                    //If the user has given a workout name then we will update the workout name in the database
+//                } else {
+//                    String newWorkoutName = workoutEditText.getText().toString();
+//                    Long _id = Long.parseLong(itemId);
+//
+//                    //Updates with the new value
+//                    dbManager.updateWorkout(_id, newWorkoutName);
+//
+//                    //Remembers the position of the recycler view when modify workout or delete workout is called
+//                    final Parcelable recyclerViewState;
+//                    recyclerViewState = recyclerView.getLayoutManager().onSaveInstanceState();
+//
+//                    //Shows the update made by clearing the recyclerview and re-adding all the items
+//                    //Works better this way as we don't have to re-create the entire activity
+//                    listItem.clear();
+//                    loadWorkoutData();
+//                    adapter.notifyDataSetChanged();
+//
+//                    //places the user back at the same position in the recycler view rather than scrolling all the way back up to the top
+//                    recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
+//
+//
+//                    //Closes the dialog
+//                    dialog.dismiss();
+//                }
+//            }
         });
 
         btnDelete.setOnClickListener(new View.OnClickListener() {
@@ -592,7 +722,6 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
         });
 
 
-
         (dialog.findViewById(R.id.bt_close)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -603,6 +732,5 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
         dialog.show();
         dialog.getWindow().setAttributes(lp);
     }
-
 
 }

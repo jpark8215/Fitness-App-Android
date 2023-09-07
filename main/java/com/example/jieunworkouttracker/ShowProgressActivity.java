@@ -291,7 +291,7 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
 
         BarDataSet set1 = new BarDataSet(values, "Data Set");
         set1.setValues(values);
-        //TODO Change colour scheme
+        //TODO Change color scheme
         set1.setColors(ColorTemplate.VORDIPLOM_COLORS);
         set1.setDrawValues(false);
 
