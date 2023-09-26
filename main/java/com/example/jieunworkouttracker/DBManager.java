@@ -1,7 +1,9 @@
 package com.example.jieunworkouttracker;
 
+import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -166,15 +168,7 @@ public class DBManager {
     }
 
 
-    //Super hacky way of doing it this
-    //Select MAX date time was not working correctly from fetchExerciseLogs()
-    //But.. it did seem to work correctly when ordering by log_id DESC
-    //So we are going to Count the amount of exercises in a workout.
-    //Use that value in fetchExerciseLogs as a LIMIT value
-    //This will then return the correct results we are after... but then everything is reversed
-    //So we then have to flip it around to appear in the correct order
     //TODO - Make this better
-
     public String countExercises(String id){
 
         Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_EXERCISES, null, "EXERCISES.WORKOUT_ID = ?", new String[]{id}, null, null, null);
@@ -223,7 +217,6 @@ public class DBManager {
 
     }
 
-
     public Cursor fetchExerciseLogs(String id, String numOfExercises) {
 
         //Uses a prepared statement to help protect against SQL injection attacks
@@ -251,7 +244,6 @@ public class DBManager {
         String[] columns = new String[] { "EXERCISES.WORKOUT_ID", "LOGS.EXERCISE_ID", DatabaseHelper.LOG_ID, DatabaseHelper.EXERCISE, "MAX(datetime)", DatabaseHelper.SET1, DatabaseHelper.SET1_IMPROVEMENT, DatabaseHelper.SET2, DatabaseHelper.SET2_IMPROVEMENT, DatabaseHelper.SET3, DatabaseHelper.SET3_IMPROVEMENT, DatabaseHelper.SET4, DatabaseHelper.SET4_IMPROVEMENT, DatabaseHelper.SET5, DatabaseHelper.SET5_IMPROVEMENT, DatabaseHelper.WEIGHT};
         // Cursor cursor = database.query( DatabaseHelper.TABLE_NAME_EXERCISES + " LEFT OUTER JOIN " + DatabaseHelper.TABLE_NAME_LOGS + " ON " + "EXERCISES.EXERCISE_ID" + "=" + "LOGS.EXERCISE_ID", columns, "EXERCISES.WORKOUT_ID = ?", new String[]{id}, "LOGS.EXERCISE_ID", null, null);
 
-
         Cursor cursor = database.query( true,DatabaseHelper.TABLE_NAME_LOGS + " LEFT OUTER JOIN " + DatabaseHelper.TABLE_NAME_EXERCISES + " ON " + "LOGS.EXERCISE_ID" + "=" + "EXERCISES.EXERCISE_ID", columns, "EXERCISES.WORKOUT_ID = ?" + " AND " + "LOGS.DATE = ?", new String[]{id, date}, "LOGS.EXERCISE_ID", null, DatabaseHelper.LOG_ID, null);
 
         if (cursor != null) {
@@ -259,7 +251,6 @@ public class DBManager {
         }
         return cursor;
     }
-
 
     public Cursor fetchAllExerciseLogsForCalendar() {
         String[] columns = new String[] { DatabaseHelper.WORKOUT_ID, DatabaseHelper.DATE};
@@ -269,7 +260,6 @@ public class DBManager {
         }
         return cursor;
     }
-
 
     //The logs table only gives us the workout ID
     public Cursor fetchWorkoutsOnSelectedDateForCalendar(String strDate) {
@@ -291,14 +281,12 @@ public class DBManager {
         return cursor;
     }
 
-
     public int updateWorkout(long _id, String workoutName) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(DatabaseHelper.WORKOUT, workoutName);
         int i = database.update(DatabaseHelper.TABLE_NAME_WORKOUTS, contentValues, DatabaseHelper.WORKOUT_ID + " = " + _id, null);
         return i;
     }
-
 
     public int updateExerciseName(long _id, String exerciseName) {
         //For exercises it is passing across the log id when a list item is long selected.
@@ -325,7 +313,6 @@ public class DBManager {
         return i;
     }
 
-
     public int updateExerciseWeight(long _id, Double exerciseWeight) {
 
         //For exercises it is passing across the log id when a list item is long selected.
@@ -337,14 +324,12 @@ public class DBManager {
         return i;
     }
 
-
     public int updateExerciseLogs(long log_id, String setSelected, Integer intReps){
         ContentValues contentValues = new ContentValues();
         contentValues.put(setSelected, intReps);
         int i = database.update(DatabaseHelper.TABLE_NAME_LOGS, contentValues, DatabaseHelper.LOG_ID + " = " + log_id, null);
         return i;
     }
-
 
     public int updateExerciseLogsWithImprovement(long log_id, String setSelected, Integer intReps, Integer intImprovement){
         ContentValues contentValues = new ContentValues();
@@ -356,7 +341,6 @@ public class DBManager {
         return i;
     }
 
-
     public int recordExerciseLogDuration(String log_id, long workoutDuration){
 
         ContentValues contentValues = new ContentValues();
@@ -365,14 +349,12 @@ public class DBManager {
         return i;
     }
 
-
     public void archiveWorkout(Long workout_id){
         ContentValues contentValues = new ContentValues();
         contentValues.put("archive", 1);
 
         database.update(DatabaseHelper.TABLE_NAME_WORKOUTS, contentValues, DatabaseHelper.WORKOUT_ID + " = " + workout_id, null);
     }
-
 
     public void unarchiveWorkout(Long workout_id){
         ContentValues contentValues = new ContentValues();
@@ -381,38 +363,120 @@ public class DBManager {
         database.update(DatabaseHelper.TABLE_NAME_WORKOUTS, contentValues, DatabaseHelper.WORKOUT_ID + " = " + workout_id, null);
     }
 
+//    public void deleteWorkout(long _id) {
+//        database.delete(DatabaseHelper.TABLE_NAME_WORKOUTS, DatabaseHelper.WORKOUT_ID + "=" + _id, null);
+//    }
+public void deleteWorkout(long _id) {
+    // First, let's count the associated exercises and logs
+    int associatedExerciseCount = countAssociatedExercises(_id);
+    int associatedLogCount = countAssociatedLogs(_id);
 
-    public void deleteWorkout(long _id) {
+    // Check if there are associated exercises or logs
+    if (associatedExerciseCount > 0 || associatedLogCount > 0) {
+        // If there are associated exercises or logs, ask for confirmation
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Confirm Deletion");
+
+        String message = "This workout has " + associatedExerciseCount + " associated exercise(s) and " +
+                associatedLogCount + " associated log(s). Are you sure you want to delete it and its associated data?";
+
+        builder.setMessage(message);
+
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                // User confirmed, delete the workout, its exercises, and logs
+                deleteAssociatedExercises(_id);
+//                deleteAssociatedLogs(_id);
+        database.delete(DatabaseHelper.TABLE_NAME_WORKOUTS, DatabaseHelper.WORKOUT_ID + "=" + _id, null);
+        database.delete(DatabaseHelper.TABLE_NAME_LOGS, DatabaseHelper.EXERCISE_ID + "=" + _id, null);
+
+            }
+        });
+
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                // User canceled the deletion, do nothing
+            }
+        });
+
+        builder.show();
+    } else {
+        // If there are no associated exercises or logs, directly delete the workout
         database.delete(DatabaseHelper.TABLE_NAME_WORKOUTS, DatabaseHelper.WORKOUT_ID + "=" + _id, null);
     }
+}
 
+//    public void deleteExercise(long _id) {
+//        //For exercises it is passing across the log id when a list item is long selected.
+//        //We First work out which exercise correlates to the log id selected and then we delete that exercise id
+//        String[] columns = new String[] {DatabaseHelper.LOG_ID, DatabaseHelper.EXERCISE_ID};
+//        String exerciseId = "";
+//        Cursor cursor = database.query( DatabaseHelper.TABLE_NAME_LOGS, columns, "LOGS.LOG_ID = ?", new String[]{Long.toString(_id)}, null, null, null, null);
+//
+//        if (cursor.moveToFirst()) {
+//            int exerciseIdColumnIndex = cursor.getColumnIndex("exercise_id");
+//            if (exerciseIdColumnIndex != -1) {
+//                exerciseId = cursor.getString(exerciseIdColumnIndex);
+//            }
+//        }
+//        cursor.close();
+//
+//        //Deletes the exercise based on the id we received earlier
+//        database.delete(DatabaseHelper.TABLE_NAME_EXERCISES,DatabaseHelper.EXERCISE_ID + "=" + exerciseId, null);
+//        //Deletes the log associated with that exercise as well
+//        database.delete(DatabaseHelper.TABLE_NAME_LOGS,DatabaseHelper.LOG_ID + "=" + _id, null);
+//    }
 
     public void deleteExercise(long _id) {
-        //For exercises it is passing across the log id when a list item is long selected.
-        //We First work out which exercise correlates to the log id selected and then we delete that exercise id
-        String[] columns = new String[] {DatabaseHelper.LOG_ID, DatabaseHelper.EXERCISE_ID};
-        String exerciseId = "";
-        Cursor cursor = database.query( DatabaseHelper.TABLE_NAME_LOGS, columns, "LOGS.LOG_ID = ?", new String[]{Long.toString(_id)}, null, null, null, null);
+        // Query to get the exercise name associated with this exercise ID
+        String[] exerciseColumns = new String[]{DatabaseHelper.EXERCISE};
+        Cursor exerciseCursor = database.query(DatabaseHelper.TABLE_NAME_EXERCISES, exerciseColumns, DatabaseHelper.EXERCISE_ID + " = ?", new String[]{Long.toString(_id)}, null, null, null);
 
-        if (cursor.moveToFirst()) {
-            int exerciseIdColumnIndex = cursor.getColumnIndex("exercise_id");
-            if (exerciseIdColumnIndex != -1) {
-                exerciseId = cursor.getString(exerciseIdColumnIndex);
+        // Variables to store exercise name and associated log count
+        String exerciseName = "";
+        int associatedLogCount = 0;
+
+        if (exerciseCursor.moveToFirst()) {
+            int exerciseNameColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.EXERCISE);
+            if (exerciseNameColumnIndex != -1) {
+                exerciseName = exerciseCursor.getString(exerciseNameColumnIndex);
             }
         }
-        cursor.close();
+        exerciseCursor.close();
 
-        //Deletes the exercise based on the id we received earlier
-        database.delete(DatabaseHelper.TABLE_NAME_EXERCISES,DatabaseHelper.EXERCISE_ID + "=" + exerciseId, null);
+        // Query to count the associated logs for this exercise
+        String[] logColumns = new String[]{DatabaseHelper.LOG_ID};
+        Cursor logCursor = database.query(DatabaseHelper.TABLE_NAME_LOGS, logColumns, DatabaseHelper.EXERCISE_ID + " = ?", new String[]{Long.toString(_id)}, null, null, null);
+        associatedLogCount = logCursor.getCount();
+        logCursor.close();
 
-        //TODO - Have a think about this section... may need to remove the deletion of the exercise from EXERCISES table and just delete the log.
-        //TODO - If you remove the exercise name the historical exercises which have previously been logged will also be lost/affected
+        // Confirm with the user before deleting
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Confirm Deletion");
+        builder.setMessage("This exercise (" + exerciseName + ") has " + associatedLogCount + " associated log(s). Are you sure you want to delete it and its log(s)?");
 
-        //Deletes the log associated with that exercise as well
-        database.delete(DatabaseHelper.TABLE_NAME_LOGS,DatabaseHelper.LOG_ID + "=" + _id, null);
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                // User confirmed, delete the exercise and its logs
+                database.delete(DatabaseHelper.TABLE_NAME_EXERCISES, DatabaseHelper.EXERCISE_ID + "=" + _id, null);
+                database.delete(DatabaseHelper.TABLE_NAME_LOGS, DatabaseHelper.EXERCISE_ID + "=" + _id, null);
+            }
+        });
+
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                // User canceled the deletion, do nothing
+            }
+        });
+
+        builder.show();
     }
 
-    //Added 8/16 checking exercise duplicates
+    //Checking exercise duplicates
     public boolean doesExerciseExist(String exerciseName) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor = null;
@@ -433,7 +497,6 @@ public class DBManager {
         }
     }
 
-
     // In DBManager.java
     public boolean isDuplicateWorkout(String workoutName) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
@@ -449,5 +512,85 @@ public class DBManager {
         return count > 0;
     }
 
+    public int countAssociatedExercises(long workoutId) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = null;
+        int count = 0;
+
+        try {
+            // Define the columns to be returned in the query
+            String[] projection = { dbHelper.EXERCISE_ID };
+
+            // Define the selection criteria to find exercises associated with the specified workout ID
+            String selection = dbHelper.WORKOUT_ID + " = ?";
+            String[] selectionArgs = { String.valueOf(workoutId) };
+
+            // Execute the query to count associated exercises
+            cursor = db.query(dbHelper.TABLE_NAME_EXERCISES, projection, selection, selectionArgs, null, null, null);
+
+            // Count the rows returned by the query
+            count = cursor.getCount();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+
+        return count;
+    }
+
+
+    public int countAssociatedLogs(long workoutId) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = null;
+
+        try {
+            // Query the database to count logs associated with the given workout ID
+            String[] projection = {DatabaseHelper.LOG_ID};
+            String selection = DatabaseHelper.WORKOUT_ID + " = ?";
+            String[] selectionArgs = {String.valueOf(workoutId)};
+
+            cursor = db.query(DatabaseHelper.TABLE_NAME_LOGS, projection, selection, selectionArgs, null, null, null);
+
+            return cursor.getCount();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    public void deleteAssociatedExercises(long workoutId) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        try {
+            // Define the selection criteria to find exercises associated with the specified workout ID
+            String selection = dbHelper.WORKOUT_ID + " = ?";
+            String[] selectionArgs = { String.valueOf(workoutId) };
+
+            // Delete the associated exercises
+            db.delete(dbHelper.TABLE_NAME_EXERCISES, selection, selectionArgs);
+        } finally {
+            // Close the database connection
+            db.close();
+        }
+    }
+
+
+//    public void deleteLogs(long exerciseId, long workoutId) {
+//        SQLiteDatabase db = dbHelper.getWritableDatabase();
+//
+//        try {
+//            // Define the selection criteria to find logs associated with the specified exercise and workout IDs
+//            String selection = dbHelper.EXERCISE_ID + " = ? AND " + dbHelper.WORKOUT_ID + " = ?";
+//            String[] selectionArgs = { String.valueOf(exerciseId), String.valueOf(workoutId) };
+//
+//            // Delete the associated logs
+//            db.delete(dbHelper.TABLE_NAME_LOGS, selection, selectionArgs);
+//        } finally {
+//            // Close the database connection
+//            db.close();
+//        }
+//    }
 
 }

@@ -515,8 +515,8 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
                     // Exercise with the same name exists, ask the user if they want to proceed
                     AlertDialog.Builder builder = new AlertDialog.Builder(ExerciseList.this);
                     builder.setTitle("Exercise Already Exists");
-                    builder.setMessage("An exercise with the same name already exists. Do you want to add another exercise with the same name?");
-                    builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    builder.setMessage("An exercise with the same name already exists. By clicking Add, you will have two exercises with the same name. Still Add?");
+                    builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             // User wants to use the same exercise, so directly add it

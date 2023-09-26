@@ -153,8 +153,6 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
             }
         });
 
-
-
     }
 
 
@@ -439,8 +437,8 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
                             // It's a duplicate, ask for confirmation
                             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivityWorkoutList.this);
                             builder.setTitle("Duplicate Workout Name");
-                            builder.setMessage("A workout with the same name already exists. Do you want to add another workout with the same name?");
-                            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            builder.setMessage("A workout with the same name already exists. By clicking Add, you will have two workouts with the same name. Still Add??");
+                            builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     // User confirmed, add the workout
@@ -570,7 +568,7 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
                         // Handle the case where the workout name already exists
                         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivityWorkoutList.this);
                         builder.setTitle("Duplicate Workout Name");
-                        builder.setMessage("A workout with this name already exists. By clicking Update, you will have two exercises with the same name. Still Update?");
+                        builder.setMessage("A workout with this name already exists. By clicking Update, you will have two workouts with the same name. Still Update?");
 
                         // Add buttons for user choice
                         builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
