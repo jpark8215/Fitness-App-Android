@@ -4,9 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.jieunworkouttracker.MainActivityWorkoutList">
+    tools:context="com.developerjp.jieunworkouttracker.MainActivityWorkoutList">
 
-
+    <!-- CompactCalendarView -->
     <com.github.sundeepk.compactcalendarview.CompactCalendarView
         android:id="@+id/compactcalendar_view"
         android:layout_width="match_parent"
@@ -22,6 +22,9 @@
         app:compactCalendarTextColor="#fff"
         app:compactCalendarTextSize="12sp" />
 
+
+
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
@@ -31,7 +34,9 @@
         android:clickable="true"
         android:dividerHeight="1dp"
         android:longClickable="true"
-        android:padding="10dp"></androidx.recyclerview.widget.RecyclerView>
+        android:padding="10dp" />
+
+
 
     <LinearLayout
         android:layout_width="match_parent"

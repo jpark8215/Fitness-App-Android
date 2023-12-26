@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#265ABC</color>
-    <color name="colorPrimaryDark">#2251AB</color>
-    <color name="colorPrimaryLight">#1E88E5</color>
-    <color name="colorAccent">#2196f3</color>
-    <color name="colorAccentPressed">#1b80d1</color>
+    <color name="colorPrimary">#43A047</color> <!-- Green 600 -->
+    <color name="colorPrimaryDark">#2E7D32</color> <!-- Green 800 -->
+    <color name="colorPrimaryLight">#A5D6A7</color> <!-- Green 200 -->
+    <color name="colorAccent">#7CB342</color> <!-- Light Green 600 -->
+    <color name="colorAccentPressed">#689F38</color> <!-- Light Green 700 -->
+
 
     <color name="overlay_dark_10">#1A000000</color>
     <color name="overlay_dark_20">#33000000</color>
