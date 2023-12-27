@@ -10,8 +10,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 public class DBManager {
 
@@ -52,11 +54,11 @@ public class DBManager {
         ContentValues contentValues2 = new ContentValues();
         contentValues2.put(DatabaseHelper.EXERCISE_ID, exerciseId);
         contentValues2.put(DatabaseHelper.WORKOUT_ID, id);
-        contentValues2.put(DatabaseHelper.SET1, 10);
-        contentValues2.put(DatabaseHelper.SET2, 10);
-        contentValues2.put(DatabaseHelper.SET3, 10);
-        contentValues2.put(DatabaseHelper.SET4, 10);
-        contentValues2.put(DatabaseHelper.SET5, 10);
+        contentValues2.put(DatabaseHelper.SET1, 5);
+        contentValues2.put(DatabaseHelper.SET2, 5);
+        contentValues2.put(DatabaseHelper.SET3, 5);
+        contentValues2.put(DatabaseHelper.SET4, 5);
+        contentValues2.put(DatabaseHelper.SET5, 5);
         contentValues2.put(DatabaseHelper.WEIGHT, exerciseWeight);
 
 
@@ -74,7 +76,6 @@ public class DBManager {
         // database.update(DatabaseHelper.TABLE_NAME_EXERCISES, contentValue, "EXERCISES.WORKOUT_ID = ?", new String[] {id});
 
     }
-
 
     //Is called when the user starts a workout.
     //Creates a new exercise log for them to track the workout.
@@ -137,9 +138,7 @@ public class DBManager {
                     String date = sdf.format(new Date());
                     contentValues.put(DatabaseHelper.DATE, date);
 
-
                     database.insert(DatabaseHelper.TABLE_NAME_LOGS, null, contentValues);
-
 
                     // Clear the contentValues for the next iteration
                     contentValues.clear();
@@ -411,6 +410,7 @@ public class DBManager {
             // If there are no associated exercises or logs, directly delete the workout
             try {
                 database.delete(DatabaseHelper.TABLE_NAME_WORKOUTS, DatabaseHelper.WORKOUT_ID + "=?", new String[]{String.valueOf(_id)});
+                //ToDo refresh UI after deletion
 
             } catch (Exception e) {
                 // Log the exception
@@ -420,50 +420,52 @@ public class DBManager {
     }
 
     public void deleteExercise(long _id) {
-        // For exercises, it is passing across the log id when a list item is long selected.
-        // We first work out which exercise correlates to the log id selected and then we delete that exercise id
-        String[] columns = new String[]{DatabaseHelper.LOG_ID, DatabaseHelper.EXERCISE_ID};
-        final String[] exerciseId = {""}; // Declare as final array
-
+        // Directly query the exercise ID from the selected log ID
+        String[] columns = new String[]{DatabaseHelper.EXERCISE_ID};
         Cursor cursor = database.query(
                 DatabaseHelper.TABLE_NAME_LOGS,
                 columns,
-                "LOGS.LOG_ID = ?",
-                new String[]{Long.toString(_id)},
+                DatabaseHelper.LOG_ID + " = ?",
+                new String[]{String.valueOf(_id)},
                 null,
                 null,
                 null,
                 null
         );
 
+        List<String> exerciseIds = new ArrayList<>();
+
         if (cursor.moveToFirst()) {
-            int exerciseIdColumnIndex = cursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
-            if (exerciseIdColumnIndex != -1) {
-                exerciseId[0] = cursor.getString(exerciseIdColumnIndex);
-            }
+            do {
+                int exerciseIdColumnIndex = cursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
+                if (exerciseIdColumnIndex != -1) {
+                    exerciseIds.add(cursor.getString(exerciseIdColumnIndex));
+                }
+            } while (cursor.moveToNext());
         }
+
         cursor.close();
 
         // Confirm with the user before deleting
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Confirm Deletion");
-        builder.setMessage("Are you sure you want to delete this exercise and its associated log?");
+        builder.setMessage("Are you sure you want to delete this exercise and its associated log(s)?");
 
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 try {
-                    // Deletes the exercise based on the id we received earlier
-                    database.delete(DatabaseHelper.TABLE_NAME_EXERCISES, DatabaseHelper.EXERCISE_ID + "=?", new String[]{exerciseId[0]});
-                    // Deletes the log associated with that exercise as well
-                    database.delete(DatabaseHelper.TABLE_NAME_LOGS, DatabaseHelper.LOG_ID + "=?", new String[]{Long.toString(_id)});
+                    // Delete logs associated with each exercise ID
+                    for (String exerciseId : exerciseIds) {
+                        database.delete(DatabaseHelper.TABLE_NAME_EXERCISES, DatabaseHelper.EXERCISE_ID + "=?", new String[]{exerciseId});
+                        database.delete(DatabaseHelper.TABLE_NAME_LOGS, DatabaseHelper.EXERCISE_ID + "=?", new String[]{exerciseId});
+                    }
 
                     //ToDo refresh UI after deletion
 
-
                 } catch (Exception e) {
                     // Log an error if an exception occurs during deletion
-                    Log.e("DeleteExercise", "Error deleting exercise and log.", e);
+                    Log.e("DeleteExercise", "Error deleting exercise and logs.", e);
                 }
             }
         });
@@ -477,6 +479,7 @@ public class DBManager {
 
         builder.show();
     }
+
 
 
     //Checking exercise duplicates

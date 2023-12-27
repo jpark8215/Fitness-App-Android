@@ -48,14 +48,14 @@ import java.util.List;
 import java.util.Objects;
 
 
-public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRecyclerViewAdapter.OnItemLongSelectedListener, WorkoutRecyclerViewAdapter.OnButtonClickListener {
+public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRecyclerViewAdaptor.OnItemLongSelectedListener, WorkoutRecyclerViewAdaptor.OnButtonClickListener {
 
     private DBManager dbManager;
     private RecyclerView recyclerView;
     // Item List
     private final List<com.developerjp.jieunworkouttracker.ExerciseItem> ExerciseItem = new ArrayList<>();
     // Custom Recycler View Adaptor
-    private WorkoutRecyclerViewAdapter adapter;
+    private WorkoutRecyclerViewAdaptor adapter;
     //Public variables which are used across classes/voids
     public String id;
     public String title;
@@ -439,7 +439,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         }
 
 
-        adapter = new WorkoutRecyclerViewAdapter(ExerciseItem, this, this, this);
+        adapter = new WorkoutRecyclerViewAdaptor(ExerciseItem, this, this, this);
         recyclerView.setAdapter(adapter);
 
 
