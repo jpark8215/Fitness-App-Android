@@ -25,7 +25,8 @@
         android:layout_height="match_parent"
         android:background="@color/overlay_dark_30"
         android:clickable="true"
-        android:fitsSystemWindows="true" />
+        android:fitsSystemWindows="true"
+        android:importantForAccessibility="no"/>
 
     <TextView
         android:id="@+id/empty"
@@ -64,7 +65,8 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:onClick="bottomNavigationHomeClick"
                     app:srcCompat="@drawable/ic_home_round"
-                    app:tint="@color/colorPrimaryLight" />
+                    app:tint="@color/colorPrimaryLight"
+                    android:contentDescription="Home" />
 
             </LinearLayout>
 
@@ -85,7 +87,8 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:onClick="bottomNavigationCalendarClick"
                     app:srcCompat="@drawable/ic_calendar_round"
-                    app:tint="@color/colorPrimaryLight" />
+                    app:tint="@color/colorPrimaryLight"
+                    android:contentDescription="Calendar" />
 
             </LinearLayout>
 
@@ -140,12 +143,13 @@
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fab_pause_workout"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="76dp"
                 android:layout_marginLeft="@dimen/spacing_smlarge"
                 android:layout_marginTop="@dimen/spacing_middle"
                 android:layout_marginRight="@dimen/spacing_smlarge"
                 android:layout_marginBottom="@dimen/spacing_middle"
                 android:clickable="true"
+                android:contentDescription="Pause Workout"
                 android:tint="@color/grey_80"
                 app:fabSize="mini"
                 app:rippleColor="@android:color/black"
@@ -195,7 +199,8 @@
                 android:tint="@color/grey_80"
                 app:fabSize="mini"
                 app:rippleColor="@android:color/black"
-                app:srcCompat="@drawable/fab_start_workout" />
+                app:srcCompat="@drawable/fab_start_workout"
+                android:contentDescription="Finish Workout" />
 
             <View
                 android:layout_width="@dimen/spacing_xmedium"
@@ -215,7 +220,8 @@
             app:backgroundTint="@color/colorAccent"
             app:fabSize="normal"
             app:rippleColor="@android:color/white"
-            app:srcCompat="@drawable/fab_add_icon" />
+            app:srcCompat="@drawable/fab_add_icon"
+            android:contentDescription="Add" />
 
     </LinearLayout>
 

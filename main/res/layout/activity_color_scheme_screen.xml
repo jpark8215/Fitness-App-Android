@@ -81,7 +81,8 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:onClick="bottomNavigationHomeClick"
                     app:srcCompat="@drawable/ic_home_round"
-                    app:tint="@color/colorPrimaryLight" />
+                    app:tint="@color/colorPrimaryLight"
+                    android:contentDescription="Home" />
 
             </LinearLayout>
 
@@ -102,7 +103,8 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:onClick="bottomNavigationCalendarClick"
                     app:srcCompat="@drawable/ic_calendar_round"
-                    app:tint="@color/colorPrimaryLight" />
+                    app:tint="@color/colorPrimaryLight"
+                    android:contentDescription="Calendar" />
 
             </LinearLayout>
 

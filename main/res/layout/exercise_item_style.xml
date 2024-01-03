@@ -61,8 +61,8 @@
 
                     <Button
                         android:id="@+id/button1"
-                        android:layout_width="45dp"
-                        android:layout_height="45dp"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
                         android:background="@drawable/button_shape_default"
                         android:focusable="false"
                         android:text="2" />
@@ -78,8 +78,8 @@
 
                     <Button
                         android:id="@+id/button2"
-                        android:layout_width="45dp"
-                        android:layout_height="45dp"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
                         android:background="@drawable/button_shape_default"
                         android:focusable="false"
                         android:text="3" />
@@ -95,8 +95,8 @@
 
                     <Button
                         android:id="@+id/button3"
-                        android:layout_width="45dp"
-                        android:layout_height="45dp"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
                         android:background="@drawable/button_shape_default"
                         android:focusable="false"
                         android:text="4" />
@@ -112,8 +112,8 @@
 
                     <Button
                         android:id="@+id/button4"
-                        android:layout_width="45dp"
-                        android:layout_height="45dp"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
                         android:background="@drawable/button_shape_default"
                         android:focusable="false"
                         android:text="5" />
@@ -129,8 +129,8 @@
 
                     <Button
                         android:id="@+id/button5"
-                        android:layout_width="45dp"
-                        android:layout_height="45dp"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
                         android:background="@drawable/button_shape_default"
                         android:focusable="false"
                         android:text="6" />
@@ -143,9 +143,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
-                android:text="Long click to reverse"
                 android:layout_marginTop="2dp"
                 android:textSize="10sp" />
+
+            <!--                android:text="Long click to reverse"-->
+
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>

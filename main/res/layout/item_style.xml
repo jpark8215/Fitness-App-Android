@@ -22,7 +22,6 @@
                 android:id="@+id/textViewHead"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_alignParentTop="true"
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:text="Your Title"

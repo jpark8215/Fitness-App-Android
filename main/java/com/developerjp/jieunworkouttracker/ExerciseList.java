@@ -141,7 +141,6 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
         fab_add_exercise.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 addExercise(v);
             }
         });
@@ -150,7 +149,6 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
         cv_add_exercise.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 addExercise(v);
             }
         });
@@ -158,7 +156,6 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
         fab_start_workout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 startWorkout(v);
             }
         });
@@ -533,45 +530,6 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
                     dialog.dismiss();
                 }
             }
-//            @Override
-//            public void onClick(View v) {
-//
-//
-//                if (TextUtils.isEmpty(exerciseEditText.getText())) {
-//                    Toast.makeText(ExerciseList.this,
-//                            "You must give an exercise name", Toast.LENGTH_LONG).show();
-//                } else {
-//                    final String exerciseName = exerciseEditText.getText().toString();
-//                    Double exerciseWeight = 0.0;
-//
-//
-//                    // Edit text field only accepts numbers
-//                    // Check if weight is provided and convert if lbs is selected
-//                    // Update the weightTextView based on toggleWeightUnit state
-//
-//                    if (weightEditText.getText().toString().trim().length() > 0) {
-//                        exerciseWeight = Double.parseDouble(weightEditText.getText().toString());
-//
-//                        // Convert kilograms to pounds if lbs is selected
-//                        if (!toggleWeightUnit.isChecked()) {
-//                            exerciseWeight = Double.parseDouble(nf.format(exerciseWeight / 2.20462));
-//                        }
-//                    }
-//
-//
-//                    Intent intent = getIntent();
-//                    dbManager.insertExercise(intent.getStringExtra("id"), exerciseName, exerciseWeight);
-//                    Intent main = new Intent(v.getContext(), ExerciseList.class);
-//                    main.putExtra("title", intent.getStringExtra("title"));
-//                    main.putExtra("id", intent.getStringExtra("id"));
-//                    main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                    startActivity(main);
-//
-//                    dialog.dismiss();
-//                }
-//            }
-//        });
-
         });
 
         (dialog.findViewById(R.id.bt_close)).setOnClickListener(new View.OnClickListener() {
@@ -714,43 +672,6 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
                 }
             }
 
-
-//            @Override
-//            public void onClick(View v) {
-//                if (TextUtils.isEmpty(exerciseEditText.getText())) {
-//                    Toast.makeText(ExerciseList.this,
-//                            "You must give an exercise name", Toast.LENGTH_LONG).show();
-//                } else {
-//                    String newExerciseName = exerciseEditText.getText().toString();
-//                    Long _id = Long.parseLong(itemId);
-//
-//                    // Update exercise name
-//                    dbManager.updateExerciseName(_id, newExerciseName);
-//
-//                    // If there is a weight given, update the database
-//                    if (weightEditText.getText().toString().trim().length() > 0) {
-//                        Double newExerciseWeight = Double.parseDouble(weightEditText.getText().toString());
-//
-//                        // Convert the entered weight to kg if lbs is selected
-//                        if (!toggleWeightUnit.isChecked()) {
-//                            newExerciseWeight = Double.parseDouble(nf.format(newExerciseWeight / 2.20462));
-//                        }
-//
-//                        dbManager.updateExerciseWeight(_id, newExerciseWeight);
-//                    } else {
-//                        // If no weight value was given, update with a default value of 0
-//                        Double newExerciseWeight = 0.0;
-//                        dbManager.updateExerciseWeight(_id, newExerciseWeight);
-//                    }
-//
-//                    // Refresh the recycler view
-//                    ExerciseItem.clear();
-//                    loadExerciseData();
-//                    adapter.notifyDataSetChanged();
-//
-//                    dialog.dismiss();
-//                }
-//            }
         });
 
         btnDelete.setOnClickListener(new View.OnClickListener() {
