@@ -199,7 +199,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
 
         toggle.syncState();
 
-//          open drawer at start
+        //open drawer at start
 //        drawer.openDrawer(GravityCompat.START);
 
         //Handles side navigation menu clicks
@@ -475,23 +475,25 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
         txtTitle.setText("Add an Exercise");
         exerciseEditText.setHint("Exercise");
 
+//TODO when adding/updating exercise with the same name, they should have the same exercise id, and progress should be consolidated
         btnAdd.setOnClickListener(new View.OnClickListener() {
-
-
             @Override
             public void onClick(View v) {
                 final String exerciseName = exerciseEditText.getText().toString();
 
                 // Check if the exercise name already exists in the database
                 if (dbManager.doesExerciseExist(exerciseName)) {
-                    // Exercise with the same name exists, ask the user if they want to proceed
+                    // Exercise with the same name exists, ask the user if they want to consolidate progress
                     AlertDialog.Builder builder = new AlertDialog.Builder(ExerciseList.this);
                     builder.setTitle("Exercise Already Exists");
-                    builder.setMessage("An exercise with the same name already exists. By clicking Add, you will have two exercises with the same name. Still Add?");
-                    builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                    builder.setMessage("An exercise with the same name already exists. Do you want to consolidate progress?");
+                    builder.setPositiveButton("Consolidate", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            // User wants to use the same exercise, so directly add it
+                            // Retrieve existing exercise ID
+                            String existingExerciseId = dbManager.getExerciseId(exerciseName);
+
+                            // Retrieve user input for weight
                             double exerciseWeight = 0.0;
                             if (weightEditText.getText().toString().trim().length() > 0) {
                                 exerciseWeight = Double.parseDouble(weightEditText.getText().toString());
@@ -499,20 +501,29 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
                                     exerciseWeight = Double.parseDouble(nf.format(exerciseWeight / 2.20462));
                                 }
                             }
+
+                            // Insert new log with the same exercise ID
+                            dbManager.insertExerciseLogs(existingExerciseId, String.valueOf(exerciseWeight));
+
+                            // Insert new exercise with existing exercise ID
                             Intent intent = getIntent();
-                            dbManager.insertExercise(intent.getStringExtra("id"), exerciseName, exerciseWeight);
+                            dbManager.insertExercise( existingExerciseId, exerciseName, exerciseWeight);
+
+                            // Navigate back to ExerciseList activity
                             Intent main = new Intent(v.getContext(), ExerciseList.class);
                             main.putExtra("title", intent.getStringExtra("title"));
                             main.putExtra("id", intent.getStringExtra("id"));
                             main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(main);
-                            dialog.dismiss();
                         }
                     });
-                    builder.setNegativeButton("No", null);
+
+                    builder.setNeutralButton("Cancel", null);
                     builder.show();
+
                 } else {
                     // Exercise name doesn't exist, proceed with adding it
+                    // Retrieve user input for weight
                     double exerciseWeight = 0.0;
                     if (weightEditText.getText().toString().trim().length() > 0) {
                         exerciseWeight = Double.parseDouble(weightEditText.getText().toString());
@@ -520,17 +531,78 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
                             exerciseWeight = Double.parseDouble(nf.format(exerciseWeight / 2.20462));
                         }
                     }
+
+                    // Insert new exercise with new exercise ID and appropriate workout ID
                     Intent intent = getIntent();
                     dbManager.insertExercise(intent.getStringExtra("id"), exerciseName, exerciseWeight);
+
+                    // Navigate back to ExerciseList activity
                     Intent main = new Intent(v.getContext(), ExerciseList.class);
                     main.putExtra("title", intent.getStringExtra("title"));
                     main.putExtra("id", intent.getStringExtra("id"));
                     main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(main);
-                    dialog.dismiss();
                 }
             }
         });
+
+
+
+//        btnAdd.setOnClickListener(new View.OnClickListener() {
+//
+//            @Override
+//            public void onClick(View v) {
+//                final String exerciseName = exerciseEditText.getText().toString();
+//
+//                // Check if the exercise name already exists in the database
+//                if (dbManager.doesExerciseExist(exerciseName)) {
+//                    // Exercise with the same name exists, ask the user if they want to proceed
+//                    AlertDialog.Builder builder = new AlertDialog.Builder(ExerciseList.this);
+//                    builder.setTitle("Exercise Already Exists");
+//                    builder.setMessage("An exercise with the same name already exists. By clicking Add, you will have two exercises with the same name. Still Add?");
+//                    builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialogInterface, int i) {
+//                            // User wants to use the same exercise, so directly add it
+//                            double exerciseWeight = 0.0;
+//                            if (weightEditText.getText().toString().trim().length() > 0) {
+//                                exerciseWeight = Double.parseDouble(weightEditText.getText().toString());
+//                                if (!toggleWeightUnit.isChecked()) {
+//                                    exerciseWeight = Double.parseDouble(nf.format(exerciseWeight / 2.20462));
+//                                }
+//                            }
+//                            Intent intent = getIntent();
+//                            dbManager.insertExercise(intent.getStringExtra("id"), exerciseName, exerciseWeight);
+//                            Intent main = new Intent(v.getContext(), ExerciseList.class);
+//                            main.putExtra("title", intent.getStringExtra("title"));
+//                            main.putExtra("id", intent.getStringExtra("id"));
+//                            main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                            startActivity(main);
+//                            dialog.dismiss();
+//                        }
+//                    });
+//                    builder.setNegativeButton("No", null);
+//                    builder.show();
+//                } else {
+//                    // Exercise name doesn't exist, proceed with adding it
+//                    double exerciseWeight = 0.0;
+//                    if (weightEditText.getText().toString().trim().length() > 0) {
+//                        exerciseWeight = Double.parseDouble(weightEditText.getText().toString());
+//                        if (!toggleWeightUnit.isChecked()) {
+//                            exerciseWeight = Double.parseDouble(nf.format(exerciseWeight / 2.20462));
+//                        }
+//                    }
+//                    Intent intent = getIntent();
+//                    dbManager.insertExercise(intent.getStringExtra("id"), exerciseName, exerciseWeight);
+//                    Intent main = new Intent(v.getContext(), ExerciseList.class);
+//                    main.putExtra("title", intent.getStringExtra("title"));
+//                    main.putExtra("id", intent.getStringExtra("id"));
+//                    main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                    startActivity(main);
+//                    dialog.dismiss();
+//                }
+//            }
+//        });
 
         (dialog.findViewById(R.id.bt_close)).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -584,6 +656,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
         exerciseEditText.setSelection(exerciseEditText.getText().length());
         weightEditText.setSelection(weightEditText.getText().length());
 
+        //TODO here is the update button
         btnUpdate.setOnClickListener(new View.OnClickListener() {
 
             @Override

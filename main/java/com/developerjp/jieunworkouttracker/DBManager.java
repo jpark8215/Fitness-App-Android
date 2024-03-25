@@ -1,5 +1,6 @@
 package com.developerjp.jieunworkouttracker;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentValues;
@@ -69,7 +70,7 @@ public class DBManager {
 
         //Is used to put the current date into the LOGS table date field
         //We had to record the date by itself separate from the datetime to make querying the database easier for some of the calendar queries
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String date = sdf.format(new Date());
         contentValues2.put(DatabaseHelper.DATE, date);
 
@@ -135,7 +136,7 @@ public class DBManager {
 
                     //Is used to put the current date into the LOGS table date field
                     //We had to record the date by itself separate from the datetime to make querying the database easier for some of the calendar queries
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                     String date = sdf.format(new Date());
                     contentValues.put(DatabaseHelper.DATE, date);
 
@@ -175,7 +176,7 @@ public class DBManager {
 
     public String countExercises(String id){
 
-        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_EXERCISES, null, "EXERCISES.WORKOUT_ID = ?", new String[]{id}, null, null, null);
+        @SuppressLint("Recycle") Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_EXERCISES, null, "EXERCISES.WORKOUT_ID = ?", new String[]{id}, null, null, null);
         int numOfExercises = cursor.getCount();
 
         //Our query needs the value as a String so we convert it here
@@ -186,7 +187,7 @@ public class DBManager {
 
         String exerciseId = "";
         String[] columns = new String[] {"EXERCISES.EXERCISE_ID"};
-        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_EXERCISES, columns, "EXERCISES.EXERCISE = ?", new String[]{name}, null, null, null);
+        @SuppressLint("Recycle") Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_EXERCISES, columns, "EXERCISES.EXERCISE = ?", new String[]{name}, null, null, null);
 
         if (cursor != null) {
             cursor.moveToFirst();
@@ -387,6 +388,7 @@ public class DBManager {
                         database.delete(DatabaseHelper.TABLE_NAME_EXERCISES, DatabaseHelper.WORKOUT_ID + "=?", new String[]{String.valueOf(_id)});
                         database.delete(DatabaseHelper.TABLE_NAME_WORKOUTS, DatabaseHelper.WORKOUT_ID + "=?", new String[]{String.valueOf(_id)});
                         database.setTransactionSuccessful();
+                        ((Activity) context).recreate();
 
                     } catch (Exception e) {
                         // Log the exception
@@ -405,6 +407,7 @@ public class DBManager {
             });
 
             builder.show();
+
         } else {
             // If there are no associated exercises or logs, directly delete the workout
             try {
