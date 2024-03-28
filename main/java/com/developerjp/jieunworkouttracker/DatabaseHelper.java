@@ -47,9 +47,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + " INTEGER PRIMARY KEY AUTOINCREMENT, " + WORKOUT + " TEXT NOT NULL, " + ARCHIVE + " INTEGER);";
 
 
+//TODO Find a way to de-primary key Exercise ID so duplicated exerciseID can be generated
     //Create EXERCISES table query
-    private static final String CREATE_EXERCISES_TABLE = "create table " + TABLE_NAME_EXERCISES + "(" + EXERCISE_ID
-            + " INTEGER PRIMARY KEY AUTOINCREMENT, " + WORKOUT_ID + " INTEGER NOT NULL, " + EXERCISE + " TEXT);";
+    private static final String CREATE_EXERCISES_TABLE = "CREATE TABLE " + TABLE_NAME_EXERCISES + " (" +
+            EXERCISE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            WORKOUT_ID + " INTEGER NOT NULL, " +
+            EXERCISE + " TEXT);";
+
 
     //Create LOGS table query
     private static final String CREATE_LOGS_TABLE = "create table " + TABLE_NAME_LOGS + "(" + LOG_ID

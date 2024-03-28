@@ -46,6 +46,7 @@ public class DBManager {
         database.insert(DatabaseHelper.TABLE_NAME_WORKOUTS, null, contentValue);
     }
 
+//TODO Find a way to de-primary key Exercise ID so duplicated exerciseID can be generated
     public void insertExercise(String id, String exerciseName, Double exerciseWeight) {
         ContentValues contentValue = new ContentValues();
 
@@ -63,7 +64,6 @@ public class DBManager {
         contentValues2.put(DatabaseHelper.SET5, 5);
         contentValues2.put(DatabaseHelper.WEIGHT, exerciseWeight);
 
-
         //Is used to put the current datetime into the LOGS table datetime field
         Date datetime = Calendar.getInstance().getTime();
         contentValues2.put(DatabaseHelper.DATETIME, datetime.toString());
@@ -75,9 +75,8 @@ public class DBManager {
         contentValues2.put(DatabaseHelper.DATE, date);
 
         database.insert(DatabaseHelper.TABLE_NAME_LOGS, null, contentValues2);
-        // database.update(DatabaseHelper.TABLE_NAME_EXERCISES, contentValue, "EXERCISES.WORKOUT_ID = ?", new String[] {id});
-
     }
+
 
     //Is called when the user starts a workout.
     //Creates a new exercise log for them to track the workout.
@@ -183,7 +182,7 @@ public class DBManager {
         return Integer.toString(numOfExercises);
     }
 
-    public String getExerciseId( String name){
+    public String getExerciseId(String name){
 
         String exerciseId = "";
         String[] columns = new String[] {"EXERCISES.EXERCISE_ID"};

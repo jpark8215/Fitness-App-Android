@@ -462,6 +462,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         txtTitle.setText("Add an Exercise");
         exerciseEditText.setHint("Exercise");
 
+//TODO Find a way to de-primary key Exercise ID so duplicated exerciseID can be generated
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
