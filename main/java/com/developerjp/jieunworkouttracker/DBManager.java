@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class DBManager {
 
@@ -151,6 +152,7 @@ public class DBManager {
         }
     }
 
+
     public Cursor fetchActiveWorkouts() {
         String[] columns = new String[] { DatabaseHelper.WORKOUT_ID, DatabaseHelper.WORKOUT};
 
@@ -182,6 +184,7 @@ public class DBManager {
         return Integer.toString(numOfExercises);
     }
 
+
     public String getExerciseId(String name){
 
         String exerciseId = "";
@@ -195,18 +198,6 @@ public class DBManager {
         return exerciseId;
     }
 
-    public Cursor getExerciseLogProgress(String id){
-
-        String[] columns = new String[] {"LOGS.WEIGHT, LOGS.DATE"};
-        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_LOGS, columns, "LOGS.EXERCISE_ID = ?", new String[] {id}, null, null, null);
-
-
-        if (cursor != null) {
-            cursor.moveToFirst();
-        }
-        return cursor;
-
-    }
 
     public Cursor getAllExercises(){
 
@@ -219,6 +210,41 @@ public class DBManager {
         return cursor;
 
     }
+
+
+    public Cursor getExerciseLogProgress(List<String> ids) {
+        StringBuilder selectionBuilder = new StringBuilder("LOGS.EXERCISE_ID IN (");
+        for (int i = 0; i < ids.size(); i++) {
+            selectionBuilder.append("?");
+            if (i < ids.size() - 1) {
+                selectionBuilder.append(", ");
+            }
+        }
+        selectionBuilder.append(")");
+        String selection = selectionBuilder.toString();
+
+        String[] selectionArgs = ids.toArray(new String[0]);
+
+        String[] columns = new String[] {"LOGS.WEIGHT, LOGS.DATE"};
+        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_LOGS, columns, selection, selectionArgs, null, null, null);
+
+        return cursor;
+    }
+
+
+//        public Cursor getExerciseLogProgress(String id){
+//
+//        String[] columns = new String[] {"LOGS.WEIGHT, LOGS.DATE"};
+//        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_LOGS, columns, "LOGS.EXERCISE_ID = ?", new String[] {id}, null, null, null);
+//
+//
+//        if (cursor != null) {
+//            cursor.moveToFirst();
+//        }
+//        return cursor;
+//
+//    }
+
 
     public Cursor fetchExerciseLogs(String id, String numOfExercises) {
 
@@ -255,6 +281,7 @@ public class DBManager {
         return cursor;
     }
 
+
     public Cursor fetchAllExerciseLogsForCalendar() {
         String[] columns = new String[] { DatabaseHelper.WORKOUT_ID, DatabaseHelper.DATE};
         Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_LOGS, columns, "LOGS.DURATION IS NOT NULL", null, DatabaseHelper.WORKOUT_ID + "," + DatabaseHelper.DATE, null, null, null);
@@ -274,6 +301,7 @@ public class DBManager {
         return cursor;
     }
 
+
     //We then need to call this cursor to query the workouts table based on the ID given
     public Cursor fetchWorkoutNameOnSelectedDateForCalendar(String workout_id) {
         String[] columns = new String[] { DatabaseHelper.WORKOUT};
@@ -284,11 +312,13 @@ public class DBManager {
         return cursor;
     }
 
+
     public void updateWorkout(long _id, String workoutName) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(DatabaseHelper.WORKOUT, workoutName);
         int i = database.update(DatabaseHelper.TABLE_NAME_WORKOUTS, contentValues, DatabaseHelper.WORKOUT_ID + " = " + _id, null);
     }
+
 
     public void updateExerciseName(long _id, String exerciseName) {
         //For exercises it is passing across the log id when a list item is long selected.
@@ -315,20 +345,56 @@ public class DBManager {
     }
 
     public void updateExerciseWeight(long _id, Double exerciseWeight) {
+        // Get today's date in the format "YYYY-MM-DD"
+        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
-        //For exercises it is passing across the log id when a list item is long selected.
+        // Prepare the SQL query to fetch the exercise ID associated with the provided log ID
+        String[] projection = { DatabaseHelper.EXERCISE_ID };
+        String selection = DatabaseHelper.LOG_ID + " = ?";
+        String[] selectionArgs = { String.valueOf(_id) };
+
+        // Execute the query to fetch the exercise ID
+        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_LOGS, projection, selection, selectionArgs, null, null, null);
+        long exerciseId = -1; // Default value
+
+        if (cursor != null && cursor.moveToFirst()) {
+            int exerciseIdColumnIndex = cursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
+            if (exerciseIdColumnIndex != -1) {
+                exerciseId = cursor.getLong(exerciseIdColumnIndex);
+            }
+            cursor.close();
+        }
+
+        // Prepare the selection and selection arguments to filter by exercise ID and today's date
+        String selectionUpdate = "LOGS.EXERCISE_ID = ? AND strftime('%Y-%m-%d', LOGS.DATE) = ?";
+        String[] selectionArgsUpdate = { String.valueOf(exerciseId), todayDate };
+
+        // Prepare the content values to update the exercise weight
         ContentValues contentValues = new ContentValues();
         contentValues.put(DatabaseHelper.WEIGHT, exerciseWeight);
 
-        //Updates the Exercise Weight
-        int i = database.update(DatabaseHelper.TABLE_NAME_LOGS, contentValues, "LOGS.LOG_ID = ?", new String[]{Long.toString(_id)});
+        // Update the Exercise Weight for today's date and the exercise associated with the provided log ID
+        int i = database.update(DatabaseHelper.TABLE_NAME_LOGS, contentValues, selectionUpdate, selectionArgsUpdate);
     }
+
+
+//    public void updateExerciseWeight(long _id, Double exerciseWeight) {
+//
+//        //For exercises it is passing across the log id when a list item is long selected.
+//        ContentValues contentValues = new ContentValues();
+//        contentValues.put(DatabaseHelper.WEIGHT, exerciseWeight);
+//
+//        //Updates the Exercise Weight
+//        int i = database.update(DatabaseHelper.TABLE_NAME_LOGS, contentValues, "LOGS.LOG_ID = ?", new String[]{Long.toString(_id)});
+//    }
+
 
     public void updateExerciseLogs(long log_id, String setSelected, Integer intReps){
         ContentValues contentValues = new ContentValues();
         contentValues.put(setSelected, intReps);
         int i = database.update(DatabaseHelper.TABLE_NAME_LOGS, contentValues, DatabaseHelper.LOG_ID + " = " + log_id, null);
     }
+
 
     public void updateExerciseLogsWithImprovement(long log_id, String setSelected, Integer intReps, Integer intImprovement){
         ContentValues contentValues = new ContentValues();
@@ -339,6 +405,7 @@ public class DBManager {
         int i = database.update(DatabaseHelper.TABLE_NAME_LOGS, contentValues, DatabaseHelper.LOG_ID + " = " + log_id, null);
     }
 
+
     public void recordExerciseLogDuration(String log_id, long workoutDuration){
 
         ContentValues contentValues = new ContentValues();
@@ -346,12 +413,14 @@ public class DBManager {
         int i = database.update(DatabaseHelper.TABLE_NAME_LOGS, contentValues, DatabaseHelper.LOG_ID + " = " + log_id, null);
     }
 
+
     public void archiveWorkout(Long workout_id){
         ContentValues contentValues = new ContentValues();
         contentValues.put("archive", 1);
 
         database.update(DatabaseHelper.TABLE_NAME_WORKOUTS, contentValues, DatabaseHelper.WORKOUT_ID + " = " + workout_id, null);
     }
+
 
     public void unarchiveWorkout(Long workout_id){
         ContentValues contentValues = new ContentValues();
@@ -418,6 +487,7 @@ public class DBManager {
             }
         }
     }
+
 
     public void deleteExercise(long _id) {
         // Directly query the exercise ID from the selected log ID
@@ -503,7 +573,7 @@ public class DBManager {
         }
     }
 
-    // In DBManager.java
+
     public boolean isDuplicateWorkout(String workoutName) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         String query = "SELECT COUNT(*) FROM " + DatabaseHelper.TABLE_NAME_WORKOUTS + " WHERE " +
@@ -517,6 +587,7 @@ public class DBManager {
         }
         return count > 0;
     }
+
 
     public int countAssociatedExercises(long workoutId) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
@@ -565,5 +636,42 @@ public class DBManager {
             }
         }
     }
+
+
+    public double getMostRecentWeightForExercise(String exerciseName) {
+    double mostRecentWeight = 0.0;
+    SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+    try {
+        String[] projection = {DatabaseHelper.WEIGHT};
+        String selection = DatabaseHelper.EXERCISE + " = ?";
+        String[] selectionArgs = {exerciseName};
+        String sortOrder = DatabaseHelper.DATETIME + " DESC";
+
+        Cursor cursor = db.query(
+                DatabaseHelper.TABLE_NAME_LOGS + " JOIN " + DatabaseHelper.TABLE_NAME_EXERCISES +
+                        " ON " + DatabaseHelper.TABLE_NAME_LOGS + "." + DatabaseHelper.EXERCISE_ID +
+                        " = " + DatabaseHelper.TABLE_NAME_EXERCISES + "." + DatabaseHelper.EXERCISE_ID,
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                sortOrder
+        );
+
+        if (cursor.moveToFirst()) {
+            int weightColumnIndex = cursor.getColumnIndex(DatabaseHelper.WEIGHT);
+            if (weightColumnIndex != -1) {
+                mostRecentWeight = cursor.getDouble(weightColumnIndex);
+            }
+        }
+
+        cursor.close();
+    } finally {
+//        db.close();
+    }
+    return mostRecentWeight;
+}
 
 }
