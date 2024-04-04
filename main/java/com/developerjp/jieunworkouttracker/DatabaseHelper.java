@@ -37,7 +37,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     // Database Information
-    static final String DB_NAME = "JIEUN WORKOUTS.DB";
+    static final String DB_NAME = "YOUR_WORKOUTS.DB";
 
     // database version
     static final int DB_VERSION = 23;
@@ -76,7 +76,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_LOGS_TABLE);
 
     }
-
 
 
     @Override
