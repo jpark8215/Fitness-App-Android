@@ -44,31 +44,25 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarRe
         final String currentTitle = myList.getTitle();
         final String date = myList.getDate();
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        holder.itemView.setOnClickListener(v -> {
 
-                TextView text = v.findViewById(R.id.textViewHead);
-                Context context = v.getContext();
-                Intent intent = new Intent();
-                if (itemSelectedListener != null) {
-                    itemSelectedListener.onItemSelected(currentId, currentTitle, date);
-                }
+            TextView text = v.findViewById(R.id.textViewHead);
+            Context context = v.getContext();
+            Intent intent = new Intent();
+            if (itemSelectedListener != null) {
+                itemSelectedListener.onItemSelected(currentId, currentTitle, date);
             }
         });
 
 
-        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                TextView text = v.findViewById(R.id.textViewHead);
-                Context context = v.getContext();
-                Intent intent = new Intent();
-                if (itemLongSelectedListener != null) {
-                    itemLongSelectedListener.onItemLongSelected(currentId, currentTitle);
-                }
-                return true;
+        holder.itemView.setOnLongClickListener(v -> {
+            TextView text = v.findViewById(R.id.textViewHead);
+            Context context = v.getContext();
+            Intent intent = new Intent();
+            if (itemLongSelectedListener != null) {
+                itemLongSelectedListener.onItemLongSelected(currentId, currentTitle);
             }
+            return true;
         });
     }
 
@@ -79,7 +73,7 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarRe
         return list.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView textViewHead;
         public TextView textViewId;

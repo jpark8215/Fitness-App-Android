@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewStub;
 import android.widget.AdapterView;
@@ -15,7 +14,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -155,44 +153,41 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        nav_view.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
-                String itemCLicked = item.getTitle().toString();
-                Intent intent;
+        nav_view.setNavigationItemSelectedListener(item -> {
+            String itemCLicked = item.getTitle().toString();
+            Intent intent;
 
-                switch (itemCLicked) {
-                    case "Workouts":
-                        intent = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
-                        startActivity(intent);
-                        break;
-                    case "Archived":
-                        intent = new Intent(getApplicationContext(), ArchivedWorkoutList.class);
-                        startActivity(intent);
-                        break;
-                    case "Progress":
-                        intent = new Intent(getApplicationContext(), ShowProgressActivity.class);
-                        startActivity(intent);
-                        break;
-                    case "Calendar":
-                        intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
-                        startActivity(intent);
-                        break;
-                    case "Color Scheme":
-                        intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
-                        startActivity(intent);
-                        break;
-                    case "Settings":
-                        Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
-                        break;
-                    case "About":
-                        Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
-                        break;
-                }
-
-                drawer.closeDrawers();
-                return true;
+            switch (itemCLicked) {
+                case "Workouts":
+                    intent = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
+                    startActivity(intent);
+                    break;
+                case "Archived":
+                    intent = new Intent(getApplicationContext(), ArchivedWorkoutList.class);
+                    startActivity(intent);
+                    break;
+                case "Progress":
+                    intent = new Intent(getApplicationContext(), ShowProgressActivity.class);
+                    startActivity(intent);
+                    break;
+                case "Calendar":
+                    intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
+                    startActivity(intent);
+                    break;
+                case "Color Scheme":
+                    intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
+                    startActivity(intent);
+                    break;
+                case "Settings":
+                    Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
+                    break;
+                case "About":
+                    Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
+                    break;
             }
+
+            drawer.closeDrawers();
+            return true;
         });
     }
 

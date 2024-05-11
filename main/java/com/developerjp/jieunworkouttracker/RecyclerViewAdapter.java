@@ -44,31 +44,25 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         final String currentId = myList.getId();
         final String currentTitle = myList.getTitle();
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        holder.itemView.setOnClickListener(v -> {
 
-                TextView text = v.findViewById(R.id.textViewHead);
-                Context context = v.getContext();
-                Intent intent = new Intent();
-                if (itemSelectedListener != null) {
-                    itemSelectedListener.onItemSelected(currentId, currentTitle);
-                }
+            TextView text = v.findViewById(R.id.textViewHead);
+            Context context = v.getContext();
+            Intent intent = new Intent();
+            if (itemSelectedListener != null) {
+                itemSelectedListener.onItemSelected(currentId, currentTitle);
             }
         });
 
 
-        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                TextView text = v.findViewById(R.id.textViewHead);
-                Context context = v.getContext();
-                Intent intent = new Intent();
-                if (itemLongSelectedListener != null) {
-                    itemLongSelectedListener.onItemLongSelected(currentId, currentTitle);
-                }
-                return true;
+        holder.itemView.setOnLongClickListener(v -> {
+            TextView text = v.findViewById(R.id.textViewHead);
+            Context context = v.getContext();
+            Intent intent = new Intent();
+            if (itemLongSelectedListener != null) {
+                itemLongSelectedListener.onItemLongSelected(currentId, currentTitle);
             }
+            return true;
         });
     }
 
@@ -80,7 +74,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView textViewHead;
         public TextView textViewId;
@@ -92,6 +86,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     public interface OnItemSelectedListener {
+        void OnBackPressedDispatcher();
+
         void onItemSelected(String itemId, String itemTitle);
     }
 

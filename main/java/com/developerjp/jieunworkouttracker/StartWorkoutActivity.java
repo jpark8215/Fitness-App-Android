@@ -16,7 +16,6 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewStub;
 import android.view.Window;
@@ -28,7 +27,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -39,6 +37,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
@@ -157,48 +157,18 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         loadExerciseData();
 
 
-        fab_add.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toggleFabMode(v);
-            }
-        });
+        fab_add.setOnClickListener(this::toggleFabMode);
 
-        back_drop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toggleFabMode(fab_add);
-            }
-        });
+        back_drop.setOnClickListener(v -> toggleFabMode(fab_add));
 
-        fab_pause_workout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pauseWorkout();
-            }
-        });
+        fab_pause_workout.setOnClickListener(v -> pauseWorkout());
 
 
-        cv_pause_workout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pauseWorkout();
-            }
-        });
+        cv_pause_workout.setOnClickListener(v -> pauseWorkout());
 
-        fab_finish_workout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finishWorkout();
-            }
-        });
+        fab_finish_workout.setOnClickListener(v -> finishWorkout());
 
-        cv_finish_workout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finishWorkout();
-            }
-        });
+        cv_finish_workout.setOnClickListener(v -> finishWorkout());
 
     }
 
@@ -225,65 +195,62 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                 super.onDrawerOpened(drawerView);
             }
         };
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         // open drawer at start
         //drawer.openDrawer(GravityCompat.START);
 
         //Handles side navigation menu clicks
-        nav_view.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
-                String itemCLicked = item.getTitle().toString();
-                Intent intent;
+        nav_view.setNavigationItemSelectedListener(item -> {
+            String itemCLicked = item.getTitle().toString();
+            Intent intent;
 
-                switch (itemCLicked) {
+            switch (itemCLicked) {
 
-                    case "Workouts":
-                        Log.d("menu item clicked", "Workouts");
-                        //Starts the MainActivityWorkout activity
-                        intent = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
-                        startActivity(intent);
-                        break;
-                    case "Archived":
-                        Log.d("menu item clicked", "Archived");
-                        intent = new Intent(getApplicationContext(), ArchivedWorkoutList.class);
-                        startActivity(intent);
-                        break;
-                    case "Progress":
-                        Log.d("menu item clicked", "Progress");
-                        intent = new Intent(getApplicationContext(), ShowProgressActivity.class);
-                        startActivity(intent);
-                        break;
-                    case "Calendar":
-                        Log.d("menu item clicked", "Calendar");
-                        //Starts the Calendar activity
-                        intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
-                        startActivity(intent);
-                        break;
-                    case "Color Scheme":
-                        Log.d("menu item clicked", "Color Scheme");
-                        intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
-                        startActivity(intent);
-                        break;
-                    case "Settings":
-                        Log.d("menu item clicked", "Settings");
-                        //Do something
-                        //TODO Create Settings Page
-                        Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
-                        break;
-                    case "About":
-                        Log.d("menu item clicked", "About");
-                        //Do something
-                        //TODO Create About Page
-                        Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
-                        break;
-                }
-
-                drawer.closeDrawers();
-                return true;
+                case "Workouts":
+                    Log.d("menu item clicked", "Workouts");
+                    //Starts the MainActivityWorkout activity
+                    intent = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
+                    startActivity(intent);
+                    break;
+                case "Archived":
+                    Log.d("menu item clicked", "Archived");
+                    intent = new Intent(getApplicationContext(), ArchivedWorkoutList.class);
+                    startActivity(intent);
+                    break;
+                case "Progress":
+                    Log.d("menu item clicked", "Progress");
+                    intent = new Intent(getApplicationContext(), ShowProgressActivity.class);
+                    startActivity(intent);
+                    break;
+                case "Calendar":
+                    Log.d("menu item clicked", "Calendar");
+                    //Starts the Calendar activity
+                    intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
+                    startActivity(intent);
+                    break;
+                case "Color Scheme":
+                    Log.d("menu item clicked", "Color Scheme");
+                    intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
+                    startActivity(intent);
+                    break;
+                case "Settings":
+                    Log.d("menu item clicked", "Settings");
+                    //Do something
+                    //TODO Create Settings Page
+                    Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
+                    break;
+                case "About":
+                    Log.d("menu item clicked", "About");
+                    //Do something
+                    //TODO Create About Page
+                    Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
+                    break;
             }
+
+            drawer.closeDrawers();
+            return true;
         });
     }
 
@@ -464,9 +431,9 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
 
     @Override
-    public void onBackPressed() {
+    public void OnBackPressedDispatcher() {
         //When the user clicks on the back button we want to take them back to the workout list page
-        super.onBackPressed();
+        super.getOnBackPressedDispatcher();
         this.finish();
     }
 
@@ -513,62 +480,33 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         weightEditText.setSelection( weightEditText.getText().length());
 
 
-        btnUpdate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        btnUpdate.setOnClickListener(v -> {
 
-                //Does a validation check to make sure the user has entered in a value for the exercise name
-                if (TextUtils.isEmpty(exerciseEditText.getText())) {
-                    Toast.makeText(StartWorkoutActivity.this,
-                            "You must give an exercise name", Toast.LENGTH_LONG).show();
+            //Does a validation check to make sure the user has entered in a value for the exercise name
+            if (TextUtils.isEmpty(exerciseEditText.getText())) {
+                Toast.makeText(StartWorkoutActivity.this,
+                        "You must give an exercise name", Toast.LENGTH_LONG).show();
 
-                    //If the user has given an exercise name then we will update the exercise name in the database
-                } else {
-                    String newWorkoutName = exerciseEditText.getText().toString();
-                    long _id = Long.parseLong(itemId);
-
-                    //Updates with the new value
-                    String newExerciseName = exerciseEditText.getText().toString();
-                    dbManager.updateExerciseName(_id, newExerciseName);
-
-
-                    //If there is a weight given then update the database
-                    if (weightEditText.getText().toString().trim().length() > 0)  {
-                        Double newExerciseWeight = Double.parseDouble(weightEditText.getText().toString());
-                        dbManager.updateExerciseWeight(_id, newExerciseWeight);
-                    } else {
-                        //If no weight value was given then update with a default value of 0
-                        Double newExerciseWeight = 0.0;
-                        dbManager.updateExerciseWeight(_id, newExerciseWeight);
-                    }
-
-
-                    //Remembers the position of the recycler view when modify exercise or delete exercise is called
-                    final Parcelable recyclerViewState;
-                    recyclerViewState = Objects.requireNonNull(recyclerView.getLayoutManager()).onSaveInstanceState();
-
-                    //Shows the update made by clearing the recyclerview and re-adding all the items
-                    //Works better this way as we don't have to re-create the entire activity
-                    ExerciseItem.clear();
-                    loadExerciseData();
-                    adapter.notifyDataSetChanged();
-
-                    //places the user back at the same position in the recycler view rather than scrolling all the way back up to the top
-                    recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
-
-                    //Closes the dialog
-                    dialog.dismiss();
-                }
-            }
-        });
-
-        btnDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+                //If the user has given an exercise name then we will update the exercise name in the database
+            } else {
+                String newWorkoutName = exerciseEditText.getText().toString();
                 long _id = Long.parseLong(itemId);
 
-                //Deletes the selected exercise
-                dbManager.deleteExercise(_id);
+                //Updates with the new value
+                String newExerciseName = exerciseEditText.getText().toString();
+                dbManager.updateExerciseName(_id, newExerciseName);
+
+
+                //If there is a weight given then update the database
+                if (weightEditText.getText().toString().trim().length() > 0)  {
+                    Double newExerciseWeight = Double.parseDouble(weightEditText.getText().toString());
+                    dbManager.updateExerciseWeight(_id, newExerciseWeight);
+                } else {
+                    //If no weight value was given then update with a default value of 0
+                    Double newExerciseWeight = 0.0;
+                    dbManager.updateExerciseWeight(_id, newExerciseWeight);
+                }
+
 
                 //Remembers the position of the recycler view when modify exercise or delete exercise is called
                 final Parcelable recyclerViewState;
@@ -588,12 +526,30 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
             }
         });
 
-        (dialog.findViewById(R.id.bt_close)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
+        btnDelete.setOnClickListener(v -> {
+            long _id = Long.parseLong(itemId);
+
+            //Deletes the selected exercise
+            dbManager.deleteExercise(_id);
+
+            //Remembers the position of the recycler view when modify exercise or delete exercise is called
+            final Parcelable recyclerViewState;
+            recyclerViewState = Objects.requireNonNull(recyclerView.getLayoutManager()).onSaveInstanceState();
+
+            //Shows the update made by clearing the recyclerview and re-adding all the items
+            //Works better this way as we don't have to re-create the entire activity
+            ExerciseItem.clear();
+            loadExerciseData();
+            adapter.notifyDataSetChanged();
+
+            //places the user back at the same position in the recycler view rather than scrolling all the way back up to the top
+            recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
+
+            //Closes the dialog
+            dialog.dismiss();
         });
+
+        (dialog.findViewById(R.id.bt_close)).setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
         dialog.getWindow().setAttributes(lp);
@@ -744,7 +700,6 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         }
     }
 
-
     public void finishWorkout() {
 
         //minimises the floating action button
@@ -756,7 +711,6 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         //unbinds the service
         unbindService(mServiceConnection);
         stopService(serviceIntent);
-
 
 
         //Fetches all of the exercise logs in this workout so we can record the workout duration
@@ -775,38 +729,75 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         showWorkoutSummaryDialog();
     }
 
-
     private void showWorkoutSummaryDialog() {
         final Dialog dialog = new Dialog(this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); // before
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.dialog_workout_summary);
         dialog.setCancelable(false);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        // Initialize AdView and load ad
+        AdView adView = dialog.findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        adView.loadAd(adRequest);
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
         lp.copyFrom(dialog.getWindow().getAttributes());
         lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
 
-
-        dialog.findViewById(R.id.bt_ok).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
-                startActivity(i);
-            }
+        dialog.findViewById(R.id.bt_ok).setOnClickListener(v -> {
+            Intent i = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
+            startActivity(i);
         });
 
-        dialog.findViewById(R.id.bt_close).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
-                startActivity(i);
-            }
+        dialog.findViewById(R.id.bt_close).setOnClickListener(v -> {
+            Intent i = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
+            startActivity(i);
         });
-
 
         dialog.show();
         dialog.getWindow().setAttributes(lp);
+    }
+
+//    private void showWorkoutSummaryDialog() {
+//        final Dialog dialog = new Dialog(this);
+//        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); // before
+//        dialog.setContentView(R.layout.dialog_workout_summary);
+//        dialog.setCancelable(false);
+//        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+//
+//        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+//        lp.copyFrom(dialog.getWindow().getAttributes());
+//        lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
+//        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+//
+//
+//        dialog.findViewById(R.id.bt_ok).setOnClickListener(v -> {
+//            Intent i = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
+//            startActivity(i);
+//        });
+//
+//        dialog.findViewById(R.id.bt_close).setOnClickListener(v -> {
+//            Intent i = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
+//            startActivity(i);
+//        });
+//
+//
+//        dialog.show();
+//        dialog.getWindow().setAttributes(lp);
+//
+//    }
+
+    // ViewHolder for AdView
+    public static class AdViewHolder extends RecyclerView.ViewHolder {
+        final AdView adView;
+
+        AdViewHolder(View itemView) {
+            super(itemView);
+            adView = itemView.findViewById(R.id.adView);
+            AdRequest adRequest = new AdRequest.Builder().build();
+            adView.loadAd(adRequest);
+        }
     }
 }

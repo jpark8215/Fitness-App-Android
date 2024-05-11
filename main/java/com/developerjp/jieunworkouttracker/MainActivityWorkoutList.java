@@ -3,7 +3,6 @@ package com.developerjp.jieunworkouttracker;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -11,7 +10,6 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewStub;
 import android.view.Window;
@@ -23,7 +21,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,6 +31,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
@@ -111,34 +109,17 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
         back_drop.setVisibility(View.GONE);
         ViewAnimation.initShowOut(lyt_add_workout);
 
+        fab_add.setOnClickListener(this::toggleFabMode);
 
-        fab_add.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toggleFabMode(v);
-            }
-        });
+        back_drop.setOnClickListener(v -> toggleFabMode(fab_add));
 
-        back_drop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toggleFabMode(fab_add);
-            }
-        });
+        fab_add_workout.setOnClickListener(this::addWorkout);
 
-        fab_add_workout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                addWorkout(v);
-            }
-        });
+        cv_add_workout.setOnClickListener(this::addWorkout);
 
+        MobileAds.initialize(this, initializationStatus -> {
+            Log.d("Ads", "Initialization status: " + initializationStatus);
 
-        cv_add_workout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                addWorkout(v);
-            }
         });
 
     }
@@ -169,65 +150,62 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
                 super.onDrawerOpened(drawerView);
             }
         };
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         // open drawer at start
         //drawer.openDrawer(GravityCompat.START);
 
         //Handles side navigation menu clicks
-        nav_view.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
-                String itemCLicked = item.getTitle().toString();
-                Intent intent;
+        nav_view.setNavigationItemSelectedListener(item -> {
+            String itemCLicked = item.getTitle().toString();
+            Intent intent;
 
-                switch (itemCLicked) {
+            switch (itemCLicked) {
 
-                    case "Workouts":
-                        Log.d("menu item clicked", "Workouts");
-                        //Starts the MainActivityWorkout activity
-                        intent = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
-                        startActivity(intent);
-                        break;
-                    case "Archived":
-                        Log.d("menu item clicked", "Archived");
-                        intent = new Intent(getApplicationContext(), ArchivedWorkoutList.class);
-                        startActivity(intent);
-                        break;
-                    case "Progress":
-                        Log.d("menu item clicked", "Progress");
-                        intent = new Intent(getApplicationContext(), ShowProgressActivity.class);
-                        startActivity(intent);
-                        break;
-                    case "Calendar":
-                        Log.d("menu item clicked", "Calendar");
-                        //Starts the Calendar activity
-                        intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
-                        startActivity(intent);
-                        break;
-                    case "Color Scheme":
-                        Log.d("menu item clicked", "Color Scheme");
-                        intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
-                        startActivity(intent);
-                        break;
-                    case "Settings":
-                        Log.d("menu item clicked", "Settings");
-                        //Do something
-                        //TODO Create Settings Page
-                        Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
-                        break;
-                    case "About":
-                        Log.d("menu item clicked", "About");
-                        //Do something
-                        //TODO Create About Page
-                        Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
-                        break;
-                }
-
-                drawer.closeDrawers();
-                return true;
+                case "Workouts":
+                    Log.d("menu item clicked", "Workouts");
+                    //Starts the MainActivityWorkout activity
+                    intent = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
+                    startActivity(intent);
+                    break;
+                case "Archived":
+                    Log.d("menu item clicked", "Archived");
+                    intent = new Intent(getApplicationContext(), ArchivedWorkoutList.class);
+                    startActivity(intent);
+                    break;
+                case "Progress":
+                    Log.d("menu item clicked", "Progress");
+                    intent = new Intent(getApplicationContext(), ShowProgressActivity.class);
+                    startActivity(intent);
+                    break;
+                case "Calendar":
+                    Log.d("menu item clicked", "Calendar");
+                    //Starts the Calendar activity
+                    intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
+                    startActivity(intent);
+                    break;
+                case "Color Scheme":
+                    Log.d("menu item clicked", "Color Scheme");
+                    intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
+                    startActivity(intent);
+                    break;
+                case "Settings":
+                    Log.d("menu item clicked", "Settings");
+                    //Do something
+                    //TODO Create Settings Page
+                    Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
+                    break;
+                case "About":
+                    Log.d("menu item clicked", "About");
+                    //Do something
+                    //TODO Create About Page
+                    Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
+                    break;
             }
+
+            drawer.closeDrawers();
+            return true;
         });
     }
 
@@ -239,9 +217,9 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
     }
 
     @Override
-    public void onBackPressed() {
+    public void OnBackPressedDispatcher() {
         //When the user clicks on the back button we want to exit the application
-        super.onBackPressed();
+        super.getOnBackPressedDispatcher();
         this.finish();
     }
 
@@ -387,11 +365,8 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
                         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivityWorkoutList.this);
                         builder.setTitle("Duplicate Workout Name");
                         builder.setMessage("A workout with the same name already exists. Please choose another name.");
-                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                // Dismiss the dialog
-                            }
+                        builder.setPositiveButton("OK", (dialogInterface, i) -> {
+                            // Dismiss the dialog
                         });
                         builder.show();
 
@@ -483,12 +458,7 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
 //            }
 //        });
 
-        (dialog.findViewById(R.id.bt_close)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
+        (dialog.findViewById(R.id.bt_close)).setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
         dialog.getWindow().setAttributes(lp);
@@ -531,51 +501,45 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
         toggleWeightUnit.setVisibility(View.GONE);
 
         //Does not allow duplicated workout name
-        btnUpdate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Validate if the user has entered a workout name
-                if (TextUtils.isEmpty(workoutEditText.getText())) {
-                    Toast.makeText(MainActivityWorkoutList.this,
-                            "You must give a workout name", Toast.LENGTH_LONG).show();
+        btnUpdate.setOnClickListener(v -> {
+            // Validate if the user has entered a workout name
+            if (TextUtils.isEmpty(workoutEditText.getText())) {
+                Toast.makeText(MainActivityWorkoutList.this,
+                        "You must give a workout name", Toast.LENGTH_LONG).show();
+            } else {
+                String newWorkoutName = workoutEditText.getText().toString();
+                long _id = Long.parseLong(itemId);
+
+                // Check if the new workout name already exists
+                if (dbManager.isDuplicateWorkout(newWorkoutName)) {
+                    // Handle the case where the workout name already exists
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivityWorkoutList.this);
+                    builder.setTitle("Duplicate Workout Name");
+                    builder.setMessage("A workout with this name already exists. Please choose another name.");
+
+                    // Add buttons for user choice
+                    builder.setPositiveButton("OK", (dialogInterface, i) -> {
+                        // Dismiss the dialog
+                    });
+                    builder.show();
                 } else {
-                    String newWorkoutName = workoutEditText.getText().toString();
-                    Long _id = Long.parseLong(itemId);
+                    // No duplicate found, update the workout name directly
+                    dbManager.updateWorkout(_id, newWorkoutName);
 
-                    // Check if the new workout name already exists
-                    if (dbManager.isDuplicateWorkout(newWorkoutName)) {
-                        // Handle the case where the workout name already exists
-                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivityWorkoutList.this);
-                        builder.setTitle("Duplicate Workout Name");
-                        builder.setMessage("A workout with this name already exists. Please choose another name.");
+                    // Remember the position of the recycler view when modifying a workout
+                    final Parcelable recyclerViewState = Objects.requireNonNull(recyclerView.getLayoutManager()).onSaveInstanceState();
 
-                        // Add buttons for user choice
-                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                // Dismiss the dialog
-                            }
-                        });
-                        builder.show();
-                    } else {
-                        // No duplicate found, update the workout name directly
-                        dbManager.updateWorkout(_id, newWorkoutName);
+                    // Show the update by clearing the recyclerview and re-adding all the items
+                    // This works better as we don't have to re-create the entire activity
+                    listItem.clear();
+                    loadWorkoutData();
+                    adapter.notifyDataSetChanged();
 
-                        // Remember the position of the recycler view when modifying a workout
-                        final Parcelable recyclerViewState = recyclerView.getLayoutManager().onSaveInstanceState();
+                    // Place the user back at the same position in the recycler view rather than scrolling to the top
+                    recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
 
-                        // Show the update by clearing the recyclerview and re-adding all the items
-                        // This works better as we don't have to re-create the entire activity
-                        listItem.clear();
-                        loadWorkoutData();
-                        adapter.notifyDataSetChanged();
-
-                        // Place the user back at the same position in the recycler view rather than scrolling to the top
-                        recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
-
-                        // Close the dialog
-                        dialog.dismiss();
-                    }
+                    // Close the dialog
+                    dialog.dismiss();
                 }
             }
         });
@@ -656,68 +620,56 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
 //            }
 //        });
 
-        btnDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                long _id = Long.parseLong(itemId);
+        btnDelete.setOnClickListener(v -> {
+            long _id = Long.parseLong(itemId);
 
-                //Deletes the selected Workout
-                dbManager.deleteWorkout(_id);
+            //Deletes the selected Workout
+            dbManager.deleteWorkout(_id);
 
-                //Remembers the position of the recycler view when modify workout or delete workout is called
-                final Parcelable recyclerViewState;
-                recyclerViewState = Objects.requireNonNull(recyclerView.getLayoutManager()).onSaveInstanceState();
+            //Remembers the position of the recycler view when modify workout or delete workout is called
+            final Parcelable recyclerViewState;
+            recyclerViewState = Objects.requireNonNull(recyclerView.getLayoutManager()).onSaveInstanceState();
 
-                //Shows the update made by clearing the recyclerview and re-adding all the items
-                //Works better this way as we don't have to re-create the entire activity
-                listItem.clear();
-                loadWorkoutData();
-                adapter.notifyDataSetChanged();
+            //Shows the update made by clearing the recyclerview and re-adding all the items
+            //Works better this way as we don't have to re-create the entire activity
+            listItem.clear();
+            loadWorkoutData();
+            adapter.notifyDataSetChanged();
 
-                //places the user back at the same position in the recycler view rather than scrolling all the way back up to the top
-                recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
+            //places the user back at the same position in the recycler view rather than scrolling all the way back up to the top
+            recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
 
-                //Closes the dialog
-                dialog.dismiss();
+            //Closes the dialog
+            dialog.dismiss();
 
-            }
         });
 
 
-        btnArchive.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Long _id = Long.parseLong(itemId);
+        btnArchive.setOnClickListener(v -> {
+            Long _id = Long.parseLong(itemId);
 
-                //Deletes the selected Workout
-                dbManager.archiveWorkout(_id);
+            //Deletes the selected Workout
+            dbManager.archiveWorkout(_id);
 
-                //Remembers the position of the recycler view when modify workout or delete workout is called
-                final Parcelable recyclerViewState;
-                recyclerViewState = Objects.requireNonNull(recyclerView.getLayoutManager()).onSaveInstanceState();
+            //Remembers the position of the recycler view when modify workout or delete workout is called
+            final Parcelable recyclerViewState;
+            recyclerViewState = Objects.requireNonNull(recyclerView.getLayoutManager()).onSaveInstanceState();
 
-                //Shows the update made by clearing the recyclerview and re-adding all the items
-                //Works better this way as we don't have to re-create the entire activity
-                listItem.clear();
-                loadWorkoutData();
-                adapter.notifyDataSetChanged();
+            //Shows the update made by clearing the recyclerview and re-adding all the items
+            //Works better this way as we don't have to re-create the entire activity
+            listItem.clear();
+            loadWorkoutData();
+            adapter.notifyDataSetChanged();
 
-                //places the user back at the same position in the recycler view rather than scrolling all the way back up to the top
-                recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
+            //places the user back at the same position in the recycler view rather than scrolling all the way back up to the top
+            recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
 
-                //Closes the dialog
-                dialog.dismiss();
+            //Closes the dialog
+            dialog.dismiss();
 
-            }
         });
 
-
-        (dialog.findViewById(R.id.bt_close)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
+        (dialog.findViewById(R.id.bt_close)).setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
         dialog.getWindow().setAttributes(lp);

@@ -27,8 +27,9 @@
             android:fitsSystemWindows="false"
             android:focusable="false"
             android:onClick="myClickHandler"
-            android:text="2"
-            style="?android:attr/buttonBarButtonStyle" />
+            android:text="1"
+            style="?android:attr/buttonBarButtonStyle"
+            tools:ignore="UsingOnClickInXml" />
 
         <Button
             android:id="@+id/button2"
@@ -37,8 +38,9 @@
             android:layout_weight="1"
             android:onClick="myClickHandler"
             android:focusable="false"
-            android:text="3"
-            style="?android:attr/buttonBarButtonStyle" />
+            android:text="2"
+            style="?android:attr/buttonBarButtonStyle"
+            tools:ignore="UsingOnClickInXml" />
 
         <Button
             android:id="@+id/button3"
@@ -47,8 +49,9 @@
             android:layout_weight="1"
             android:focusable="false"
             android:onClick="myClickHandler"
-            android:text="4"
-            style="?android:attr/buttonBarButtonStyle" />
+            android:text="3"
+            style="?android:attr/buttonBarButtonStyle"
+            tools:ignore="UsingOnClickInXml" />
 
         <Button
             android:id="@+id/button4"
@@ -57,8 +60,9 @@
             android:layout_weight="1"
             android:focusable="false"
             android:onClick="myClickHandler"
-            android:text="5"
-            style="?android:attr/buttonBarButtonStyle" />
+            android:text="4"
+            style="?android:attr/buttonBarButtonStyle"
+            tools:ignore="UsingOnClickInXml" />
 
         <Button
             android:id="@+id/button5"
@@ -67,8 +71,9 @@
             android:layout_weight="1"
             android:focusable="false"
             android:onClick="myClickHandler"
-            android:text="6"
-            style="?android:attr/buttonBarButtonStyle" />
+            android:text="5"
+            style="?android:attr/buttonBarButtonStyle"
+            tools:ignore="UsingOnClickInXml" />
     </LinearLayout>
 
 </LinearLayout>

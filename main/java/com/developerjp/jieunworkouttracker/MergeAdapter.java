@@ -12,16 +12,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
- * Adapter that merges multiple child adapters and views into a single
- * contiguous whole.
- *
+ * Adapter that merges multiple child adapters and views into a single contiguous whole.
  * Adapters used as pieces within MergeAdapter must have view type IDs
  * monotonically increasing from 0. Ideally, adapters also have distinct ranges
  * for their row ids, as returned by getItemId().
  *
  */
 public class MergeAdapter extends BaseAdapter implements SectionIndexer {
-    protected ArrayList<ListAdapter> pieces = new ArrayList<ListAdapter>();
+    protected ArrayList<ListAdapter> pieces = new ArrayList<>();
     protected String noItemsText;
 
     /**
@@ -284,7 +282,7 @@ public class MergeAdapter extends BaseAdapter implements SectionIndexer {
     }
 
     public Object[] getSections() {
-        ArrayList<Object> sections = new ArrayList<Object>();
+        ArrayList<Object> sections = new ArrayList<>();
 
         for (ListAdapter piece : pieces) {
             if (piece instanceof SectionIndexer) {

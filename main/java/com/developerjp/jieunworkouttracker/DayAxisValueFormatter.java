@@ -39,25 +39,17 @@ public class DayAxisValueFormatter extends ValueFormatter
 
             switch (dayOfMonth) {
                 case 1:
+                case 21:
+                case 31:
                     appendix = "st";
                     break;
                 case 2:
-                    appendix = "nd";
-                    break;
-                case 3:
-                    appendix = "rd";
-                    break;
-                case 21:
-                    appendix = "st";
-                    break;
                 case 22:
                     appendix = "nd";
                     break;
+                case 3:
                 case 23:
                     appendix = "rd";
-                    break;
-                case 31:
-                    appendix = "st";
                     break;
             }
 

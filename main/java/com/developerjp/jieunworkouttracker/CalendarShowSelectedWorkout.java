@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewStub;
 import android.widget.Chronometer;
@@ -36,15 +35,8 @@ import java.util.List;
 public class CalendarShowSelectedWorkout extends AppCompatActivity {
 
 
-    private DBManager dbManager;
-
-    private RecyclerView recyclerView;
-
     // Item List
-    private final List<com.developerjp.jieunworkouttracker.ExerciseItem> ExerciseItem = new ArrayList();
-
-    // Custom Recycler View Adaptor
-    private ExerciseRecyclerViewAdapter adapter;
+    private final List<com.developerjp.jieunworkouttracker.ExerciseItem> ExerciseItem = new ArrayList<>();
 
     private Double exerciseWeight;
     private final NumberFormat nf = new DecimalFormat("##.#");
@@ -141,65 +133,62 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
                 super.onDrawerOpened(drawerView);
             }
         };
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         // open drawer at start
         //drawer.openDrawer(GravityCompat.START);
 
         //Handles side navigation menu clicks
-        nav_view.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(final MenuItem item) {
-                String itemCLicked = item.getTitle().toString();
-                Intent intent;
+        nav_view.setNavigationItemSelectedListener(item -> {
+            String itemCLicked = item.getTitle().toString();
+            Intent intent;
 
-                switch (itemCLicked) {
+            switch (itemCLicked) {
 
-                    case "Workouts":
-                        Log.d("menu item clicked", "Workouts");
-                        //Starts the MainActivityWorkout activity
-                        intent = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
-                        startActivity(intent);
-                        break;
-                    case "Archived":
-                        Log.d("menu item clicked", "Archived");
-                        intent = new Intent(getApplicationContext(), ArchivedWorkoutList.class);
-                        startActivity(intent);
-                        break;
-                    case "Progress":
-                        Log.d("menu item clicked", "Progress");
-                        intent = new Intent(getApplicationContext(), ShowProgressActivity.class);
-                        startActivity(intent);
-                        break;
-                    case "Calendar":
-                        Log.d("menu item clicked", "Calendar");
-                        //Starts the Calendar activity
-                        intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
-                        startActivity(intent);
-                        break;
-                    case "Color Scheme":
-                        Log.d("menu item clicked", "Color Scheme");
-                        intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
-                        startActivity(intent);
-                        break;
-                    case "Settings":
-                        Log.d("menu item clicked", "Settings");
-                        //Do something
-                        //TODO Create Settings Page
-                        Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
-                        break;
-                    case "About":
-                        Log.d("menu item clicked", "About");
-                        //Do something
-                        //TODO Create About Page
-                        Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
-                        break;
-                }
-
-                drawer.closeDrawers();
-                return true;
+                case "Workouts":
+                    Log.d("menu item clicked", "Workouts");
+                    //Starts the MainActivityWorkout activity
+                    intent = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
+                    startActivity(intent);
+                    break;
+                case "Archived":
+                    Log.d("menu item clicked", "Archived");
+                    intent = new Intent(getApplicationContext(), ArchivedWorkoutList.class);
+                    startActivity(intent);
+                    break;
+                case "Progress":
+                    Log.d("menu item clicked", "Progress");
+                    intent = new Intent(getApplicationContext(), ShowProgressActivity.class);
+                    startActivity(intent);
+                    break;
+                case "Calendar":
+                    Log.d("menu item clicked", "Calendar");
+                    //Starts the Calendar activity
+                    intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
+                    startActivity(intent);
+                    break;
+                case "Color Scheme":
+                    Log.d("menu item clicked", "Color Scheme");
+                    intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
+                    startActivity(intent);
+                    break;
+                case "Settings":
+                    Log.d("menu item clicked", "Settings");
+                    //Do something
+                    //TODO Create Settings Page
+                    Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
+                    break;
+                case "About":
+                    Log.d("menu item clicked", "About");
+                    //Do something
+                    //TODO Create About Page
+                    Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
+                    break;
             }
+
+            drawer.closeDrawers();
+            return true;
         });
     }
 
@@ -208,11 +197,11 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
         //We pass the database manager the id AND title variable in case the user has entered in two workouts which
         //have the same name. We obviously only want to return the one they clicked on rather than everything
         //with that duplicate workout name
-        dbManager = new DBManager(this);
+        DBManager dbManager = new DBManager(this);
         dbManager.open();
         Cursor cursor = dbManager.fetchExerciseLogsForSelectedDate(id, date);
 
-        recyclerView = findViewById(R.id.recycler_view);
+        RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -375,7 +364,8 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
             ExerciseItem.add(exerciseItem);
             i++;
         }
-        adapter = new ExerciseRecyclerViewAdapter(ExerciseItem, this, null, null);
+        // Custom Recycler View Adaptor
+        ExerciseRecyclerViewAdapter adapter = new ExerciseRecyclerViewAdapter(ExerciseItem, this, null, null);
         recyclerView.setAdapter(adapter);
     }
 

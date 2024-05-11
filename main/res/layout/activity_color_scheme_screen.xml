@@ -31,9 +31,10 @@
             <Switch
                 android:id="@+id/switchTheme"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="49dp"
                 android:layout_weight="1"
-                android:text="Light" />
+                android:text="Light"
+                tools:ignore="UseSwitchCompatOrMaterialXml" />
         </LinearLayout>
 
         <View
@@ -82,7 +83,8 @@
                     android:onClick="bottomNavigationHomeClick"
                     app:srcCompat="@drawable/ic_home_round"
                     app:tint="@color/colorPrimaryLight"
-                    android:contentDescription="Home" />
+                    android:contentDescription="Home"
+                    tools:ignore="UsingOnClickInXml" />
 
             </LinearLayout>
 
@@ -104,7 +106,8 @@
                     android:onClick="bottomNavigationCalendarClick"
                     app:srcCompat="@drawable/ic_calendar_round"
                     app:tint="@color/colorPrimaryLight"
-                    android:contentDescription="Calendar" />
+                    android:contentDescription="Calendar"
+                    tools:ignore="UsingOnClickInXml" />
 
             </LinearLayout>
 

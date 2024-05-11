@@ -5,14 +5,12 @@ import static com.github.mikephil.charting.charts.Chart.LOG_TAG;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewStub;
 import android.view.Window;
@@ -24,7 +22,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -108,34 +105,13 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         ViewAnimation.initShowOut(lyt_add_exercise);
         ViewAnimation.initShowOut(lyt_start_workout);
 
-        fab_add.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toggleFabMode(v);
-            }
-        });
+        fab_add.setOnClickListener(this::toggleFabMode);
 
-        back_drop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toggleFabMode(fab_add);
-            }
-        });
+        back_drop.setOnClickListener(v -> toggleFabMode(fab_add));
 
-        fab_add_exercise.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        fab_add_exercise.setOnClickListener(this::addExercise);
 
-                addExercise(v);
-            }
-        });
-
-        cv_add_exercise.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                addExercise(v);
-            }
-        });
+        cv_add_exercise.setOnClickListener(this::addExercise);
     }
 
     private void initToolbar() {
@@ -163,65 +139,62 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
                 super.onDrawerOpened(drawerView);
             }
         };
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         // open drawer at start
         //drawer.openDrawer(GravityCompat.START);
 
         //Handles side navigation menu clicks
-        nav_view.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
-                String itemCLicked = item.getTitle().toString();
-                Intent intent;
+        nav_view.setNavigationItemSelectedListener(item -> {
+            String itemCLicked = item.getTitle().toString();
+            Intent intent;
 
-                switch (itemCLicked) {
+            switch (itemCLicked) {
 
-                    case "Workouts":
-                        Log.d("menu item clicked", "Workouts");
-                        //Starts the MainActivityWorkout activity
-                        intent = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
-                        startActivity(intent);
-                        break;
-                    case "Archived":
-                        Log.d("menu item clicked", "Archived");
-                        intent = new Intent(getApplicationContext(), ArchivedWorkoutList.class);
-                        startActivity(intent);
-                        break;
-                    case "Progress":
-                        Log.d("menu item clicked", "Progress");
-                        intent = new Intent(getApplicationContext(), ShowProgressActivity.class);
-                        startActivity(intent);
-                        break;
-                    case "Calendar":
-                        Log.d("menu item clicked", "Calendar");
-                        //Starts the Calendar activity
-                        intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
-                        startActivity(intent);
-                        break;
-                    case "Color Scheme":
-                        Log.d("menu item clicked", "Color Scheme");
-                        intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
-                        startActivity(intent);
-                        break;
-                    case "Settings":
-                        Log.d("menu item clicked", "Settings");
-                        //Do something
-                        //TODO Create Settings Page
-                        Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
-                        break;
-                    case "About":
-                        Log.d("menu item clicked", "About");
-                        //Do something
-                        //TODO Create About Page
-                        Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
-                        break;
-                }
-
-                drawer.closeDrawers();
-                return true;
+                case "Workouts":
+                    Log.d("menu item clicked", "Workouts");
+                    //Starts the MainActivityWorkout activity
+                    intent = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
+                    startActivity(intent);
+                    break;
+                case "Archived":
+                    Log.d("menu item clicked", "Archived");
+                    intent = new Intent(getApplicationContext(), ArchivedWorkoutList.class);
+                    startActivity(intent);
+                    break;
+                case "Progress":
+                    Log.d("menu item clicked", "Progress");
+                    intent = new Intent(getApplicationContext(), ShowProgressActivity.class);
+                    startActivity(intent);
+                    break;
+                case "Calendar":
+                    Log.d("menu item clicked", "Calendar");
+                    //Starts the Calendar activity
+                    intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
+                    startActivity(intent);
+                    break;
+                case "Color Scheme":
+                    Log.d("menu item clicked", "Color Scheme");
+                    intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
+                    startActivity(intent);
+                    break;
+                case "Settings":
+                    Log.d("menu item clicked", "Settings");
+                    //Do something
+                    //TODO Create Settings Page
+                    Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
+                    break;
+                case "About":
+                    Log.d("menu item clicked", "About");
+                    //Do something
+                    //TODO Create About Page
+                    Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
+                    break;
             }
+
+            drawer.closeDrawers();
+            return true;
         });
     }
 
@@ -328,9 +301,9 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
     }
 
     @Override
-    public void onBackPressed() {
+    public void OnBackPressedDispatcher() {
         //When the user clicks on the back button we want to take them back to the workout list page
-        super.onBackPressed();
+        super.getOnBackPressedDispatcher();
         this.finish();
     }
 
@@ -465,52 +438,26 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         exerciseEditText.setHint("Exercise");
 
 
-        btnAdd.setOnClickListener(new View.OnClickListener() {
+        btnAdd.setOnClickListener(v -> {
+            final String exerciseName = exerciseEditText.getText().toString();
 
-            @Override
-            public void onClick(View v) {
-                final String exerciseName = exerciseEditText.getText().toString();
-
-                // Check if the exercise name already exists in the database
-                if (dbManager.doesExerciseExist(exerciseName)) {
-                    // Exercise with the same name exists
-                    double mostRecentWeight = dbManager.getMostRecentWeightForExercise(exerciseName);
-                    String message;
-                    if (mostRecentWeight > 0.0) {
-                        message = "An exercise with the same name already exists. The most recent weight recorded for this exercise is: " + mostRecentWeight + ". \nStill add as you entered?";
-                    } else {
-                        message = "An exercise with the same name already exists. \nStill add as you entered?";
-                    }
-
-                    // Ask the user if they want to proceed
-                    AlertDialog.Builder builder = new AlertDialog.Builder(ArchivedExerciseList.this);
-                    builder.setTitle("Exercise Already Exists");
-                    builder.setMessage(message);
-                    builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            // User wants to use the same exercise, so directly add it
-                            double exerciseWeight = 0.0;
-                            if (weightEditText.getText().toString().trim().length() > 0) {
-                                exerciseWeight = Double.parseDouble(weightEditText.getText().toString());
-                                if (!toggleWeightUnit.isChecked()) {
-                                    exerciseWeight = Double.parseDouble(nf.format(exerciseWeight / 2.20462));
-                                }
-                            }
-                            Intent intent = getIntent();
-                            dbManager.insertExercise(intent.getStringExtra("id"), exerciseName, exerciseWeight);
-                            Intent main = new Intent(v.getContext(), ExerciseList.class);
-                            main.putExtra("title", intent.getStringExtra("title"));
-                            main.putExtra("id", intent.getStringExtra("id"));
-                            main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(main);
-                            dialog.dismiss();
-                        }
-                    });
-                    builder.setNegativeButton("No", null);
-                    builder.show();
+            // Check if the exercise name already exists in the database
+            if (dbManager.doesExerciseExist(exerciseName)) {
+                // Exercise with the same name exists
+                double mostRecentWeight = dbManager.getMostRecentWeightForExercise(exerciseName);
+                String message;
+                if (mostRecentWeight > 0.0) {
+                    message = "An exercise with the same name already exists. The most recent weight recorded for this exercise is: " + mostRecentWeight + ". \nStill add as you entered?";
                 } else {
-                    // Exercise name doesn't exist, proceed with adding it
+                    message = "An exercise with the same name already exists. \nStill add as you entered?";
+                }
+
+                // Ask the user if they want to proceed
+                AlertDialog.Builder builder = new AlertDialog.Builder(ArchivedExerciseList.this);
+                builder.setTitle("Exercise Already Exists");
+                builder.setMessage(message);
+                builder.setPositiveButton("Add", (dialogInterface, i) -> {
+                    // User wants to use the same exercise, so directly add it
                     double exerciseWeight = 0.0;
                     if (weightEditText.getText().toString().trim().length() > 0) {
                         exerciseWeight = Double.parseDouble(weightEditText.getText().toString());
@@ -526,7 +473,26 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
                     main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(main);
                     dialog.dismiss();
+                });
+                builder.setNegativeButton("No", null);
+                builder.show();
+            } else {
+                // Exercise name doesn't exist, proceed with adding it
+                double exerciseWeight = 0.0;
+                if (weightEditText.getText().toString().trim().length() > 0) {
+                    exerciseWeight = Double.parseDouble(weightEditText.getText().toString());
+                    if (!toggleWeightUnit.isChecked()) {
+                        exerciseWeight = Double.parseDouble(nf.format(exerciseWeight / 2.20462));
+                    }
                 }
+                Intent intent = getIntent();
+                dbManager.insertExercise(intent.getStringExtra("id"), exerciseName, exerciseWeight);
+                Intent main = new Intent(v.getContext(), ExerciseList.class);
+                main.putExtra("title", intent.getStringExtra("title"));
+                main.putExtra("id", intent.getStringExtra("id"));
+                main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(main);
+                dialog.dismiss();
             }
         });
 
@@ -571,12 +537,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
 //
 //        });
 
-        (dialog.findViewById(R.id.bt_close)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
+        (dialog.findViewById(R.id.bt_close)).setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
         dialog.getWindow().setAttributes(lp);
@@ -621,92 +582,85 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         weightEditText.setSelection( weightEditText.getText().length());
 
 
-        btnUpdate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (TextUtils.isEmpty(exerciseEditText.getText())) {
-                    Toast.makeText(ArchivedExerciseList.this, "You must give an exercise name", Toast.LENGTH_LONG).show();
+        btnUpdate.setOnClickListener(v -> {
+            if (TextUtils.isEmpty(exerciseEditText.getText())) {
+                Toast.makeText(ArchivedExerciseList.this, "You must give an exercise name", Toast.LENGTH_LONG).show();
+            } else {
+                String newExerciseName = exerciseEditText.getText().toString();
+                long _id = Long.parseLong(itemId);
+
+                // Check for duplicate exercise name
+                if (dbManager.doesExerciseExist(newExerciseName)) {
+                    // Exercise with the same name already exists, ask the user what to do
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ArchivedExerciseList.this);
+                    double mostRecentWeight = dbManager.getMostRecentWeightForExercise(newExerciseName);
+                    String message = "The most recent weight was " + mostRecentWeight + ". \nStill update as you entered?";
+                    builder.setMessage(message)
+                            .setPositiveButton("Update", (dialogInterface, id) -> {
+                                // Update exercise name
+                                dbManager.updateExerciseName(_id, newExerciseName);
+
+                                // If there is a weight given, update the database
+                                if (weightEditText.getText().toString().trim().length() > 0) {
+                                    double newExerciseWeight = Double.parseDouble(weightEditText.getText().toString());
+
+                                    // Convert the entered weight to kg if lbs is selected
+                                    if (!toggleWeightUnit.isChecked()) {
+                                        newExerciseWeight = Double.parseDouble(nf.format(newExerciseWeight / 2.20462));
+                                    }
+
+                                    dbManager.updateExerciseWeight(_id, newExerciseWeight);
+                                } else {
+                                    // If no weight value was given, update with a default value of 0
+                                    Double newExerciseWeight = 0.0;
+                                    dbManager.updateExerciseWeight(_id, newExerciseWeight);
+                                }
+
+                                // Refresh the recycler view
+                                ExerciseItem.clear();
+                                loadExerciseData();
+                                adapter.notifyDataSetChanged();
+
+                                // Dismiss the main dialog
+                                dialog.dismiss();
+                                // Dismiss the inner dialog
+                                dialogInterface.dismiss();
+                            })
+
+                            .setNegativeButton("Cancel", (dialog1, id) -> {
+                                // User does not want to use the same name, do nothing
+                                dialog1.dismiss();
+                            });
+
+                    AlertDialog dialog1 = builder.create();
+                    dialog1.show();
                 } else {
-                    String newExerciseName = exerciseEditText.getText().toString();
-                    long _id = Long.parseLong(itemId);
+                    // No duplicate, proceed with the update
+                    // Update exercise name
+                    dbManager.updateExerciseName(_id, newExerciseName);
 
-                    // Check for duplicate exercise name
-                    if (dbManager.doesExerciseExist(newExerciseName)) {
-                        // Exercise with the same name already exists, ask the user what to do
-                        AlertDialog.Builder builder = new AlertDialog.Builder(ArchivedExerciseList.this);
-                        double mostRecentWeight = dbManager.getMostRecentWeightForExercise(newExerciseName);
-                        String message = "The most recent weight was " + mostRecentWeight + ". \nStill update as you entered?";
-                        builder.setMessage(message)
-                                .setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialogInterface, int id) {
-                                        // Update exercise name
-                                        dbManager.updateExerciseName(_id, newExerciseName);
+                    // If there is a weight given, update the database
+                    if (weightEditText.getText().toString().trim().length() > 0) {
+                        double newExerciseWeight = Double.parseDouble(weightEditText.getText().toString());
 
-                                        // If there is a weight given, update the database
-                                        if (weightEditText.getText().toString().trim().length() > 0) {
-                                            double newExerciseWeight = Double.parseDouble(weightEditText.getText().toString());
-
-                                            // Convert the entered weight to kg if lbs is selected
-                                            if (!toggleWeightUnit.isChecked()) {
-                                                newExerciseWeight = Double.parseDouble(nf.format(newExerciseWeight / 2.20462));
-                                            }
-
-                                            dbManager.updateExerciseWeight(_id, newExerciseWeight);
-                                        } else {
-                                            // If no weight value was given, update with a default value of 0
-                                            Double newExerciseWeight = 0.0;
-                                            dbManager.updateExerciseWeight(_id, newExerciseWeight);
-                                        }
-
-                                        // Refresh the recycler view
-                                        ExerciseItem.clear();
-                                        loadExerciseData();
-                                        adapter.notifyDataSetChanged();
-
-                                        // Dismiss the main dialog
-                                        dialog.dismiss();
-                                        // Dismiss the inner dialog
-                                        dialogInterface.dismiss();
-                                    }
-                                })
-
-                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        // User does not want to use the same name, do nothing
-                                        dialog.dismiss();
-                                    }
-                                });
-
-                        AlertDialog dialog = builder.create();
-                        dialog.show();
-                    } else {
-                        // No duplicate, proceed with the update
-                        // Update exercise name
-                        dbManager.updateExerciseName(_id, newExerciseName);
-
-                        // If there is a weight given, update the database
-                        if (weightEditText.getText().toString().trim().length() > 0) {
-                            double newExerciseWeight = Double.parseDouble(weightEditText.getText().toString());
-
-                            // Convert the entered weight to kg if lbs is selected
-                            if (!toggleWeightUnit.isChecked()) {
-                                newExerciseWeight = Double.parseDouble(nf.format(newExerciseWeight / 2.20462));
-                            }
-
-                            dbManager.updateExerciseWeight(_id, newExerciseWeight);
-                        } else {
-                            // If no weight value was given, update with a default value of 0
-                            Double newExerciseWeight = 0.0;
-                            dbManager.updateExerciseWeight(_id, newExerciseWeight);
+                        // Convert the entered weight to kg if lbs is selected
+                        if (!toggleWeightUnit.isChecked()) {
+                            newExerciseWeight = Double.parseDouble(nf.format(newExerciseWeight / 2.20462));
                         }
 
-                        // Refresh the recycler view
-                        ExerciseItem.clear();
-                        loadExerciseData();
-                        adapter.notifyDataSetChanged();
-
-                        dialog.dismiss();
+                        dbManager.updateExerciseWeight(_id, newExerciseWeight);
+                    } else {
+                        // If no weight value was given, update with a default value of 0
+                        Double newExerciseWeight = 0.0;
+                        dbManager.updateExerciseWeight(_id, newExerciseWeight);
                     }
+
+                    // Refresh the recycler view
+                    ExerciseItem.clear();
+                    loadExerciseData();
+                    adapter.notifyDataSetChanged();
+
+                    dialog.dismiss();
                 }
             }
         });
@@ -763,39 +717,31 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
 //            }
 //        });
 
-        btnDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                long _id = Long.parseLong(itemId);
+        btnDelete.setOnClickListener(v -> {
+            long _id = Long.parseLong(itemId);
 
-                //Deletes the selected exercise
-                dbManager.deleteExercise(_id);
+            //Deletes the selected exercise
+            dbManager.deleteExercise(_id);
 
-                //Remembers the position of the recycler view when modify exercise or delete exercise is called
-                final Parcelable recyclerViewState;
-                recyclerViewState = Objects.requireNonNull(recyclerView.getLayoutManager()).onSaveInstanceState();
+            //Remembers the position of the recycler view when modify exercise or delete exercise is called
+            final Parcelable recyclerViewState;
+            recyclerViewState = Objects.requireNonNull(recyclerView.getLayoutManager()).onSaveInstanceState();
 
-                //Shows the update made by clearing the recyclerview and re-adding all the items
-                //Works better this way as we don't have to re-create the entire activity
-                ExerciseItem.clear();
-                loadExerciseData();
-                adapter.notifyDataSetChanged();
+            //Shows the update made by clearing the recyclerview and re-adding all the items
+            //Works better this way as we don't have to re-create the entire activity
+            ExerciseItem.clear();
+            loadExerciseData();
+            adapter.notifyDataSetChanged();
 
-                //places the user back at the same position in the recycler view rather than scrolling all the way back up to the top
-                recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
+            //places the user back at the same position in the recycler view rather than scrolling all the way back up to the top
+            recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
 
-                //Closes the dialog
-                dialog.dismiss();
+            //Closes the dialog
+            dialog.dismiss();
 
-            }
         });
 
-        (dialog.findViewById(R.id.bt_close)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
+        (dialog.findViewById(R.id.bt_close)).setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
         dialog.getWindow().setAttributes(lp);

@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -446,32 +445,26 @@ public class DBManager {
 
             builder.setMessage(message);
 
-            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    // User confirmed, delete the workout, its exercises, and logs
-                    try {
-                        database.beginTransaction();
-                        database.delete(DatabaseHelper.TABLE_NAME_LOGS, DatabaseHelper.WORKOUT_ID + "=?", new String[]{String.valueOf(_id)});
-                        database.delete(DatabaseHelper.TABLE_NAME_EXERCISES, DatabaseHelper.WORKOUT_ID + "=?", new String[]{String.valueOf(_id)});
-                        database.delete(DatabaseHelper.TABLE_NAME_WORKOUTS, DatabaseHelper.WORKOUT_ID + "=?", new String[]{String.valueOf(_id)});
-                        database.setTransactionSuccessful();
-                        ((Activity) context).recreate();
+            builder.setPositiveButton("Yes", (dialogInterface, i) -> {
+                // User confirmed, delete the workout, its exercises, and logs
+                try {
+                    database.beginTransaction();
+                    database.delete(DatabaseHelper.TABLE_NAME_LOGS, DatabaseHelper.WORKOUT_ID + "=?", new String[]{String.valueOf(_id)});
+                    database.delete(DatabaseHelper.TABLE_NAME_EXERCISES, DatabaseHelper.WORKOUT_ID + "=?", new String[]{String.valueOf(_id)});
+                    database.delete(DatabaseHelper.TABLE_NAME_WORKOUTS, DatabaseHelper.WORKOUT_ID + "=?", new String[]{String.valueOf(_id)});
+                    database.setTransactionSuccessful();
+                    ((Activity) context).recreate();
 
-                    } catch (Exception e) {
-                        // Log the exception
-                        Log.e("DeleteWorkout", "Error deleting workout with ID " + _id, e);
-                    } finally {
-                        database.endTransaction();
-                    }
+                } catch (Exception e) {
+                    // Log the exception
+                    Log.e("DeleteWorkout", "Error deleting workout with ID " + _id, e);
+                } finally {
+                    database.endTransaction();
                 }
             });
 
-            builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    // User canceled the deletion, do nothing
-                }
+            builder.setNegativeButton("No", (dialogInterface, i) -> {
+                // User canceled the deletion, do nothing
             });
 
             builder.show();
@@ -521,30 +514,24 @@ public class DBManager {
         builder.setTitle("Confirm Deletion");
         builder.setMessage("Are you sure you want to delete this exercise and its associated log(s)?");
 
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                try {
-                    // Delete logs associated with each exercise ID
-                    for (String exerciseId : exerciseIds) {
-                        database.delete(DatabaseHelper.TABLE_NAME_EXERCISES, DatabaseHelper.EXERCISE_ID + "=?", new String[]{exerciseId});
-                        database.delete(DatabaseHelper.TABLE_NAME_LOGS, DatabaseHelper.EXERCISE_ID + "=?", new String[]{exerciseId});
-                    }
-                    // Refresh the activity to renew the page
-                    ((Activity) context).recreate();
-
-                } catch (Exception e) {
-                    // Log an error if an exception occurs during deletion
-                    Log.e("DeleteExercise", "Error deleting exercise and logs.", e);
+        builder.setPositiveButton("Yes", (dialogInterface, i) -> {
+            try {
+                // Delete logs associated with each exercise ID
+                for (String exerciseId : exerciseIds) {
+                    database.delete(DatabaseHelper.TABLE_NAME_EXERCISES, DatabaseHelper.EXERCISE_ID + "=?", new String[]{exerciseId});
+                    database.delete(DatabaseHelper.TABLE_NAME_LOGS, DatabaseHelper.EXERCISE_ID + "=?", new String[]{exerciseId});
                 }
+                // Refresh the activity to renew the page
+                ((Activity) context).recreate();
+
+            } catch (Exception e) {
+                // Log an error if an exception occurs during deletion
+                Log.e("DeleteExercise", "Error deleting exercise and logs.", e);
             }
         });
 
-        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                // User canceled the deletion, do nothing
-            }
+        builder.setNegativeButton("No", (dialogInterface, i) -> {
+            // User canceled the deletion, do nothing
         });
 
         builder.show();
@@ -642,7 +629,6 @@ public class DBManager {
     double mostRecentWeight = 0.0;
     SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-    try {
         String[] projection = {DatabaseHelper.WEIGHT};
         String selection = DatabaseHelper.EXERCISE + " = ?";
         String[] selectionArgs = {exerciseName};
@@ -668,10 +654,7 @@ public class DBManager {
         }
 
         cursor.close();
-    } finally {
-//        db.close();
-    }
-    return mostRecentWeight;
+        return mostRecentWeight;
 }
 
 }

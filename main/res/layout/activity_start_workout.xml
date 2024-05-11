@@ -144,14 +144,14 @@
                 android:id="@+id/fab_pause_workout"
                 android:layout_width="wrap_content"
                 android:layout_height="76dp"
-                android:layout_marginLeft="@dimen/spacing_smlarge"
+                android:layout_marginLeft="@dimen/spacing_middle"
                 android:layout_marginTop="@dimen/spacing_middle"
-                android:layout_marginRight="@dimen/spacing_smlarge"
+                android:layout_marginRight="@dimen/spacing_middle"
                 android:layout_marginBottom="@dimen/spacing_middle"
                 android:clickable="true"
                 android:contentDescription="Pause Workout"
                 android:tint="@color/grey_80"
-                app:fabSize="mini"
+                app:fabSize="normal"
                 app:rippleColor="@android:color/black"
                 app:srcCompat="@drawable/fab_pause_workout" />
 
@@ -191,16 +191,16 @@
                 android:id="@+id/fab_finish_workout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/spacing_smlarge"
+                android:layout_marginLeft="@dimen/spacing_middle"
                 android:layout_marginTop="@dimen/spacing_middle"
-                android:layout_marginRight="@dimen/spacing_smlarge"
+                android:layout_marginRight="@dimen/spacing_middle"
                 android:layout_marginBottom="@dimen/spacing_middle"
                 android:clickable="true"
+                android:contentDescription="Finish Workout"
                 android:tint="@color/grey_80"
-                app:fabSize="mini"
+                app:fabSize="normal"
                 app:rippleColor="@android:color/black"
-                app:srcCompat="@drawable/fab_start_workout"
-                android:contentDescription="Finish Workout" />
+                app:srcCompat="@drawable/fab_start_workout" />
 
             <View
                 android:layout_width="@dimen/spacing_xmedium"

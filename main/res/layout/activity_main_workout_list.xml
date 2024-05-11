@@ -148,16 +148,16 @@
                 android:id="@+id/fab_add_workout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/spacing_smlarge"
+                android:layout_marginLeft="@dimen/spacing_middle"
                 android:layout_marginTop="@dimen/spacing_middle"
-                android:layout_marginRight="@dimen/spacing_smlarge"
+                android:layout_marginRight="@dimen/spacing_middle"
                 android:layout_marginBottom="@dimen/spacing_middle"
                 android:clickable="true"
+                android:contentDescription="Add Workout"
                 android:tint="@color/grey_80"
-                app:fabSize="mini"
+                app:fabSize="normal"
                 app:rippleColor="@android:color/black"
-                app:srcCompat="@drawable/fab_add_workout_icon"
-                android:contentDescription="Add Workout" />
+                app:srcCompat="@drawable/fab_add_workout_icon" />
 
             <View
                 android:layout_width="@dimen/spacing_xmedium"

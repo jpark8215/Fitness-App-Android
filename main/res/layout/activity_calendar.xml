@@ -34,7 +34,8 @@
         android:clickable="true"
         android:dividerHeight="1dp"
         android:longClickable="true"
-        android:padding="10dp" />
+        android:padding="10dp"
+        android:focusable="true" />
 
 
 

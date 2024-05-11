@@ -46,6 +46,7 @@ public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRe
         return new ViewHolder(v);
     }
 
+    @SuppressLint("LongLogTag")
     @Override
     public void onBindViewHolder(final ExerciseRecyclerViewAdapter.ViewHolder holder, final int position) {
         ExerciseItem myList = list.get(position);
@@ -75,188 +76,142 @@ public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRe
         final String currentTitle = myList.getTitle();
         final Double currentWeight = myList.getWeight();
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        holder.itemView.setOnClickListener(v -> {
 
-            }
         });
 
-        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                TextView text = v.findViewById(R.id.textViewHead);
-                Context context = v.getContext();
-                Intent intent = new Intent();
-                if (itemLongSelectedListener != null) {
-                    itemLongSelectedListener.onItemLongSelected(currentId, currentTitle, currentWeight);
-                }
-                return true;
+        holder.itemView.setOnLongClickListener(v -> {
+            TextView text = v.findViewById(R.id.textViewHead);
+            Context context = v.getContext();
+            Intent intent = new Intent();
+            if (itemLongSelectedListener != null) {
+                itemLongSelectedListener.onItemLongSelected(currentId, currentTitle, currentWeight);
             }
+            return true;
         });
 
         //Handle normal button clicks
-        holder.button1.setOnClickListener(new View.OnClickListener() {
-            @SuppressLint("LongLogTag")
-            @Override
-            public void onClick(View v) {
-                if (buttonClickListener != null) {
-                    Log.d(LOG_TAG, " Button1");
-                    String setSelected = "set1";
-                    int intReps = Integer.parseInt(holder.button1.getText().toString());
-                    intReps += 1;
-                    buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps);
-                    holder.button1.setBackgroundResource(R.drawable.button_shape_blue);
-                    holder.button1.setText(Integer.toString(intReps));
-                }
+        holder.button1.setOnClickListener(v -> {
+            if (buttonClickListener != null) {
+                Log.d(LOG_TAG, " Button1");
+                String setSelected = "set1";
+                int intReps = Integer.parseInt(holder.button1.getText().toString());
+                intReps += 1;
+                buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps);
+                holder.button1.setBackgroundResource(R.drawable.button_shape_blue);
+                holder.button1.setText(Integer.toString(intReps));
             }
         });
 
-        holder.button2.setOnClickListener(new View.OnClickListener() {
-            @SuppressLint("LongLogTag")
-            @Override
-            public void onClick(View v) {
-                if (buttonClickListener != null) {
-                    Log.d(LOG_TAG, " Button2");
-                    String setSelected = "set2";
-                    int intReps = Integer.parseInt(holder.button2.getText().toString());
-                    intReps += 1;
-                    buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps);
-                    holder.button2.setBackgroundResource(R.drawable.button_shape_blue);
-                    holder.button2.setText(Integer.toString(intReps));
-                }
+        holder.button2.setOnClickListener(v -> {
+            if (buttonClickListener != null) {
+                Log.d(LOG_TAG, " Button2");
+                String setSelected = "set2";
+                int intReps = Integer.parseInt(holder.button2.getText().toString());
+                intReps += 1;
+                buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps);
+                holder.button2.setBackgroundResource(R.drawable.button_shape_blue);
+                holder.button2.setText(Integer.toString(intReps));
             }
         });
 
-        holder.button3.setOnClickListener(new View.OnClickListener() {
-            @SuppressLint("LongLogTag")
-            @Override
-            public void onClick(View v) {
-                if (buttonClickListener != null) {
-                    Log.d(LOG_TAG, " Button3");
-                    String setSelected = "set3";
-                    int intReps = Integer.parseInt(holder.button3.getText().toString());
-                    intReps += 1;
-                    buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps);
-                    holder.button3.setBackgroundResource(R.drawable.button_shape_blue);
-                    holder.button3.setText(Integer.toString(intReps));
-                }
+        holder.button3.setOnClickListener(v -> {
+            if (buttonClickListener != null) {
+                Log.d(LOG_TAG, " Button3");
+                String setSelected = "set3";
+                int intReps = Integer.parseInt(holder.button3.getText().toString());
+                intReps += 1;
+                buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps);
+                holder.button3.setBackgroundResource(R.drawable.button_shape_blue);
+                holder.button3.setText(Integer.toString(intReps));
             }
         });
 
-        holder.button4.setOnClickListener(new View.OnClickListener() {
-            @SuppressLint("LongLogTag")
-            @Override
-            public void onClick(View v) {
-                if (buttonClickListener != null) {
-                    Log.d(LOG_TAG, " Button4");
-                    String setSelected = "set4";
-                    int intReps = Integer.parseInt(holder.button4.getText().toString());
-                    intReps += 1;
-                    buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps);
-                    holder.button4.setBackgroundResource(R.drawable.button_shape_blue);
-                    holder.button4.setText(Integer.toString(intReps));
-                }
+        holder.button4.setOnClickListener(v -> {
+            if (buttonClickListener != null) {
+                Log.d(LOG_TAG, " Button4");
+                String setSelected = "set4";
+                int intReps = Integer.parseInt(holder.button4.getText().toString());
+                intReps += 1;
+                buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps);
+                holder.button4.setBackgroundResource(R.drawable.button_shape_blue);
+                holder.button4.setText(Integer.toString(intReps));
             }
         });
 
-        holder.button5.setOnClickListener(new View.OnClickListener() {
-            @SuppressLint("LongLogTag")
-            @Override
-            public void onClick(View v) {
-                if (buttonClickListener != null) {
-                    Log.d(LOG_TAG, " Button5");
-                    String setSelected = "set5";
-                    int intReps = Integer.parseInt(holder.button5.getText().toString());
-                    intReps += 1;
-                    buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps);
-                    holder.button5.setBackgroundResource(R.drawable.button_shape_blue);
-                    holder.button5.setText(Integer.toString(intReps));
-                }
+        holder.button5.setOnClickListener(v -> {
+            if (buttonClickListener != null) {
+                Log.d(LOG_TAG, " Button5");
+                String setSelected = "set5";
+                int intReps = Integer.parseInt(holder.button5.getText().toString());
+                intReps += 1;
+                buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps);
+                holder.button5.setBackgroundResource(R.drawable.button_shape_blue);
+                holder.button5.setText(Integer.toString(intReps));
             }
         });
 
 
         //Handle long button clicks
         //Have a look to see if there is a way to handle user action when the button is held down for some time
-        holder.button1.setOnLongClickListener(new View.OnLongClickListener() {
-            @SuppressLint("LongLogTag")
-            @Override
-            public boolean onLongClick(View v) {
-                if (buttonClickListener != null) {
-                    Log.d(LOG_TAG, " Button1 long");
-                    String setSelected = "set1";
-                    int intReps = Integer.parseInt(holder.button1.getText().toString());
-                    intReps -= 1;
-                    buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps);
-                    holder.button1.setText(Integer.toString(intReps));
-                }
-                return true;
+        holder.button1.setOnLongClickListener(v -> {
+            if (buttonClickListener != null) {
+                Log.d(LOG_TAG, " Button1 long");
+                String setSelected = "set1";
+                int intReps = Integer.parseInt(holder.button1.getText().toString());
+                intReps -= 1;
+                buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps);
+                holder.button1.setText(Integer.toString(intReps));
             }
+            return true;
         });
 
-        holder.button2.setOnLongClickListener(new View.OnLongClickListener() {
-            @SuppressLint("LongLogTag")
-            @Override
-            public boolean onLongClick(View v) {
-                if (buttonClickListener != null) {
-                    Log.d(LOG_TAG, " Button2 long");
-                    String setSelected = "set2";
-                    int intReps = Integer.parseInt(holder.button2.getText().toString());
-                    intReps -= 1;
-                    buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps);
-                    holder.button2.setText(Integer.toString(intReps));
-                }
-                return true;
+        holder.button2.setOnLongClickListener(v -> {
+            if (buttonClickListener != null) {
+                Log.d(LOG_TAG, " Button2 long");
+                String setSelected = "set2";
+                int intReps = Integer.parseInt(holder.button2.getText().toString());
+                intReps -= 1;
+                buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps);
+                holder.button2.setText(Integer.toString(intReps));
             }
+            return true;
         });
 
-        holder.button3.setOnLongClickListener(new View.OnLongClickListener() {
-            @SuppressLint("LongLogTag")
-            @Override
-            public boolean onLongClick(View v) {
-                if (buttonClickListener != null) {
-                    Log.d(LOG_TAG, " Button3 long");
-                    String setSelected = "set3";
-                    int intReps = Integer.parseInt(holder.button3.getText().toString());
-                    intReps -= 1;
-                    buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps);
-                    holder.button3.setText(Integer.toString(intReps));
-                }
-                return true;
+        holder.button3.setOnLongClickListener(v -> {
+            if (buttonClickListener != null) {
+                Log.d(LOG_TAG, " Button3 long");
+                String setSelected = "set3";
+                int intReps = Integer.parseInt(holder.button3.getText().toString());
+                intReps -= 1;
+                buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps);
+                holder.button3.setText(Integer.toString(intReps));
             }
+            return true;
         });
 
-        holder.button4.setOnLongClickListener(new View.OnLongClickListener() {
-            @SuppressLint("LongLogTag")
-            @Override
-            public boolean onLongClick(View v) {
-                if (buttonClickListener != null) {
-                    Log.d(LOG_TAG, " Button4 long");
-                    String setSelected = "set4";
-                    int intReps = Integer.parseInt(holder.button4.getText().toString());
-                    intReps -= 1;
-                    buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps);
-                    holder.button4.setText(Integer.toString(intReps));
-                }
-                return true;
+        holder.button4.setOnLongClickListener(v -> {
+            if (buttonClickListener != null) {
+                Log.d(LOG_TAG, " Button4 long");
+                String setSelected = "set4";
+                int intReps = Integer.parseInt(holder.button4.getText().toString());
+                intReps -= 1;
+                buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps);
+                holder.button4.setText(Integer.toString(intReps));
             }
+            return true;
         });
 
-        holder.button5.setOnLongClickListener(new View.OnLongClickListener() {
-            @SuppressLint("LongLogTag")
-            @Override
-            public boolean onLongClick(View v) {
-                if (buttonClickListener != null) {
-                    Log.d(LOG_TAG, " Button5 long");
-                    String setSelected = "set5";
-                    int intReps = Integer.parseInt(holder.button5.getText().toString());
-                    intReps -= 1;
-                    buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps);
-                    holder.button5.setText(Integer.toString(intReps));
-                }
-                return true;
+        holder.button5.setOnLongClickListener(v -> {
+            if (buttonClickListener != null) {
+                Log.d(LOG_TAG, " Button5 long");
+                String setSelected = "set5";
+                int intReps = Integer.parseInt(holder.button5.getText().toString());
+                intReps -= 1;
+                buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps);
+                holder.button5.setText(Integer.toString(intReps));
             }
+            return true;
         });
     }
 
@@ -266,7 +221,7 @@ public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRe
         return list.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView textViewExercise;
         //not sure what this id is used for, can probably be removed with some testing
@@ -302,6 +257,8 @@ public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRe
     }
 
     public interface OnButtonClickListener {
+        void OnBackPressedDispatcher();
+
         void onButtonClick(String itemId, String itemTitle, String setSelected, Integer intReps);
     }
 }
