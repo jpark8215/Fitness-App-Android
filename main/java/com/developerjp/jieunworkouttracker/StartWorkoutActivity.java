@@ -42,6 +42,7 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.gms.ads.MobileAds;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,6 +87,9 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Initialize MobileAds
+        MobileAds.initialize(this, initializationStatus -> {});
 
         // Get a reference to the Shared Preferences object
         SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);

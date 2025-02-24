@@ -117,10 +117,12 @@ public class MainActivityWorkoutList extends AppCompatActivity implements Recycl
 
         cv_add_workout.setOnClickListener(this::addWorkout);
 
-        MobileAds.initialize(this, initializationStatus -> {
-            Log.d("Ads", "Initialization status: " + initializationStatus);
-
-        });
+        new Thread(
+                () -> {
+                    // Initialize the Google Mobile Ads SDK on a background thread.
+                    MobileAds.initialize(this, initializationStatus -> {});
+                })
+                .start();
 
     }
 

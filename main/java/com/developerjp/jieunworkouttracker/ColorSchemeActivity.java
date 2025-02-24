@@ -12,6 +12,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +20,11 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.material.navigation.NavigationView;
 
 
@@ -32,6 +38,11 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Initialize MobileAds
+        MobileAds.initialize(this, initializationStatus -> {
+            Log.d("Ads", "Initialization status: " + initializationStatus);
+        });
+
         // Get a reference to the Shared Preferences object
         SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
 
@@ -42,7 +53,6 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
         if (darkModeEnabled){
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             setTheme(R.style.DarkAppTheme_NoActionBar);
-            // Otherwise do this
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
             setTheme(R.style.AppTheme_NoActionBar);
@@ -54,6 +64,25 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
         ViewStub stub = findViewById(R.id.main_view_stub);
         stub.setLayoutResource(R.layout.activity_color_scheme_screen);
         stub.inflate();
+
+        // Initialize and load the ad AFTER layout inflation
+        AdView adView2 = findViewById(R.id.adView2);
+        if (adView2 != null) {
+            AdRequest adRequest = new AdRequest.Builder().build();
+            adView2.setAdListener(new AdListener() {
+                @Override
+                public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                    Log.e("Ads", "Ad failed to load: " + loadAdError.getMessage());
+                }
+                @Override
+                public void onAdLoaded() {
+                    Log.d("Ads", "Ad loaded successfully");
+                }
+            });
+            adView2.loadAd(adRequest);
+        } else {
+            Log.e("Ads", "AdView not found in layout");
+        }
 
         //Sets up the toolbar, navigation menu and switch
         initToolbar();
