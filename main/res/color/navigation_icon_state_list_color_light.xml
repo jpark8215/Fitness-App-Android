@@ -3,7 +3,7 @@
     <!-- Item checked -->
     <item android:color="@color/colorPrimaryLight" android:state_checked="true" />
     <!-- Item pressed -->
-    <item android:color="@color/grey_20" android:state_pressed="true" />
+    <item android:color="@color/grey_60" android:state_pressed="true" />
     <!-- Item default -->
-    <item android:color="@color/grey_20" />
+    <item android:color="@color/grey_60" />
 </selector>

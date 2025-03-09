@@ -43,6 +43,7 @@
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="Close"
+                android:visibility="invisible"
                 app:srcCompat="@drawable/ic_close"
                 app:tint="@color/grey_20" />
 
@@ -92,7 +93,6 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="@dimen/spacing_large"
-                android:autoLink="web"
                 android:text="Your workout has been successfully recorded"
                 android:textAlignment="center"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small" />

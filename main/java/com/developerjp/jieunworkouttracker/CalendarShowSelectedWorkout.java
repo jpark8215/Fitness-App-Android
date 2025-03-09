@@ -148,13 +148,13 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
 
                 case "Workouts":
                     Log.d("menu item clicked", "Workouts");
-                    //Starts the MainActivityWorkout activity
-                    intent = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
+                    //Starts the MainActivityExerciseList activity
+                    intent = new Intent(getApplicationContext(), MainActivityExerciseList.class);
                     startActivity(intent);
                     break;
                 case "Archived":
                     Log.d("menu item clicked", "Archived");
-                    intent = new Intent(getApplicationContext(), ArchivedWorkoutList.class);
+                    intent = new Intent(getApplicationContext(), ArchivedExerciseList.class);
                     startActivity(intent);
                     break;
                 case "Progress":
@@ -172,18 +172,6 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
                     Log.d("menu item clicked", "Color Scheme");
                     intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
                     startActivity(intent);
-                    break;
-                case "Settings":
-                    Log.d("menu item clicked", "Settings");
-                    //Do something
-                    //TODO Create Settings Page
-                    Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
-                    break;
-                case "About":
-                    Log.d("menu item clicked", "About");
-                    //Do something
-                    //TODO Create About Page
-                    Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
                     break;
             }
 
@@ -370,7 +358,7 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
     }
 
     public void bottomNavigationHomeClick(View view){
-        Intent intent = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
+        Intent intent = new Intent(getApplicationContext(), MainActivityExerciseList.class);
         startActivity(intent);
     }
 

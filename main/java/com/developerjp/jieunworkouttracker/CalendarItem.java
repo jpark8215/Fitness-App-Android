@@ -1,24 +1,26 @@
 package com.developerjp.jieunworkouttracker;
 
-
 public class CalendarItem {
-    private String title;        // The title associated with the calendar item.
-    private String workout_id;   // The unique identifier of the associated workout.
-    private String date;         // The date of the calendar item.
+    private String workoutId;
+    private String title;
+    private String date;
+    private String logId;
+    private String duration;
+    private String time;
+
+    // Setter method to set the workout ID of the calendar item.
+    public void setWorkoutId(String workoutId) {
+        this.workoutId = workoutId;
+    }
+
+    // Getter method to retrieve the workout ID of the calendar item.
+    public String getWorkoutId() {
+        return workoutId;
+    }
 
     // Setter method to set the title of the calendar item.
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    // Setter method to set the workout ID of the calendar item.
-    public void setWorkoutId(String workout_id) {
-        this.workout_id = workout_id;
-    }
-
-    // Setter method to set the date of the calendar item.
-    public void setDate(String date) {
-        this.date = date;
     }
 
     // Getter method to retrieve the title of the calendar item.
@@ -26,13 +28,37 @@ public class CalendarItem {
         return title;
     }
 
-    // Getter method to retrieve the workout ID of the calendar item.
-    public String getWorkoutId() {
-        return workout_id;
+    // Setter method to set the date of the calendar item.
+    public void setDate(String date) {
+        this.date = date;
     }
 
     // Getter method to retrieve the date of the calendar item.
     public String getDate() {
         return date;
+    }
+
+    public String getLogId() {
+        return logId;
+    }
+
+    public void setLogId(String logId) {
+        this.logId = logId;
+    }
+
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 }

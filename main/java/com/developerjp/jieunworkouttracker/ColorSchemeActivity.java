@@ -66,22 +66,30 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
         stub.inflate();
 
         // Initialize and load the ad AFTER layout inflation
-        AdView adView2 = findViewById(R.id.adView2);
-        if (adView2 != null) {
-            AdRequest adRequest = new AdRequest.Builder().build();
-            adView2.setAdListener(new AdListener() {
-                @Override
-                public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                    Log.e("Ads", "Ad failed to load: " + loadAdError.getMessage());
+        try {
+            AdView adView2 = findViewById(R.id.adView2);
+            if (adView2 != null) {
+                try {
+                    AdRequest adRequest = new AdRequest.Builder().build();
+                    adView2.setAdListener(new AdListener() {
+                        @Override
+                        public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                            Log.e("Ads", "Ad failed to load: " + loadAdError.getMessage());
+                        }
+                        @Override
+                        public void onAdLoaded() {
+                            Log.d("Ads", "Ad loaded successfully");
+                        }
+                    });
+                    adView2.loadAd(adRequest);
+                } catch (Exception ex) {
+                    Log.e("Ads", "Error setting up ad: " + ex.getMessage());
                 }
-                @Override
-                public void onAdLoaded() {
-                    Log.d("Ads", "Ad loaded successfully");
-                }
-            });
-            adView2.loadAd(adRequest);
-        } else {
-            Log.e("Ads", "AdView not found in layout");
+            } else {
+                Log.e("Ads", "AdView not found in layout");
+            }
+        } catch (Exception e) {
+            Log.e("Ads", "Error finding AdView: " + e.getMessage());
         }
 
         //Sets up the toolbar, navigation menu and switch
@@ -145,15 +153,15 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
 
             switch (itemCLicked) {
 
-                case "Workouts":
-                    Log.d("menu item clicked", "Workouts");
-                    //Starts the MainActivityWorkout activity
-                    intent = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
+                case "Exercises":
+                    Log.d("menu item clicked", "Exercises");
+                    //Starts the MainActivityExerciseList activity
+                    intent = new Intent(getApplicationContext(), MainActivityExerciseList.class);
                     startActivity(intent);
                     break;
-                case "Archived":
-                    Log.d("menu item clicked", "Archived");
-                    intent = new Intent(getApplicationContext(), ArchivedWorkoutList.class);
+                case "Archived Exercises":
+                    Log.d("menu item clicked", "Archived Exercises");
+                    intent = new Intent(getApplicationContext(), ArchivedExerciseList.class);
                     startActivity(intent);
                     break;
                 case "Progress":
@@ -172,18 +180,6 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
                     intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
                     startActivity(intent);
                     break;
-                case "Settings":
-                    Log.d("menu item clicked", "Settings");
-                    //Do something
-                    //TODO Create Settings Page
-                    Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
-                    break;
-                case "About":
-                    Log.d("menu item clicked", "About");
-                    //Do something
-                    //TODO Create About Page
-                    Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
-                    break;
             }
 
             drawer.closeDrawers();
@@ -192,7 +188,7 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
     }
 
     public void bottomNavigationHomeClick(View view){
-        Intent intent = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
+        Intent intent = new Intent(getApplicationContext(), MainActivityExerciseList.class);
         startActivity(intent);
     }
 
@@ -232,5 +228,47 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
             // Commit the changes
             editor.apply();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        // Pause the AdView to prevent memory leaks
+        try {
+            AdView adView = findViewById(R.id.adView2);
+            if (adView != null) {
+                adView.pause();
+            }
+        } catch (Exception e) {
+            Log.e("Ads", "Error pausing AdView: " + e.getMessage());
+        }
+        super.onPause();
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Resume the AdView
+        try {
+            AdView adView = findViewById(R.id.adView2);
+            if (adView != null) {
+                adView.resume();
+            }
+        } catch (Exception e) {
+            Log.e("Ads", "Error resuming AdView: " + e.getMessage());
+        }
+    }
+    
+    @Override
+    protected void onDestroy() {
+        // Destroy the AdView to prevent memory leaks
+        try {
+            AdView adView = findViewById(R.id.adView2);
+            if (adView != null) {
+                adView.destroy();
+            }
+        } catch (Exception e) {
+            Log.e("Ads", "Error destroying AdView: " + e.getMessage());
+        }
+        super.onDestroy();
     }
 }

@@ -32,8 +32,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class ShowCalendarActivity extends AppCompatActivity implements CalendarRecyclerViewAdapter.OnItemSelectedListener {
 
@@ -122,11 +124,11 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
 
             Log.d(LOG_TAG, "Original date value: " + date);
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
             try {
                 //Gets the date/time into the milliseconds value
-                Date d = sdf.parse(date);
+                Date d = dateFormat.parse(date);
                 assert d != null;
                 long milliseconds = d.getTime();
 
@@ -223,15 +225,15 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
 
             switch (itemCLicked) {
 
-                case "Workouts":
-                    Log.d("menu item clicked", "Workouts");
-                    //Starts the MainActivityWorkout activity
-                    intent = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
+                case "Exercises":
+                    Log.d("menu item clicked", "Exercises");
+                    //Starts the MainActivityExerciseList activity
+                    intent = new Intent(getApplicationContext(), MainActivityExerciseList.class);
                     startActivity(intent);
                     break;
-                case "Archived":
-                    Log.d("menu item clicked", "Archived");
-                    intent = new Intent(getApplicationContext(), ArchivedWorkoutList.class);
+                case "Archived Exercises":
+                    Log.d("menu item clicked", "Archived Exercises");
+                    intent = new Intent(getApplicationContext(), ArchivedExerciseList.class);
                     startActivity(intent);
                     break;
                 case "Progress":
@@ -249,18 +251,6 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
                     Log.d("menu item clicked", "Color Scheme");
                     intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
                     startActivity(intent);
-                    break;
-                case "Settings":
-                    Log.d("menu item clicked", "Settings");
-                    //Do something
-                    //TODO Create Settings Page
-                    Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
-                    break;
-                case "About":
-                    Log.d("menu item clicked", "About");
-                    //Do something
-                    //TODO Create About Page
-                    Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
                     break;
             }
 
@@ -286,56 +276,157 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         List<Event> events = compactCalendarView.getEvents(dateClicked);
         Log.d(LOG_TAG, "Day was clicked: " + dateClicked + " with events " + events);
 
-
         String strDate = dateClicked.toString();
         strDate = strDate.substring(0, 10) + "%" + strDate.substring(24, 28);
 
         Log.d("*********strDate", strDate);
 
-
         dbManager.open();
-        Cursor dbCursor = dbManager.fetchWorkoutsOnSelectedDateForCalendar(strDate);
-
+        
+        // Get all exercises completed on the selected date with their details
+        Cursor exerciseCursor = dbManager.fetchExerciseDetailsForDate(strDate);
+        
         //Clears the workoutListItem so that it doesn't keep the values from previous days in it
         workoutListItem.clear();
 
-        for( dbCursor.moveToFirst(); !dbCursor.isAfterLast(); dbCursor.moveToNext() ) {
-            CalendarItem item = new CalendarItem();
-            //uses the cursor to populate the item WORKOUT_ID value
-            int workoutIdColumnIndex = dbCursor.getColumnIndex("workout_id");
-            if (workoutIdColumnIndex != -1) {
-                item.setWorkoutId(dbCursor.getString(workoutIdColumnIndex));
-            }
-
-            if (workoutIdColumnIndex != -1) {
-                String workoutId = dbCursor.getString(workoutIdColumnIndex);
-                Cursor dbCursor2 = dbManager.fetchWorkoutNameOnSelectedDateForCalendar(workoutId);
-                item.setWorkoutId(workoutId);
-
-                if (dbCursor2 != null && dbCursor2.moveToFirst()) { // Check if dbCursor2 is not null and has data
-                    int workoutTitleColumnIndex = dbCursor2.getColumnIndex("workout");
-                    if (workoutTitleColumnIndex != -1) {
-                        String workoutTitle = dbCursor2.getString(workoutTitleColumnIndex);
-                        item.setTitle(workoutTitle);
-                    } else {
-                        Log.e(LOG_TAG, "Column 'workout' not found in dbCursor2");
-                    }
-                    dbCursor2.close();
-                } else {
-                    Log.e(LOG_TAG, "No workout data found for workout_id: " + workoutId);
+        if (exerciseCursor != null && exerciseCursor.getCount() > 0) {
+            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+            // Use a format that can parse the full datetime string from the database
+            SimpleDateFormat fullDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
+            
+            // Group exercises by session (workouts completed within 30 minutes of each other)
+            Map<String, List<ExerciseSession>> sessionMap = new HashMap<>();
+            
+            for (exerciseCursor.moveToFirst(); !exerciseCursor.isAfterLast(); exerciseCursor.moveToNext()) {
+                ExerciseSession session = new ExerciseSession();
+                
+                // Get exercise details
+                int exerciseIdColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
+                int exerciseNameColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.EXERCISE);
+                int logIdColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.LOG_ID);
+                int durationColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.DURATION);
+                int dateColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.DATE);
+                int datetimeColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.DATETIME);
+                
+                if (exerciseNameColumnIndex != -1) {
+                    session.exerciseName = exerciseCursor.getString(exerciseNameColumnIndex);
                 }
-            } else {
-                Log.e(LOG_TAG, "Column 'workout_id' not found in dbCursor");
+                
+                if (exerciseIdColumnIndex != -1) {
+                    session.exerciseId = exerciseCursor.getString(exerciseIdColumnIndex);
+                }
+                
+                if (logIdColumnIndex != -1) {
+                    session.logId = exerciseCursor.getString(logIdColumnIndex);
+                }
+                
+                if (dateColumnIndex != -1) {
+                    session.date = exerciseCursor.getString(dateColumnIndex);
+                }
+                
+                if (datetimeColumnIndex != -1) {
+                    session.datetime = exerciseCursor.getString(datetimeColumnIndex);
+                }
+                
+                if (durationColumnIndex != -1) {
+                    session.duration = exerciseCursor.getLong(durationColumnIndex);
+                }
+                
+                // Determine which session this exercise belongs to
+                String sessionKey = "unknown";
+                try {
+                    if (session.datetime != null) {
+                        // Parse the datetime using the correct format that includes day of week and timezone
+                        Date exerciseDate = fullDateFormat.parse(session.datetime);
+                        if (exerciseDate != null) {
+                            // Create a session key based on the hour of the workout
+                            // This groups exercises done around the same time
+                            Calendar cal = Calendar.getInstance();
+                            cal.setTime(exerciseDate);
+                            // Get the hour of day (0-23)
+                            int hour = cal.get(Calendar.HOUR_OF_DAY);
+                            // Round to nearest session (morning, afternoon, evening)
+                            if (hour < 12) {
+                                sessionKey = "Morning Session";
+                            } else if (hour < 18) {
+                                sessionKey = "Afternoon Session";
+                            } else {
+                                sessionKey = "Evening Session";
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e(LOG_TAG, "Error parsing datetime: " + e.getMessage() + " for value: " + session.datetime);
+                    // Fallback to "Other" session if we can't parse the time
+                    sessionKey = "Other";
+                }
+                
+                // Add to session map
+                if (!sessionMap.containsKey(sessionKey)) {
+                    sessionMap.put(sessionKey, new ArrayList<>());
+                }
+                sessionMap.get(sessionKey).add(session);
             }
-
-
-            int dateColumnIndex = dbCursor.getColumnIndex("date");
-            if (dateColumnIndex != -1) {
-                item.setDate(dbCursor.getString(dateColumnIndex));
-            }            workoutListItem.add(item);
+            
+            exerciseCursor.close();
+            
+            // Create display items from session map
+            for (Map.Entry<String, List<ExerciseSession>> entry : sessionMap.entrySet()) {
+                String sessionName = entry.getKey();
+                List<ExerciseSession> exercises = entry.getValue();
+                
+                if (!exercises.isEmpty()) {
+                    // First create a session header if there are multiple sessions
+                    if (sessionMap.size() > 1) {
+                        CalendarItem headerItem = new CalendarItem();
+                        headerItem.setTitle("--- " + sessionName + " ---");
+                        workoutListItem.add(headerItem);
+                    }
+                    
+                    // Then add all exercises in this session
+                    for (ExerciseSession exercise : exercises) {
+                        CalendarItem item = new CalendarItem();
+                        
+                        // Set basic properties
+                        item.setTitle(exercise.exerciseName);
+                        item.setWorkoutId(exercise.exerciseId);
+                        item.setLogId(exercise.logId);
+                        item.setDate(exercise.date);
+                        
+                        try {
+                            // Format time and duration
+                            if (exercise.datetime != null) {
+                                // Parse date with proper format including timezone
+                                Date date = fullDateFormat.parse(exercise.datetime);
+                                if (date != null) {
+                                    String timeStr = timeFormat.format(date);
+                                    
+                                    // Format duration in minutes
+                                    int minutes = (int) (exercise.duration / 60);
+                                    String durationStr = minutes + " min";
+                                    
+                                    // Append time and duration to the title
+                                    String displayTitle = exercise.exerciseName + " (" + timeStr + ", " + durationStr + ")";
+                                    item.setTitle(displayTitle);
+                                }
+                            }
+                        } catch (Exception e) {
+                            Log.e(LOG_TAG, "Error formatting display: " + e.getMessage() + " for value: " + exercise.datetime);
+                            // Use the exercise name without time if we can't parse the datetime
+                            item.setTitle(exercise.exerciseName + " (time unknown)");
+                        }
+                        
+                        workoutListItem.add(item);
+                    }
+                }
+            }
+        } else {
+            // No exercises found for this date
+            Log.d(LOG_TAG, "No exercises found for date: " + strDate);
         }
 
         dbManager.close();
+        
         // Custom Recycler View Adaptor
         CalendarRecyclerViewAdapter adapter = new CalendarRecyclerViewAdapter(workoutListItem, ShowCalendarActivity.this, null, ShowCalendarActivity.this);
         recyclerView.setAdapter(adapter);
@@ -344,7 +435,7 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
 
 
     public void bottomNavigationHomeClick(View view){
-        Intent intent = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
+        Intent intent = new Intent(getApplicationContext(), MainActivityExerciseList.class);
         startActivity(intent);
     }
 
@@ -369,5 +460,17 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+    /**
+     * Helper class to store exercise session data for grouping
+     */
+    private static class ExerciseSession {
+        String exerciseId;
+        String exerciseName;
+        String logId;
+        String date;
+        String datetime;
+        long duration;
     }
 }

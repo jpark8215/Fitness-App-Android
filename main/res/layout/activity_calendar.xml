@@ -4,22 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.developerjp.jieunworkouttracker.MainActivityWorkoutList">
+    tools:context="com.developerjp.jieunworkouttracker.MainActivityExerciseList">
 
     <!-- CompactCalendarView -->
     <com.github.sundeepk.compactcalendarview.CompactCalendarView
         android:id="@+id/compactcalendar_view"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
+        android:layout_height="270dp"
+        android:padding="5dp"
         app:compactCalendarBackgroundColor="@color/colorPrimary"
         app:compactCalendarCurrentDayBackgroundColor="@color/colorPrimaryDark"
-        app:compactCalendarCurrentSelectedDayBackgroundColor="@color/colorPrimaryLight"
+        app:compactCalendarCurrentSelectedDayBackgroundColor="@color/colorSuccess"
         app:compactCalendarDisplayOtherMonthDays="false"
         app:compactCalendarMultiEventIndicatorColor="#fff"
-        app:compactCalendarTargetHeight="250dp"
-        app:compactCalendarTextColor="#fff"
+        app:compactCalendarTargetHeight="260dp"
+        app:compactCalendarTextColor="@color/black"
         app:compactCalendarTextSize="12sp" />
 
 

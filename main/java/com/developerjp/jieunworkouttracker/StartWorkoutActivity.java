@@ -49,14 +49,14 @@ import java.util.List;
 import java.util.Objects;
 
 
-public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRecyclerViewAdaptor.OnItemLongSelectedListener, WorkoutRecyclerViewAdaptor.OnButtonClickListener {
+public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRecyclerViewAdapter.OnItemLongSelectedListener, WorkoutRecyclerViewAdapter.OnButtonClickListener {
 
     private DBManager dbManager;
     private RecyclerView recyclerView;
     // Item List
     private final List<com.developerjp.jieunworkouttracker.ExerciseItem> ExerciseItem = new ArrayList<>();
     // Custom Recycler View Adaptor
-    private WorkoutRecyclerViewAdaptor adapter;
+    private WorkoutRecyclerViewAdapter adapter;
     //Public variables which are used across classes/voids
     public String id;
     public String title;
@@ -106,6 +106,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
             setTheme(R.style.AppTheme_NoActionBar);
         }
+
         setContentView(R.layout.activity_menu_drawer_simple_light);
 
         //Use view stubs to programmatically change the include view at runtime
@@ -119,10 +120,27 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         id = intent.getStringExtra("id");
         title = intent.getStringExtra("title");
 
+        // Get the selected exercise IDs from the intent
+        ArrayList<String> selectedExerciseIds = getIntent().getStringArrayListExtra("selected_exercise_ids");
+        if (selectedExerciseIds == null || selectedExerciseIds.isEmpty()) {
+            Toast.makeText(this, "No exercises selected", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
         //Sets up the toolbar and navigation menu
         initToolbar();
         initNavigationMenu();
 
+        // Initialize the database manager
+        dbManager = new DBManager(this);
+        dbManager.open();
+        
+        // Load the selected exercises
+        loadSelectedExercises(selectedExerciseIds);
+        
+        // Start the timer service
+        // startChronometer();  <- Remove this line
 
         View parent_view = findViewById(android.R.id.content);
         back_drop = findViewById(R.id.back_drop);
@@ -151,12 +169,8 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         startService(serviceIntent);
         bindService(serviceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
 
-
-        //Opens the database connection
-        dbManager = new DBManager(this);
-        dbManager.open();
-
-
+        // Database connection is already initialized above, no need to do it again
+        
         //Loads the Exercise logs data using recyclerview and the custom adapter
         loadExerciseData();
 
@@ -207,20 +221,20 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
         //Handles side navigation menu clicks
         nav_view.setNavigationItemSelectedListener(item -> {
-            String itemCLicked = item.getTitle().toString();
+            String itemCLicked = Objects.requireNonNull(item.getTitle()).toString();
             Intent intent;
 
             switch (itemCLicked) {
 
                 case "Workouts":
                     Log.d("menu item clicked", "Workouts");
-                    //Starts the MainActivityWorkout activity
-                    intent = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
+                    //Starts the MainActivityExerciseList activity
+                    intent = new Intent(getApplicationContext(), MainActivityExerciseList.class);
                     startActivity(intent);
                     break;
                 case "Archived":
                     Log.d("menu item clicked", "Archived");
-                    intent = new Intent(getApplicationContext(), ArchivedWorkoutList.class);
+                    intent = new Intent(getApplicationContext(), ArchivedExerciseList.class);
                     startActivity(intent);
                     break;
                 case "Progress":
@@ -238,18 +252,6 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                     Log.d("menu item clicked", "Color Scheme");
                     intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
                     startActivity(intent);
-                    break;
-                case "Settings":
-                    Log.d("menu item clicked", "Settings");
-                    //Do something
-                    //TODO Create Settings Page
-                    Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
-                    break;
-                case "About":
-                    Log.d("menu item clicked", "About");
-                    //Do something
-                    //TODO Create About Page
-                    Toast.makeText(getApplicationContext(), "Coming Soon", Toast.LENGTH_LONG).show();
                     break;
             }
 
@@ -278,166 +280,177 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
     };
 
     public void startChronometer(){
-        long timer = mBoundService.getTime();
-        simpleChronometer.setBase(timer);
-        simpleChronometer.start();
+        // Check if service is bound before accessing it
+        if (mBoundService != null) {
+            long timer = mBoundService.getTime();
+            simpleChronometer.setBase(timer);
+            simpleChronometer.start();
+        } else {
+            // If service is not yet bound, use system time
+            simpleChronometer.setBase(SystemClock.elapsedRealtime());
+            simpleChronometer.start();
+        }
     }
 
 
-    private void loadExerciseData() {
-
-        strNumberOfExercises = dbManager.countExercises(id);
-        Log.d("countExercises Value", strNumberOfExercises);
-
-        //We pass the database manager the id AND title variable in case the user has entered in two workouts which
-        //have the same name. We obviously only want to return the one they clicked on rather than everything
-        //with that duplicate workout name
-        Cursor cursor = dbManager.fetchExerciseLogs(id, strNumberOfExercises);
-
+    private void loadSelectedExercises(ArrayList<String> exerciseIds) {
+        ExerciseItem.clear();
+        
+        for (String exerciseId : exerciseIds) {
+            // Get exercise details including set values and improvements
+            Cursor exerciseCursor = dbManager.getExerciseDetails(exerciseId);
+            if (exerciseCursor != null && exerciseCursor.moveToFirst()) {
+                ExerciseItem item = new ExerciseItem();
+                
+                int exerciseIdColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
+                int exerciseNameColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.EXERCISE);
+                int weightColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.WEIGHT);
+                
+                if (exerciseIdColumnIndex != -1 && exerciseNameColumnIndex != -1 && weightColumnIndex != -1) {
+                    item.setId(exerciseCursor.getString(exerciseIdColumnIndex));
+                    item.setTitle(exerciseCursor.getString(exerciseNameColumnIndex));
+                    item.setWeight(exerciseCursor.getDouble(weightColumnIndex));
+                    
+                    // Set default reps
+                    item.setButton1("5");
+                    item.setButton2("5");
+                    item.setButton3("5");
+                    item.setButton4("5");
+                    item.setButton5("5");
+                    
+                    // Set default colors
+                    item.setButton1Colour(R.drawable.button_shape_default);
+                    item.setButton2Colour(R.drawable.button_shape_default);
+                    item.setButton3Colour(R.drawable.button_shape_default);
+                    item.setButton4Colour(R.drawable.button_shape_default);
+                    item.setButton5Colour(R.drawable.button_shape_default);
+                    
+                    // Now get the latest log with improvements for this exercise
+                    Cursor logCursor = dbManager.getLatestLogForExercise(exerciseId);
+                    if (logCursor != null && logCursor.moveToFirst()) {
+                        // Check each set and improvement to set the appropriate colors
+                        checkSetImprovementAndSetColor(logCursor, item, "set1", "set1_improvement", 1);
+                        checkSetImprovementAndSetColor(logCursor, item, "set2", "set2_improvement", 2);
+                        checkSetImprovementAndSetColor(logCursor, item, "set3", "set3_improvement", 3);
+                        checkSetImprovementAndSetColor(logCursor, item, "set4", "set4_improvement", 4);
+                        checkSetImprovementAndSetColor(logCursor, item, "set5", "set5_improvement", 5);
+                        
+                        logCursor.close();
+                    }
+                    
+                    ExerciseItem.add(item);
+                }
+                
+                exerciseCursor.close();
+            }
+        }
+        
+        // Initialize the RecyclerView
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        //If the cursor has a value in it then hide the empty textview
-        //In English. If there is a workout returned, then remove the text saying no workouts found
-        if (cursor.getCount() > 0) {
-            TextView empty = findViewById(R.id.empty);
-            empty.setVisibility(View.GONE);
-        }
-
-        int intSet1Improvement;
-        int intSet2Improvement;
-        int intSet3Improvement;
-        int intSet4Improvement;
-        int intSet5Improvement;
-
-        //fetchExerciseLogs returns the data in reverse order. So we start at the end of the cursor and work our way
-        //backwards. This way the data appear is the correct order.
-        for (cursor.moveToLast(); !cursor.isBeforeFirst(); cursor.moveToPrevious()) {
-            ExerciseItem exerciseItem = new ExerciseItem();
-            //uses the cursor to populate the item LOG_ID value
-            exerciseItem.setId(cursor.getString(cursor.getColumnIndexOrThrow("log_id")));
-            //uses the cursor to populate the item Exercise Names
-            exerciseItem.setTitle(cursor.getString(cursor.getColumnIndexOrThrow("exercise")));
-
-            exerciseItem.setButton1(cursor.getString(cursor.getColumnIndexOrThrow("set1")));
-            exerciseItem.setButton2(cursor.getString(cursor.getColumnIndexOrThrow("set2")));
-            exerciseItem.setButton3(cursor.getString(cursor.getColumnIndexOrThrow("set3")));
-            exerciseItem.setButton4(cursor.getString(cursor.getColumnIndexOrThrow("set4")));
-            exerciseItem.setButton5(cursor.getString(cursor.getColumnIndexOrThrow("set5")));
-
-            intSet1Improvement = cursor.getInt(cursor.getColumnIndexOrThrow("set1_improvement"));
-            intSet2Improvement = cursor.getInt(cursor.getColumnIndexOrThrow("set2_improvement"));
-            intSet3Improvement = cursor.getInt(cursor.getColumnIndexOrThrow("set3_improvement"));
-            intSet4Improvement = cursor.getInt(cursor.getColumnIndexOrThrow("set4_improvement"));
-            intSet5Improvement = cursor.getInt(cursor.getColumnIndexOrThrow("set5_improvement"));
-
-
-            //All of the switch statements to determine which colour button to display for the sets
-            switch(intSet1Improvement){
-                case 0:
-                    //If the value is null the int returns 0 so this is always the default case
-                    //If no improvement was recorded then make the button show the default colour
-                    exerciseItem.setButton1Colour(R.drawable.button_shape_default);
-                    break;
-                case 1:
-                    //If negative improvement was made then make the button show the negative colour
-                    exerciseItem.setButton1Colour(R.drawable.button_shape_red);
-                    break;
-                case 2:
-                    //If positive improvement was made then make the button show the positive colour
-                    exerciseItem.setButton1Colour(R.drawable.button_shape_green);
-                    break;
-            }
-
-
-            switch(intSet2Improvement){
-                case 0:
-                    exerciseItem.setButton2Colour(R.drawable.button_shape_default);
-                    break;
-                case 1:
-                    exerciseItem.setButton2Colour(R.drawable.button_shape_red);
-                    break;
-                case 2:
-                    exerciseItem.setButton2Colour(R.drawable.button_shape_green);
-                    break;
-            }
-
-
-            switch(intSet3Improvement){
-                case 0:
-                    exerciseItem.setButton3Colour(R.drawable.button_shape_default);
-                    break;
-                case 1:
-                    exerciseItem.setButton3Colour(R.drawable.button_shape_red);
-                    break;
-                case 2:
-                    exerciseItem.setButton3Colour(R.drawable.button_shape_green);
-                    break;
-            }
-
-
-            switch(intSet4Improvement){
-                case 0:
-                    exerciseItem.setButton4Colour(R.drawable.button_shape_default);
-                    break;
-                case 1:
-                    exerciseItem.setButton4Colour(R.drawable.button_shape_red);
-                    break;
-                case 2:
-                    exerciseItem.setButton4Colour(R.drawable.button_shape_green);
-                    break;
-            }
-
-
-            switch(intSet5Improvement){
-                case 0:
-                    exerciseItem.setButton5Colour(R.drawable.button_shape_default);
-                    break;
-                case 1:
-                    exerciseItem.setButton5Colour(R.drawable.button_shape_red);
-                    break;
-                case 2:
-                    exerciseItem.setButton5Colour(R.drawable.button_shape_green);
-                    break;
-            }
-
-            Double exerciseWeight = cursor.getDouble(cursor.getColumnIndexOrThrow("weight"));
-            exerciseItem.setWeight(exerciseWeight);
-            ExerciseItem.add(exerciseItem);
-
-            log_id = exerciseItem.getId();
-        }
-
-
-        adapter = new WorkoutRecyclerViewAdaptor(ExerciseItem, this, this, this);
+        
+        // Set up the adapter
+        adapter = new WorkoutRecyclerViewAdapter(ExerciseItem, this, this, this);
         recyclerView.setAdapter(adapter);
+    }
 
-
-        //Loads the intents
-        //If there is an intent value for recyclerViewState then we'll load it
-        //And point the user to the same position in the recyclerview that they were in previously
-        Intent intent = getIntent();
-        if (intent.hasExtra("recyclerViewState")) {
-            final Parcelable recyclerViewState;
-            recyclerViewState = intent.getParcelableExtra("recyclerViewState");
-            Objects.requireNonNull(recyclerView.getLayoutManager()).onRestoreInstanceState(recyclerViewState);
+    /**
+     * Helper method to check set improvement and set the appropriate button color
+     */
+    private void checkSetImprovementAndSetColor(Cursor cursor, ExerciseItem item, String setColumn, String improvementColumn, int buttonNumber) {
+        int setColumnIndex = cursor.getColumnIndex(setColumn);
+        int improvementColumnIndex = cursor.getColumnIndex(improvementColumn);
+        
+        if (setColumnIndex != -1 && improvementColumnIndex != -1) {
+            int setReps = cursor.getInt(setColumnIndex);
+            int improvement = cursor.getInt(improvementColumnIndex);
+            
+            // Set the button text value
+            if (buttonNumber == 1) {
+                item.setButton1(String.valueOf(setReps));
+            } else if (buttonNumber == 2) {
+                item.setButton2(String.valueOf(setReps));
+            } else if (buttonNumber == 3) {
+                item.setButton3(String.valueOf(setReps));
+            } else if (buttonNumber == 4) {
+                item.setButton4(String.valueOf(setReps));
+            } else if (buttonNumber == 5) {
+                item.setButton5(String.valueOf(setReps));
+            }
+            
+            if (improvement > 0) {
+                // Positive improvement (green)
+                if (buttonNumber == 1) {
+                    item.setButton1Colour(R.drawable.button_shape_green);
+                } else if (buttonNumber == 2) {
+                    item.setButton2Colour(R.drawable.button_shape_green);
+                } else if (buttonNumber == 3) {
+                    item.setButton3Colour(R.drawable.button_shape_green);
+                } else if (buttonNumber == 4) {
+                    item.setButton4Colour(R.drawable.button_shape_green);
+                } else if (buttonNumber == 5) {
+                    item.setButton5Colour(R.drawable.button_shape_green);
+                }
+            } else if (improvement < 0) {
+                // Negative improvement (red)
+                if (buttonNumber == 1) {
+                    item.setButton1Colour(R.drawable.button_shape_red);
+                } else if (buttonNumber == 2) {
+                    item.setButton2Colour(R.drawable.button_shape_red);
+                } else if (buttonNumber == 3) {
+                    item.setButton3Colour(R.drawable.button_shape_red);
+                } else if (buttonNumber == 4) {
+                    item.setButton4Colour(R.drawable.button_shape_red);
+                } else if (buttonNumber == 5) {
+                    item.setButton5Colour(R.drawable.button_shape_red);
+                }
+            }
         }
     }
 
-
     @Override
     protected void onDestroy() {
-
-        dbManager.close();
+        try {
+            // Check if dbManager is not null before closing it
+            if (dbManager != null) {
+                dbManager.close();
+                dbManager = null;
+            }
+            
+            // Unbind from the service if bound
+            if (mServiceBound) {
+                unbindService(mServiceConnection);
+                mServiceBound = false;
+            }
+        } catch (Exception e) {
+            Log.e("StartWorkoutActivity", "Error during onDestroy: " + e.getMessage());
+        }
+        
         super.onDestroy();
     }
 
 
     @Override
-    public void OnBackPressedDispatcher() {
-        //When the user clicks on the back button we want to take them back to the workout list page
-        super.getOnBackPressedDispatcher();
+    public void onBackPressed() {
+        // When backing out of the activity, make sure to clean up resources
+        try {
+            // Stop and unbind from the service if bound
+            if (mServiceBound) {
+                unbindService(mServiceConnection);
+                mServiceBound = false;
+            }
+            
+            // Stop the chronometer
+            if (simpleChronometer != null) {
+                simpleChronometer.stop();
+            }
+        } catch (Exception e) {
+            Log.e("StartWorkoutActivity", "Error during onBackPressed: " + e.getMessage());
+        }
+        
+        // Return to the workout list page
+        super.onBackPressed();
         this.finish();
     }
 
@@ -459,7 +472,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         dialog.setCancelable(true);
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-        lp.copyFrom(dialog.getWindow().getAttributes());
+        lp.copyFrom(Objects.requireNonNull(dialog.getWindow()).getAttributes());
         lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
 
@@ -519,7 +532,22 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                 //Shows the update made by clearing the recyclerview and re-adding all the items
                 //Works better this way as we don't have to re-create the entire activity
                 ExerciseItem.clear();
-                loadExerciseData();
+                // Get the original selected exercises from the intent
+                ArrayList<String> selectedExerciseIds = getIntent().getStringArrayListExtra("selected_exercise_ids");
+                if (selectedExerciseIds != null && !selectedExerciseIds.isEmpty()) {
+                    // Remove the deleted exercise ID from the list
+                    selectedExerciseIds.remove(itemId);
+                    if (!selectedExerciseIds.isEmpty()) {
+                        loadSelectedExercises(selectedExerciseIds);
+                    } else {
+                        // No exercises left, finish the activity
+                        Toast.makeText(StartWorkoutActivity.this, "No exercises remaining", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                } else {
+                    // Fallback to just this exercise if needed (though it was deleted)
+                    finish();
+                }
                 adapter.notifyDataSetChanged();
 
                 //places the user back at the same position in the recycler view rather than scrolling all the way back up to the top
@@ -543,7 +571,22 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
             //Shows the update made by clearing the recyclerview and re-adding all the items
             //Works better this way as we don't have to re-create the entire activity
             ExerciseItem.clear();
-            loadExerciseData();
+            // Get the original selected exercises from the intent
+            ArrayList<String> selectedExerciseIds = getIntent().getStringArrayListExtra("selected_exercise_ids");
+            if (selectedExerciseIds != null && !selectedExerciseIds.isEmpty()) {
+                // Remove the deleted exercise ID from the list
+                selectedExerciseIds.remove(itemId);
+                if (!selectedExerciseIds.isEmpty()) {
+                    loadSelectedExercises(selectedExerciseIds);
+                } else {
+                    // No exercises left, finish the activity
+                    Toast.makeText(StartWorkoutActivity.this, "No exercises remaining", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            } else {
+                // Fallback to just this exercise if needed (though it was deleted)
+                finish();
+            }
             adapter.notifyDataSetChanged();
 
             //places the user back at the same position in the recycler view rather than scrolling all the way back up to the top
@@ -578,15 +621,30 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         //Refreshes the data when the activity is resumed.
         //Mainly used for when an exercise is updated.
 
-        ExerciseItem.clear();
-        loadExerciseData();
-        adapter.notifyDataSetChanged();
+        // Make sure database is open
+        if (dbManager == null) {
+            dbManager = new DBManager(this);
+        }
+        if (!dbManager.isOpen()) {
+            dbManager.open();
+        }
 
-        // Restore state
-        // Once the data is re-loaded we load the same state or position
-        // This stops the recycler view of scrolling all the way back to the top when a button is clicked
+        // Get the selected exercise IDs from the intent
+        ArrayList<String> selectedExerciseIds = getIntent().getStringArrayListExtra("selected_exercise_ids");
+        if (selectedExerciseIds != null && !selectedExerciseIds.isEmpty() && adapter != null) {
+            ExerciseItem.clear();
+            loadSelectedExercises(selectedExerciseIds);
+            adapter.notifyDataSetChanged();
+            
+            // Restore state only if recyclerViewState has been saved
+            if (recyclerViewState != null && recyclerView != null && recyclerView.getLayoutManager() != null) {
+                recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
+            }
+        }
+    }
 
-        Objects.requireNonNull(recyclerView.getLayoutManager()).onRestoreInstanceState(recyclerViewState);
+    @Override
+    public void OnBackPressedDispatcher() {
 
     }
 
@@ -600,29 +658,33 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
             intReps = 0;
         }
 
-        //We pass through the itemId, set selected, number of reps & integer value of if there was an improvement made
-        dbManager.updateExerciseLogsWithImprovement(intItemId, setSelected, intReps, intImprovement);
-
-        // Save state - used when user clicks on an item far down the recycler view list
-        // It remembers the state or position
-        final Parcelable recyclerViewState;
-        recyclerViewState = Objects.requireNonNull(recyclerView.getLayoutManager()).onSaveInstanceState();
-
-        //Triggers the refresh of data in the recyclerview
-        //Clears what's currently in the view, loads the new data, refreshes the recyclerview
-        // ExerciseItem.clear();
-        // loadExerciseData();
-        // adapter.notifyDataSetChanged();
-
-        // Restore state
-        // Once the data is re-loaded we load the same state or position
-        // This stops the recycler view of scrolling all the way back to the top when a button is clicked
-        recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
-
+        try {
+            //We pass through the itemId, set selected, number of reps & integer value of if there was an improvement made
+            dbManager.updateExerciseLogsWithImprovement(intItemId, setSelected, intReps, intImprovement);
+    
+            // Save state - used when user clicks on an item far down the recycler view list
+            // It remembers the state or position
+            final Parcelable recyclerViewState;
+            if (recyclerView != null && recyclerView.getLayoutManager() != null) {
+                recyclerViewState = recyclerView.getLayoutManager().onSaveInstanceState();
+        
+                // Trigger data refresh but maintain colors
+                // The colors are now stored in the ExerciseItem objects
+                adapter.notifyDataSetChanged();
+        
+                // Restore state
+                // Once the data is updated we load the same state or position
+                // This stops the recycler view of scrolling all the way back to the top when a button is clicked
+                recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
+            }
+        } catch (Exception e) {
+            Log.e("StartWorkoutActivity", "Error updating exercise: " + e.getMessage());
+            Toast.makeText(this, "Failed to update exercise", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void bottomNavigationHomeClick(View view){
-        Intent intent = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
+        Intent intent = new Intent(getApplicationContext(), MainActivityExerciseList.class);
         startActivity(intent);
     }
 
@@ -656,13 +718,13 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
             View custom_view = getLayoutInflater().inflate(R.layout.snackbar_icon_text, null);
 
             snackbar.getView().setBackgroundColor(Color.TRANSPARENT);
-            Snackbar.SnackbarLayout snackBarView = (Snackbar.SnackbarLayout) snackbar.getView();
+            View snackBarView = snackbar.getView();
             snackBarView.setPadding(0, 0, 0, 0);
 
             ((TextView) custom_view.findViewById(R.id.message)).setText("Workout Paused!");
             ((ImageView) custom_view.findViewById(R.id.icon)).setImageResource(R.drawable.ic_done);
-            (custom_view.findViewById(R.id.parent_view)).setBackgroundColor(getResources().getColor(R.color.green_500));
-            snackBarView.addView(custom_view, 0);
+            (custom_view.findViewById(R.id.parent_view)).setBackgroundColor(getResources().getColor(R.color.colorSuccess));
+//            snackBarView.addView(custom_view, 0);
             snackbar.show();
 
             //Calculates the time when stopped
@@ -685,13 +747,13 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
             View custom_view = getLayoutInflater().inflate(R.layout.snackbar_icon_text, null);
 
             snackbar.getView().setBackgroundColor(Color.TRANSPARENT);
-            Snackbar.SnackbarLayout snackBarView = (Snackbar.SnackbarLayout) snackbar.getView();
+            View snackBarView = snackbar.getView();
             snackBarView.setPadding(0, 0, 0, 0);
 
             ((TextView) custom_view.findViewById(R.id.message)).setText("Workout Resumed!");
             ((ImageView) custom_view.findViewById(R.id.icon)).setImageResource(R.drawable.ic_done);
-            (custom_view.findViewById(R.id.parent_view)).setBackgroundColor(getResources().getColor(R.color.green_500));
-            snackBarView.addView(custom_view, 0);
+            (custom_view.findViewById(R.id.parent_view)).setBackgroundColor(getResources().getColor(R.color.colorSuccess));
+//            snackBarView.addView(custom_view, 0);
             snackbar.show();
 
 
@@ -705,28 +767,49 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
     }
 
     public void finishWorkout() {
-
         //minimises the floating action button
         toggleFabMode(fab_add);
 
         //General clean up tasks
         simpleChronometer.stop();
 
-        //unbinds the service
-        unbindService(mServiceConnection);
+        //unbinds the service if bound
+        if (mServiceBound) {
+            unbindService(mServiceConnection);
+            mServiceBound = false;
+        }
         stopService(serviceIntent);
 
+        // Get the selected exercise IDs
+        ArrayList<String> selectedExerciseIds = getIntent().getStringArrayListExtra("selected_exercise_ids");
+        if (selectedExerciseIds == null || selectedExerciseIds.isEmpty()) {
+            // No exercises to record, just show summary dialog
+            showWorkoutSummaryDialog();
+            return;
+        }
 
-        //Fetches all of the exercise logs in this workout so we can record the workout duration
-        Cursor cursor = dbManager.fetchExerciseLogs(id, strNumberOfExercises);
         //Works out how many seconds have elapsed. It records it in milliseconds so we divide by 1000 to convert it to seconds
         long workoutDuration = (SystemClock.elapsedRealtime() - simpleChronometer.getBase()) / 1000;
 
-        //Records the duration in the database
-        int i = 0;
-        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-            dbManager.recordExerciseLogDuration(cursor.getString(cursor.getColumnIndexOrThrow("log_id")), workoutDuration);
-            i++;
+        try {
+            // Fetch today's logs for the selected exercises
+            Cursor logsCursor = dbManager.fetchExerciseLogsForToday(selectedExerciseIds);
+            
+            if (logsCursor != null && logsCursor.getCount() > 0) {
+                // Update the duration for each log
+                while (logsCursor.moveToNext()) {
+                    int logIdColumnIndex = logsCursor.getColumnIndex(DatabaseHelper.LOG_ID);
+                    if (logIdColumnIndex != -1) {
+                        String logId = logsCursor.getString(logIdColumnIndex);
+                        dbManager.recordExerciseLogDuration(logId, workoutDuration);
+                    }
+                }
+                logsCursor.close();
+            } else {
+                Log.w("StartWorkoutActivity", "No logs found for today's exercises");
+            }
+        } catch (Exception e) {
+            Log.e("StartWorkoutActivity", "Error recording workout duration: " + e.getMessage());
         }
 
         //Shows the EndOfWorkoutDialog
@@ -738,7 +821,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.dialog_workout_summary);
         dialog.setCancelable(false);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
 
         // Initialize AdView and load ad
         AdView adView = dialog.findViewById(R.id.adView);
@@ -751,47 +834,18 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
 
         dialog.findViewById(R.id.bt_ok).setOnClickListener(v -> {
-            Intent i = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
+            Intent i = new Intent(getApplicationContext(), MainActivityExerciseList.class);
             startActivity(i);
         });
 
         dialog.findViewById(R.id.bt_close).setOnClickListener(v -> {
-            Intent i = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
+            Intent i = new Intent(getApplicationContext(), MainActivityExerciseList.class);
             startActivity(i);
         });
 
         dialog.show();
         dialog.getWindow().setAttributes(lp);
     }
-
-//    private void showWorkoutSummaryDialog() {
-//        final Dialog dialog = new Dialog(this);
-//        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); // before
-//        dialog.setContentView(R.layout.dialog_workout_summary);
-//        dialog.setCancelable(false);
-//        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-//
-//        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-//        lp.copyFrom(dialog.getWindow().getAttributes());
-//        lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
-//        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-//
-//
-//        dialog.findViewById(R.id.bt_ok).setOnClickListener(v -> {
-//            Intent i = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
-//            startActivity(i);
-//        });
-//
-//        dialog.findViewById(R.id.bt_close).setOnClickListener(v -> {
-//            Intent i = new Intent(getApplicationContext(), MainActivityWorkoutList.class);
-//            startActivity(i);
-//        });
-//
-//
-//        dialog.show();
-//        dialog.getWindow().setAttributes(lp);
-//
-//    }
 
     // ViewHolder for AdView
     public static class AdViewHolder extends RecyclerView.ViewHolder {
@@ -802,6 +856,74 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
             adView = itemView.findViewById(R.id.adView);
             AdRequest adRequest = new AdRequest.Builder().build();
             adView.loadAd(adRequest);
+        }
+    }
+
+    private void loadExerciseData() {
+        // Clear the existing list
+        ExerciseItem.clear();
+        
+        // Get the selected exercise IDs from the intent
+        ArrayList<String> exerciseIds = getIntent().getStringArrayListExtra("selected_exercise_ids");
+        
+        if (exerciseIds != null && !exerciseIds.isEmpty()) {
+            // Load exercises for each ID
+            for (String id : exerciseIds) {
+                // Get exercise details from the database
+                Cursor cursor = dbManager.getExerciseDetails(id);
+                
+                if (cursor != null && cursor.moveToFirst()) {
+                    // Create an ExerciseItem for each exercise
+                    ExerciseItem item = new ExerciseItem();
+                    
+                    // Get column indices
+                    int exerciseIdIndex = cursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
+                    int exerciseNameIndex = cursor.getColumnIndex(DatabaseHelper.EXERCISE);
+                    int weightIndex = cursor.getColumnIndex(DatabaseHelper.WEIGHT);
+                    
+                    // Set exercise properties
+                    if (exerciseIdIndex != -1) {
+                        item.setId(cursor.getString(exerciseIdIndex));
+                    }
+                    
+                    if (exerciseNameIndex != -1) {
+                        item.setTitle(cursor.getString(exerciseNameIndex));
+                    }
+                    
+                    if (weightIndex != -1) {
+                        item.setWeight(cursor.getDouble(weightIndex));
+                    }
+                    
+                    // Set default reps
+                    item.setButton1("5");
+                    item.setButton2("5");
+                    item.setButton3("5");
+                    item.setButton4("5");
+                    item.setButton5("5");
+                    
+                    // Set default colors
+                    item.setButton1Colour(R.drawable.button_shape_default);
+                    item.setButton2Colour(R.drawable.button_shape_default);
+                    item.setButton3Colour(R.drawable.button_shape_default);
+                    item.setButton4Colour(R.drawable.button_shape_default);
+                    item.setButton5Colour(R.drawable.button_shape_default);
+                    
+                    // Add the item to the list
+                    ExerciseItem.add(item);
+                    
+                    // Close the cursor
+                    cursor.close();
+                }
+            }
+            
+            // Update the adapter
+            if (adapter != null) {
+                adapter.notifyDataSetChanged();
+            }
+        } else {
+            Toast.makeText(this, "No exercises selected", Toast.LENGTH_SHORT).show();
+            // Return to the previous screen if no exercises were selected
+            finish();
         }
     }
 }

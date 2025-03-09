@@ -10,24 +10,54 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRecyclerViewAdapter.ViewHolder> {
 
     private final List<ExerciseItem> list;
     private final OnItemLongSelectedListener itemLongSelectedListener;
     private final OnButtonClickListener buttonClickListener;
-    private static final String LOG_TAG = "ExerciseRecyclerViewAdaptor";
+    private static final String LOG_TAG = "ExerciseRecyclerViewAdapter";
 
-//    private boolean isWeightInPounds = false; // Default weight unit is kg
-//    public void setWeightUnitInPounds(boolean isInPounds) {
-//        isWeightInPounds = isInPounds;
-//        notifyDataSetChanged(); // Refresh the RecyclerView to update the displayed weight units
-//    }
+    // Add a set to track selected exercises
+    private final Set<String> selectedExerciseIds = new HashSet<>();
+    
+    /**
+     * Get the list of selected exercise IDs
+     * @return List of selected exercise IDs
+     */
+    public List<String> getSelectedExerciseIds() {
+        return new ArrayList<>(selectedExerciseIds);
+    }
+    
+    /**
+     * Clear all selections
+     */
+    public void clearSelections() {
+        selectedExerciseIds.clear();
+        notifyDataSetChanged();
+    }
+    
+    /**
+     * Toggle selection of an exercise
+     * @param exerciseId ID of the exercise to toggle
+     */
+    public void toggleSelection(String exerciseId) {
+        if (selectedExerciseIds.contains(exerciseId)) {
+            selectedExerciseIds.remove(exerciseId);
+        } else {
+            selectedExerciseIds.add(exerciseId);
+        }
+        notifyDataSetChanged();
+    }
 
     public ExerciseRecyclerViewAdapter(List<ExerciseItem> list,
                                        Context context,
@@ -52,16 +82,36 @@ public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRe
         ExerciseItem myList = list.get(position);
 
         holder.textViewExercise.setText(myList.getTitle());
+        
+        // Show selection state with a more visible indicator
+        final String currentId = myList.getId();
+        if (selectedExerciseIds.contains(currentId)) {
+            // Use a more noticeable background for selected items
+            holder.itemView.setBackgroundResource(R.drawable.bg_gradient_soft);
+            // Add a checkmark or indicator text to show selection
+            holder.textViewExercise.setText("✓ " + myList.getTitle());
+        } else {
+            holder.itemView.setBackgroundResource(android.R.color.transparent);
+            holder.textViewExercise.setText(myList.getTitle());
+        }
+        
+        // Set up click listener for selection
+        holder.itemView.setOnClickListener(v -> {
+            toggleSelection(currentId);
+            // Show a toast when an item is selected or unselected
+            if (selectedExerciseIds.contains(currentId)) {
+                Toast.makeText(v.getContext(), "Exercise selected", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(v.getContext(), "Exercise unselected", Toast.LENGTH_SHORT).show();
+            }
+        });
+        
         holder.button1.setText(myList.getButton1());
         holder.button2.setText(myList.getButton2());
         holder.button3.setText(myList.getButton3());
         holder.button4.setText(myList.getButton4());
         holder.button5.setText(myList.getButton5());
         holder.textViewWeight.setText(myList.getWeight().toString() + "kg");
-
-//        // Convert weight to the desired unit
-//        String weightUnit = isWeightInPounds ? "lbs" : "kg";
-//        holder.textViewWeight.setText(myList.getWeight().toString() + weightUnit);
 
 
         //Sets the background colour of the buttons
@@ -72,13 +122,8 @@ public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRe
         holder.button5.setBackgroundResource(myList.getButton5colour());
 
 
-        final String currentId = myList.getId();
         final String currentTitle = myList.getTitle();
         final Double currentWeight = myList.getWeight();
-
-        holder.itemView.setOnClickListener(v -> {
-
-        });
 
         holder.itemView.setOnLongClickListener(v -> {
             TextView text = v.findViewById(R.id.textViewHead);

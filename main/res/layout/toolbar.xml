@@ -34,9 +34,10 @@
         android:id="@+id/txtTitle"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
+        android:fontFamily="casual"
         android:gravity="center"
         android:text="Title"
-        android:textColor="@color/blue_200"
+        android:textColor="@color/buttonNormalColor"
         android:textSize="20sp"
         android:textStyle="bold" />
 

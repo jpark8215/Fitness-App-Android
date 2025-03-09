@@ -26,7 +26,6 @@
             android:layout_weight="1"
             android:fitsSystemWindows="false"
             android:focusable="false"
-            android:onClick="myClickHandler"
             android:text="1"
             style="?android:attr/buttonBarButtonStyle"
             tools:ignore="UsingOnClickInXml" />
@@ -36,7 +35,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:onClick="myClickHandler"
             android:focusable="false"
             android:text="2"
             style="?android:attr/buttonBarButtonStyle"
@@ -48,7 +46,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:focusable="false"
-            android:onClick="myClickHandler"
             android:text="3"
             style="?android:attr/buttonBarButtonStyle"
             tools:ignore="UsingOnClickInXml" />
@@ -59,7 +56,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:focusable="false"
-            android:onClick="myClickHandler"
             android:text="4"
             style="?android:attr/buttonBarButtonStyle"
             tools:ignore="UsingOnClickInXml" />
@@ -70,7 +66,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:focusable="false"
-            android:onClick="myClickHandler"
             android:text="5"
             style="?android:attr/buttonBarButtonStyle"
             tools:ignore="UsingOnClickInXml" />

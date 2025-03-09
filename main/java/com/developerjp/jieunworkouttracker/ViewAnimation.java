@@ -286,4 +286,26 @@ public class ViewAnimation {
                 .setDuration(300)
                 .start();
     }
+
+    public static void rotateForward(View v) {
+        v.animate().setDuration(200)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                    }
+                })
+                .rotation(135f);
+    }
+
+    public static void rotateBackward(View v) {
+        v.animate().setDuration(200)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                    }
+                })
+                .rotation(0f);
+    }
 }

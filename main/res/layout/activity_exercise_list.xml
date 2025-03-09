@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.developerjp.jieunworkouttracker.MainActivityWorkoutList">
+    tools:context="com.developerjp.jieunworkouttracker.MainActivityExerciseList">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
@@ -37,7 +37,8 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:layout_weight="1"
-        android:text="@string/empty_exercise_list_text" />
+        android:text="@string/empty_exercise_list_text"
+        android:visibility="invisible" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -138,7 +139,10 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:text="Add Exercise"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:textColor="@color/colorWarning"
+                    android:textSize="20sp" />
 
             </androidx.cardview.widget.CardView>
 
@@ -152,7 +156,7 @@
                 android:layout_marginBottom="@dimen/spacing_middle"
                 android:clickable="true"
                 android:contentDescription="Add Exercise"
-                android:tint="@color/grey_80"
+                android:tint="@android:color/white"
                 app:fabSize="normal"
                 app:rippleColor="@android:color/black"
                 app:srcCompat="@drawable/fab_add_workout_icon" />
@@ -185,7 +189,9 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:text="Start Workout"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:textColor="@color/colorWarning"
+                    android:textSize="20sp" />
 
             </androidx.cardview.widget.CardView>
 
@@ -200,7 +206,7 @@
                 android:clickable="true"
                 android:contentDescription="Start Workout"
                 android:focusable="true"
-                android:tint="@color/grey_80"
+                android:tint="@color/white"
                 app:fabSize="normal"
                 app:rippleColor="@android:color/black"
                 app:srcCompat="@drawable/fab_start_workout" />
