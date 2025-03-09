@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
@@ -19,12 +20,12 @@
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-2201141547916408~1296910428"/>
+            android:value="ca-app-pub-2201141547916408~1296910428" />
 
 
         <activity
+            android:name=".MainActivityExerciseList"
             android:exported="true"
-            android:name=".MainActivityWorkoutList"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -35,44 +36,38 @@
         </activity>
 
         <activity
-            android:name=".ArchivedWorkoutList"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:name=".ArchivedExerciseList"
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
             android:name=".ExerciseList"
-            android:theme="@style/AppTheme.NoActionBar"/>
-
-        <activity
-            android:name=".ArchivedExerciseList"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
             android:name=".ShowProgressActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
             android:name=".StartWorkoutActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
-
-<!--        <activity-->
-<!--            android:name=".AndroidDatabaseManager"-->
-<!--            android:theme="@style/AppTheme.NoActionBar"/>-->
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
             android:name=".ShowCalendarActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
             android:name=".CalendarShowSelectedWorkout"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
             android:name=".ColorSchemeActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <service
             android:name=".WorkoutService"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="dataSync"
+            tools:ignore="ForegroundServicePermission" />
 
     </application>
 
