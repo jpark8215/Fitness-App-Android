@@ -80,14 +80,14 @@
 
                 <ImageButton
                     android:id="@+id/imageButtonHome"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:background="@android:color/transparent"
+                    android:contentDescription="Home"
                     android:onClick="bottomNavigationHomeClick"
                     android:scaleType="fitCenter"
                     app:srcCompat="@drawable/ic_home"
-                    app:tint="@color/grey_40"
-                    android:contentDescription="Home" />
+                    app:tint="@color/grey_40" />
 
             </LinearLayout>
 
@@ -100,14 +100,14 @@
 
                 <ImageButton
                     android:id="@+id/imageButtonCalendar"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:background="@android:color/transparent"
+                    android:contentDescription="Calendar"
                     android:onClick="bottomNavigationCalendarClick"
                     android:scaleType="fitCenter"
                     app:srcCompat="@drawable/ic_calendar_round"
-                    app:tint="@color/grey_40"
-                    android:contentDescription="Calendar" />
+                    app:tint="@color/grey_40" />
 
             </LinearLayout>
         </LinearLayout>
