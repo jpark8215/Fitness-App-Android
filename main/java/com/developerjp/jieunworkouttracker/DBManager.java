@@ -1,6 +1,5 @@
 package com.developerjp.jieunworkouttracker;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
@@ -25,6 +24,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class DBManager {
 
@@ -79,7 +79,7 @@ public class DBManager {
 
         //Is used to put the current date into the LOGS table date field
         //We had to record the date by itself separate from the datetime to make querying the database easier for some of the calendar queries
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String date = sdf.format(new Date());
         contentValues2.put(DatabaseHelper.DATE, date);
 
@@ -144,7 +144,7 @@ public class DBManager {
 
                     //Is used to put the current date into the LOGS table date field
                     //We had to record the date by itself separate from the datetime to make querying the database easier for some of the calendar queries
-                    @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                     String date = sdf.format(new Date());
                     contentValues.put(DatabaseHelper.DATE, date);
 
@@ -181,7 +181,7 @@ public class DBManager {
 
     public String countExercises(String id){
 
-        @SuppressLint("Recycle") Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_EXERCISES, null, "EXERCISES.WORKOUT_ID = ?", new String[]{id}, null, null, null);
+        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_EXERCISES, null, "EXERCISES.WORKOUT_ID = ?", new String[]{id}, null, null, null);
         int numOfExercises = cursor.getCount();
 
         //Our query needs the value as a String so we convert it here
@@ -193,7 +193,7 @@ public class DBManager {
 
         String exerciseId = "";
         String[] columns = new String[] {"EXERCISES.EXERCISE_ID"};
-        @SuppressLint("Recycle") Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_EXERCISES, columns, "EXERCISES.EXERCISE = ?", new String[]{name}, null, null, null);
+        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_EXERCISES, columns, "EXERCISES.EXERCISE = ?", new String[]{name}, null, null, null);
 
         cursor.moveToFirst();
         exerciseId = cursor.getString(0);
@@ -629,16 +629,16 @@ public class DBManager {
     public void deleteExercise(long _id) {
         // Check if this is an exercise ID directly in the exercises table
         Cursor exerciseCursor = database.query(
-            DatabaseHelper.TABLE_NAME_EXERCISES,
-            new String[]{DatabaseHelper.EXERCISE_ID},
-            DatabaseHelper.EXERCISE_ID + " = ?",
-            new String[]{Long.toString(_id)},
-            null, null, null
+                DatabaseHelper.TABLE_NAME_EXERCISES,
+                new String[]{DatabaseHelper.EXERCISE_ID},
+                DatabaseHelper.EXERCISE_ID + " = ?",
+                new String[]{Long.toString(_id)},
+                null, null, null
         );
-        
+
         boolean isExerciseId = false;
         List<String> exerciseIds = new ArrayList<>();
-        
+
         // If found in exercises table, use it directly
         if (exerciseCursor.moveToFirst()) {
             exerciseIds.add(Long.toString(_id));
@@ -647,7 +647,7 @@ public class DBManager {
         } else {
             exerciseCursor.close();
         }
-        
+
         // If not an exercise ID, try to find it from logs table
         if (!isExerciseId) {
             // Directly query the exercise ID from the selected log ID
@@ -674,33 +674,46 @@ public class DBManager {
 
             cursor.close();
         }
-        
+
         // Only proceed if we found exercise IDs
         if (!exerciseIds.isEmpty()) {
-            showStyledConfirmationDialog(
-                    "Are you sure you want to delete this exercise and its associated log(s)?",
-                (dialogInterface, i) -> {
-                    try {
-                        // Delete logs associated with each exercise ID
-                        for (String exerciseId : exerciseIds) {
-                            Log.d("DBManager", "Deleting exercise ID: " + exerciseId);
-                            database.delete(DatabaseHelper.TABLE_NAME_LOGS, DatabaseHelper.EXERCISE_ID + "=?", new String[]{exerciseId});
-                            database.delete(DatabaseHelper.TABLE_NAME_EXERCISES, DatabaseHelper.EXERCISE_ID + "=?", new String[]{exerciseId});
-                        }
-                        
-                        // Show a success message
-                        Toast.makeText(context, "Exercise deleted successfully", Toast.LENGTH_SHORT).show();
-                        
-                        // Refresh the activity to renew the page
-                        ((Activity) context).recreate();
-
-                    } catch (Exception e) {
-                        // Log an error if an exception occurs during deletion
-                        Log.e("DeleteExercise", "Error deleting exercise and logs.", e);
-                        Toast.makeText(context, "Error deleting exercise: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            // Create the confirmation dialog
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle("Delete Exercise");
+            builder.setMessage("Are you sure you want to delete this exercise and its associated log(s)?");
+            builder.setPositiveButton("Yes", (dialog1, which) -> {
+                try {
+                    // Delete logs associated with each exercise ID
+                    for (String exerciseId : exerciseIds) {
+                        Log.d("DBManager", "Deleting exercise ID: " + exerciseId);
+                        database.delete(DatabaseHelper.TABLE_NAME_LOGS, DatabaseHelper.EXERCISE_ID + "=?", new String[]{exerciseId});
+                        database.delete(DatabaseHelper.TABLE_NAME_EXERCISES, DatabaseHelper.EXERCISE_ID + "=?", new String[]{exerciseId});
                     }
+
+                    // Show a success message
+                    Toast.makeText(context, "Exercise deleted successfully", Toast.LENGTH_SHORT).show();
+
+                    // Refresh the activity to renew the page
+                    ((Activity) context).recreate();
+
+                } catch (Exception e) {
+                    // Log an error if an exception occurs during deletion
+                    Log.e("DeleteExercise", "Error deleting exercise and logs.", e);
+                    Toast.makeText(context, "Error deleting exercise: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
-            );
+            });
+            builder.setNegativeButton("No", (dialog1, which) -> {
+                // Do nothing
+            });
+
+            // Create the AlertDialog
+            AlertDialog confirmationDialog = builder.create();
+            // Set the custom background
+            confirmationDialog.setOnShowListener(dialogInterface -> {
+                Objects.requireNonNull(confirmationDialog.getWindow()).setBackgroundDrawableResource(R.drawable.modern_dialog_background);
+            });
+            // Show the dialog
+            confirmationDialog.show();
         } else {
             // No exercise IDs found - show an error
             Toast.makeText(context, "Could not find exercise to delete", Toast.LENGTH_SHORT).show();
@@ -836,7 +849,7 @@ public class DBManager {
                 DatabaseHelper.WORKOUT_ID + "=?", 
                 new String[]{dummyWorkoutId}, null, null, null);
                 
-        if (cursor == null || cursor.getCount() == 0) {
+        if (cursor.getCount() == 0) {
             // Create dummy workout
             ContentValues workoutValue = new ContentValues();
             workoutValue.put(DatabaseHelper.WORKOUT_ID, dummyWorkoutId);
@@ -870,7 +883,7 @@ public class DBManager {
 
         //Is used to put the current date into the LOGS table date field
         //We had to record the date by itself separate from the datetime to make querying the database easier for some of the calendar queries
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String date = sdf.format(new Date());
         contentValues2.put(DatabaseHelper.DATE, date);
 
@@ -916,7 +929,7 @@ public class DBManager {
             contentValues.put(DatabaseHelper.DATETIME, datetime.toString());
 
             //Is used to put the current date into the LOGS table date field
-            @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String date = sdf.format(new Date());
             contentValues.put(DatabaseHelper.DATE, date);
 

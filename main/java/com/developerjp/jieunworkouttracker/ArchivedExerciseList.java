@@ -41,7 +41,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
 
     // Item List
     private final List<ExerciseItem> ExerciseItem = new ArrayList<>();
-    private final NumberFormat nf = new DecimalFormat("##.##");
+    private final NumberFormat nf = new DecimalFormat("##.#");
     private DBManager dbManager;
     private RecyclerView recyclerView;
     private ExerciseRecyclerViewAdapter adapter;

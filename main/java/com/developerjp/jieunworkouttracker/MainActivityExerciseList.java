@@ -592,8 +592,15 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             builder.setNegativeButton("No", (dialog1, which) -> {
                 // Do nothing
             });
+
+            // Create the AlertDialog
+            AlertDialog confirmationDialog = builder.create();
             // Set the custom background
-            builder.show();
+            confirmationDialog.setOnShowListener(dialogInterface -> {
+                Objects.requireNonNull(confirmationDialog.getWindow()).setBackgroundDrawableResource(R.drawable.modern_dialog_background);
+            });
+            // Show the dialog
+            confirmationDialog.show();
         });
         
         // Add archive button functionality
