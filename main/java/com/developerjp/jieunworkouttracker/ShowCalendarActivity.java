@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewStub;
 import android.widget.Chronometer;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -36,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 public class ShowCalendarActivity extends AppCompatActivity implements CalendarRecyclerViewAdapter.OnItemSelectedListener {
 
@@ -220,7 +220,7 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
 
         //Handles side navigation menu clicks
         nav_view.setNavigationItemSelectedListener(item -> {
-            String itemCLicked = item.getTitle().toString();
+            String itemCLicked = Objects.requireNonNull(item.getTitle()).toString();
             Intent intent;
 
             switch (itemCLicked) {
@@ -365,7 +365,7 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
                 if (!sessionMap.containsKey(sessionKey)) {
                     sessionMap.put(sessionKey, new ArrayList<>());
                 }
-                sessionMap.get(sessionKey).add(session);
+                Objects.requireNonNull(sessionMap.get(sessionKey)).add(session);
             }
             
             exerciseCursor.close();

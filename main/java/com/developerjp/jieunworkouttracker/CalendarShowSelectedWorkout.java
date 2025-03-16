@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewStub;
 import android.widget.Chronometer;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -31,6 +30,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class CalendarShowSelectedWorkout extends AppCompatActivity {
 
@@ -141,7 +141,7 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
 
         //Handles side navigation menu clicks
         nav_view.setNavigationItemSelectedListener(item -> {
-            String itemCLicked = item.getTitle().toString();
+            String itemCLicked = Objects.requireNonNull(item.getTitle()).toString();
             Intent intent;
 
             switch (itemCLicked) {

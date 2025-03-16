@@ -1,8 +1,6 @@
 package com.developerjp.jieunworkouttracker;
 
 
-import static com.github.mikephil.charting.charts.Chart.LOG_TAG;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
@@ -26,7 +24,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.cardview.widget.CardView;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -48,7 +45,6 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
     private DBManager dbManager;
     private RecyclerView recyclerView;
     private ExerciseRecyclerViewAdapter adapter;
-    private FloatingActionButton fab_add;
     private Parcelable recyclerViewState;
     private Toolbar toolbar;
 
@@ -62,7 +58,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         ViewStub stub = findViewById(R.id.main_view_stub);
         stub.setLayoutResource(R.layout.activity_archived_exercise_list);
         View inflatedView = stub.inflate();
-        
+
         // Make sure the layout is visible
         if (inflatedView != null) {
             inflatedView.setVisibility(View.VISIBLE);
@@ -75,7 +71,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         // Initialize database
         dbManager = new DBManager(this);
         dbManager.open();
-        
+
         // Initialize RecyclerView
         recyclerView = findViewById(R.id.recycler_view);
         if (recyclerView != null) {
@@ -83,7 +79,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         }
 
         // Set up restore button
-        fab_add = findViewById(R.id.fab_add);
+        FloatingActionButton fab_add = findViewById(R.id.fab_add);
         if (fab_add != null) {
             fab_add.setOnClickListener(this::restoreExercise);
         }
@@ -174,10 +170,10 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
             dbManager = new DBManager(this);
             dbManager.open();
         }
-        
+
         // Clear existing data
         ExerciseItem.clear();
-        
+
         // Fetch archived exercises
         Cursor cursor = dbManager.fetchArchivedExercises();
 
@@ -210,22 +206,22 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
                 if (exerciseIdColumnIndex != -1) {
                     exerciseItem.setId(cursor.getString(exerciseIdColumnIndex));
                 }
-                
+
                 if (exerciseColumnIndex != -1) {
                     exerciseItem.setTitle(cursor.getString(exerciseColumnIndex));
                 }
-                
+
                 if (weightColumnIndex != -1) {
                     exerciseItem.setWeight(cursor.getDouble(weightColumnIndex));
                 }
-                
+
                 // Set default values for buttons
                 exerciseItem.setButton1("5");
                 exerciseItem.setButton2("5");
                 exerciseItem.setButton3("5");
                 exerciseItem.setButton4("5");
                 exerciseItem.setButton5("5");
-                
+
                 // Set default colors
                 exerciseItem.setButton1Colour(R.drawable.button_shape_default);
                 exerciseItem.setButton2Colour(R.drawable.button_shape_default);
@@ -236,7 +232,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
                 // Add to the list
                 ExerciseItem.add(exerciseItem);
             }
-            
+
             // Close the cursor but NOT the database
             cursor.close();
         } else {
@@ -246,13 +242,13 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
                 empty.setVisibility(View.VISIBLE);
                 empty.setText("No archived exercises found");
             }
-            
+
             // Close the cursor if it exists
             if (cursor != null) {
                 cursor.close();
             }
         }
-        
+
         // Create or update the adapter
         if (adapter == null) {
             adapter = new ExerciseRecyclerViewAdapter(ExerciseItem, this, this, this);
@@ -324,7 +320,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
 
         // Refresh the exercise list
         loadExerciseData();
-        
+
         // Restore state
         if (recyclerViewState != null && recyclerView != null && recyclerView.getLayoutManager() != null) {
             recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
@@ -341,22 +337,67 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         startActivity(intent);
     }
 
+//    private void restoreExercise(View v) {
+//        // Show dialog to select which exercise to restore
+//        if (ExerciseItem.isEmpty()) {
+//            Toast.makeText(this, "No archived exercises to restore", Toast.LENGTH_SHORT).show();
+//            return;
+//        }
+//
+//        // Create items array for the dialog
+//        final String[] items = new String[ExerciseItem.size()];
+//        final String[] ids = new String[ExerciseItem.size()];
+//
+//        for (int i = 0; i < ExerciseItem.size(); i++) {
+//            items[i] = ExerciseItem.get(i).getTitle();
+//            ids[i] = ExerciseItem.get(i).getId();
+//        }
+//
+//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//        builder.setTitle("Select Exercise to Restore");
+//        builder.setItems(items, (dialog, which) -> {
+//            try {
+//                // Unarchive the selected exercise
+//                String exerciseId = ids[which];
+//                dbManager.unarchiveExercise(exerciseId);
+//                Toast.makeText(this, "Exercise '" + items[which] + "' restored", Toast.LENGTH_SHORT).show();
+//
+//                // Refresh the exercise list
+//                loadExerciseData();
+//
+//                // If no more archived exercises, show a message
+//                if (ExerciseItem.isEmpty()) {
+//                    TextView empty = findViewById(R.id.empty);
+//                    if (empty != null) {
+//                        empty.setVisibility(View.VISIBLE);
+//                        empty.setText("No archived exercises found");
+//                    }
+//                }
+//            } catch (Exception e) {
+//                Log.e("ArchivedExerciseList", "Error restoring exercise: " + e.getMessage());
+//                Toast.makeText(this, "Error restoring exercise", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+//
+//        builder.show();
+//    }
+
     private void restoreExercise(View v) {
         // Show dialog to select which exercise to restore
         if (ExerciseItem.isEmpty()) {
             Toast.makeText(this, "No archived exercises to restore", Toast.LENGTH_SHORT).show();
             return;
         }
-        
+
         // Create items array for the dialog
         final String[] items = new String[ExerciseItem.size()];
         final String[] ids = new String[ExerciseItem.size()];
-        
+
         for (int i = 0; i < ExerciseItem.size(); i++) {
             items[i] = ExerciseItem.get(i).getTitle();
             ids[i] = ExerciseItem.get(i).getId();
         }
-        
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Select Exercise to Restore");
         builder.setItems(items, (dialog, which) -> {
@@ -365,10 +406,10 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
                 String exerciseId = ids[which];
                 dbManager.unarchiveExercise(exerciseId);
                 Toast.makeText(this, "Exercise '" + items[which] + "' restored", Toast.LENGTH_SHORT).show();
-                
+
                 // Refresh the exercise list
                 loadExerciseData();
-                
+
                 // If no more archived exercises, show a message
                 if (ExerciseItem.isEmpty()) {
                     TextView empty = findViewById(R.id.empty);
@@ -382,8 +423,19 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
                 Toast.makeText(this, "Error restoring exercise", Toast.LENGTH_SHORT).show();
             }
         });
-        builder.show();
+
+        // Create the AlertDialog
+        AlertDialog dialog = builder.create();
+
+        // Set the custom background
+        dialog.setOnShowListener(dialogInterface -> {
+            Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(R.drawable.modern_dialog_background);
+        });
+
+        // Show the dialog
+        dialog.show();
     }
+
 
     private void modifyExercise(String itemId, String itemTitle, Double itemWeight){
         showCustomModifyDialog(itemId, itemTitle, itemWeight);
@@ -396,7 +448,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         dialog.setCancelable(true);
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-        lp.copyFrom(dialog.getWindow().getAttributes());
+        lp.copyFrom(Objects.requireNonNull(dialog.getWindow()).getAttributes());
         lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
 
@@ -426,7 +478,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
             if (!TextUtils.isEmpty(weightEditText.getText())) {
                 try {
                     exerciseWeight = Double.parseDouble(weightEditText.getText().toString());
-                    
+
                     // Convert to kg if toggle is not checked (meaning it's in lbs)
                     if (toggleWeightUnit != null && !toggleWeightUnit.isChecked()) {
                         // Convert lbs to kg: kg = lbs * 0.453592
@@ -440,14 +492,15 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
 
             // Insert the exercise directly
             dbManager.insertExerciseDirectly(exerciseName, exerciseWeight);
-            
+
             // Refresh the exercise list
             loadExerciseData();
-            
+
             dialog.dismiss();
             Toast.makeText(getApplicationContext(), "Exercise added", Toast.LENGTH_SHORT).show();
         });
 
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.modern_dialog_background);
         dialog.show();
         dialog.getWindow().setAttributes(lp);
     }
@@ -459,7 +512,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         dialog.setCancelable(true);
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-        lp.copyFrom(dialog.getWindow().getAttributes());
+        lp.copyFrom(Objects.requireNonNull(dialog.getWindow()).getAttributes());
         lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
 
@@ -510,7 +563,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
                                 dbManager.updateExerciseName(_id, newExerciseName);
 
                                 // If there is a weight given, update the database
-                                if (weightEditText.getText().toString().trim().length() > 0) {
+                                if (!weightEditText.getText().toString().trim().isEmpty()) {
                                     double newExerciseWeight = Double.parseDouble(weightEditText.getText().toString());
 
                                     // Convert the entered weight to kg if lbs is selected
@@ -549,7 +602,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
                     dbManager.updateExerciseName(_id, newExerciseName);
 
                     // If there is a weight given, update the database
-                    if (weightEditText.getText().toString().trim().length() > 0) {
+                    if (!weightEditText.getText().toString().trim().isEmpty()) {
                         double newExerciseWeight = Double.parseDouble(weightEditText.getText().toString());
 
                         // Convert the entered weight to kg if lbs is selected
@@ -600,6 +653,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
 
         (dialog.findViewById(R.id.bt_close)).setOnClickListener(v -> dialog.dismiss());
 
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.modern_dialog_background);
         dialog.show();
         dialog.getWindow().setAttributes(lp);
     }

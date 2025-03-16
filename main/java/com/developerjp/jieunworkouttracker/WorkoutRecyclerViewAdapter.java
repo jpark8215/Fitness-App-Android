@@ -43,7 +43,7 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
     }
 
     @Override
-    public void onBindViewHolder(final WorkoutRecyclerViewAdapter.ViewHolder holder, final int position) {
+    public void onBindViewHolder(final WorkoutRecyclerViewAdapter.ViewHolder holder, @SuppressLint("RecyclerView") final int position) {
         ExerciseItem myList = list.get(position);
 
         holder.textViewExercise.setText(myList.getTitle());
@@ -364,7 +364,7 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
     }
 
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView textViewExercise;
         //not sure what this id is used for, can probably be removed with some testing

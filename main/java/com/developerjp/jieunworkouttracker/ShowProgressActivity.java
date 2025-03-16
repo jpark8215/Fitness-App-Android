@@ -12,7 +12,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Chronometer;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -37,6 +36,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class ShowProgressActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
@@ -154,7 +154,7 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         toggle.syncState();
 
         nav_view.setNavigationItemSelectedListener(item -> {
-            String itemCLicked = item.getTitle().toString();
+            String itemCLicked = Objects.requireNonNull(item.getTitle()).toString();
             Intent intent;
 
             switch (itemCLicked) {

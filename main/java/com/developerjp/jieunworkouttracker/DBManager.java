@@ -166,9 +166,7 @@ public class DBManager {
 
 
         Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_WORKOUTS, columns, "WORKOUTS.ARCHIVE = 0", null, null, null, null);
-        if (cursor != null) {
-            cursor.moveToFirst();
-        }
+        cursor.moveToFirst();
         return cursor;
     }
 
@@ -176,9 +174,7 @@ public class DBManager {
         String[] columns = new String[] { DatabaseHelper.WORKOUT_ID, DatabaseHelper.WORKOUT};
 
         Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_WORKOUTS, columns, "WORKOUTS.ARCHIVE = 1", null, null, null, null);
-        if (cursor != null ) {
-            cursor.moveToFirst();
-        }
+        cursor.moveToFirst();
         return cursor;
     }
 
@@ -199,10 +195,8 @@ public class DBManager {
         String[] columns = new String[] {"EXERCISES.EXERCISE_ID"};
         @SuppressLint("Recycle") Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_EXERCISES, columns, "EXERCISES.EXERCISE = ?", new String[]{name}, null, null, null);
 
-        if (cursor != null) {
-            cursor.moveToFirst();
-            exerciseId = cursor.getString(0);
-        }
+        cursor.moveToFirst();
+        exerciseId = cursor.getString(0);
         return exerciseId;
     }
 
@@ -280,9 +274,7 @@ public class DBManager {
 
         // Cursor cursor = database.query( true,DatabaseHelper.TABLE_NAME_LOGS + " LEFT OUTER JOIN " + DatabaseHelper.TABLE_NAME_EXERCISES + " ON " + "LOGS.EXERCISE_ID" + "=" + "EXERCISES.EXERCISE_ID", columns, "EXERCISES.WORKOUT_ID = ?" + " AND " + "LOGS.DATE=(SELECT MAX(date) FROM LOGS)", new String[]{id}, "LOGS.EXERCISE_ID", null, DatabaseHelper.LOG_ID, null);
 
-        if (cursor != null) {
-            cursor.moveToFirst();
-        }
+        cursor.moveToFirst();
         return cursor;
     }
 
@@ -297,9 +289,7 @@ public class DBManager {
 
         Cursor cursor = database.query( true,DatabaseHelper.TABLE_NAME_LOGS + " LEFT OUTER JOIN " + DatabaseHelper.TABLE_NAME_EXERCISES + " ON " + "LOGS.EXERCISE_ID" + "=" + "EXERCISES.EXERCISE_ID", columns, "EXERCISES.WORKOUT_ID = ?" + " AND " + "LOGS.DATE = ?", new String[]{id, date}, "LOGS.EXERCISE_ID", null, DatabaseHelper.LOG_ID, null);
 
-        if (cursor != null) {
-            cursor.moveToFirst();
-        }
+        cursor.moveToFirst();
         return cursor;
     }
 
@@ -307,9 +297,7 @@ public class DBManager {
     public Cursor fetchAllExerciseLogsForCalendar() {
         String[] columns = new String[] { DatabaseHelper.WORKOUT_ID, DatabaseHelper.DATE};
         Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_LOGS, columns, "LOGS.DURATION IS NOT NULL", null, DatabaseHelper.WORKOUT_ID + "," + DatabaseHelper.DATE, null, null, null);
-        if (cursor != null) {
-            cursor.moveToFirst();
-        }
+        cursor.moveToFirst();
         return cursor;
     }
 
@@ -317,9 +305,7 @@ public class DBManager {
     public Cursor fetchWorkoutsOnSelectedDateForCalendar(String strDate) {
         String[] columns = new String[] { DatabaseHelper.WORKOUT_ID, DatabaseHelper.DATE};
         Cursor cursor = database.query(true, DatabaseHelper.TABLE_NAME_LOGS, columns, "LOGS.DATETIME LIKE ? AND LOGS.DURATION IS NOT NULL", new String[]{(strDate)}, DatabaseHelper.WORKOUT_ID, null, null, null);
-        if (cursor != null) {
-            cursor.moveToFirst();
-        }
+        cursor.moveToFirst();
         return cursor;
     }
 
@@ -328,9 +314,7 @@ public class DBManager {
     public Cursor fetchWorkoutNameOnSelectedDateForCalendar(String workout_id) {
         String[] columns = new String[] { DatabaseHelper.WORKOUT};
         Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_WORKOUTS, columns, "WORKOUTS.WORKOUT_ID = ?", new String[]{(workout_id)}, null, null, null);
-        if (cursor != null) {
-            cursor.moveToFirst();
-        }
+        cursor.moveToFirst();
         return cursor;
     }
 
@@ -356,11 +340,11 @@ public class DBManager {
         boolean isExerciseId = false;
         
         // If we found it in exercises table, use it directly
-        if (exerciseCursor != null && exerciseCursor.moveToFirst()) {
+        if (exerciseCursor.moveToFirst()) {
             exerciseId = Long.toString(_id);
             isExerciseId = true;
             exerciseCursor.close();
-        } else if (exerciseCursor != null) {
+        } else {
             exerciseCursor.close();
         }
         
@@ -369,7 +353,7 @@ public class DBManager {
             String[] columns = new String[] {DatabaseHelper.LOG_ID, DatabaseHelper.EXERCISE_ID};
             Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_LOGS, columns, "LOGS.LOG_ID = ?", new String[]{Long.toString(_id)}, null, null, null, null);
 
-            if (cursor != null && cursor.moveToFirst()) {
+            if (cursor.moveToFirst()) {
                 int exerciseIdColumnIndex = cursor.getColumnIndex("exercise_id");
                 if (exerciseIdColumnIndex != -1) {
                     exerciseId = cursor.getString(exerciseIdColumnIndex);
@@ -412,11 +396,11 @@ public class DBManager {
         long exerciseId = -1;
         
         // If found in exercises table, use it directly
-        if (exerciseCursor != null && exerciseCursor.moveToFirst()) {
+        if (exerciseCursor.moveToFirst()) {
             exerciseId = _id;
             isExerciseId = true;
             exerciseCursor.close();
-        } else if (exerciseCursor != null) {
+        } else {
             exerciseCursor.close();
         }
         
@@ -433,7 +417,7 @@ public class DBManager {
             // Execute the query to fetch the exercise ID
             Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_LOGS, projection, selection, selectionArgs, null, null, null);
 
-            if (cursor != null && cursor.moveToFirst()) {
+            if (cursor.moveToFirst()) {
                 int exerciseIdColumnIndex = cursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
                 if (exerciseIdColumnIndex != -1) {
                     exerciseId = cursor.getLong(exerciseIdColumnIndex);
@@ -534,7 +518,7 @@ public class DBManager {
                 null, null, null
             );
             
-            if (logCursor != null && logCursor.moveToFirst()) {
+            if (logCursor.moveToFirst()) {
                 int exerciseIdColumnIndex = logCursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
                 if (exerciseIdColumnIndex != -1) {
                     exerciseId = logCursor.getString(exerciseIdColumnIndex);
@@ -555,7 +539,7 @@ public class DBManager {
                     "1" // Limit to most recent
                 );
                 
-                if (recentLogCursor != null && recentLogCursor.moveToFirst()) {
+                if (recentLogCursor.moveToFirst()) {
                     int recentLogIdColumnIndex = recentLogCursor.getColumnIndex(DatabaseHelper.LOG_ID);
                     if (recentLogIdColumnIndex != -1) {
                         String recentLogId = recentLogCursor.getString(recentLogIdColumnIndex);
@@ -613,7 +597,7 @@ public class DBManager {
             String message = "This workout has " + associatedExerciseCount + " associated exercise(s) and " +
                     associatedLogCount + " associated log(s). Are you sure you want to delete it and its associated data?";
             
-            showStyledConfirmationDialog("Confirm Deletion", message, (dialogInterface, i) -> {
+            showStyledConfirmationDialog(message, (dialogInterface, i) -> {
                 // User confirmed, delete the workout, its exercises, and logs
                 try {
                     database.beginTransaction();
@@ -656,11 +640,11 @@ public class DBManager {
         List<String> exerciseIds = new ArrayList<>();
         
         // If found in exercises table, use it directly
-        if (exerciseCursor != null && exerciseCursor.moveToFirst()) {
+        if (exerciseCursor.moveToFirst()) {
             exerciseIds.add(Long.toString(_id));
             isExerciseId = true;
             exerciseCursor.close();
-        } else if (exerciseCursor != null) {
+        } else {
             exerciseCursor.close();
         }
         
@@ -694,8 +678,7 @@ public class DBManager {
         // Only proceed if we found exercise IDs
         if (!exerciseIds.isEmpty()) {
             showStyledConfirmationDialog(
-                "Confirm Deletion", 
-                "Are you sure you want to delete this exercise and its associated log(s)?",
+                    "Are you sure you want to delete this exercise and its associated log(s)?",
                 (dialogInterface, i) -> {
                     try {
                         // Delete logs associated with each exercise ID
@@ -755,11 +738,9 @@ public class DBManager {
                 DatabaseHelper.WORKOUT + " = ?";
         Cursor cursor = db.rawQuery(query, new String[]{workoutName});
         int count = 0;
-        if (cursor != null) {
-            cursor.moveToFirst();
-            count = cursor.getInt(0);
-            cursor.close();
-        }
+        cursor.moveToFirst();
+        count = cursor.getInt(0);
+        cursor.close();
         return count > 0;
     }
 
@@ -863,11 +844,9 @@ public class DBManager {
             workoutValue.put(DatabaseHelper.ARCHIVE, 0);
             database.insert(DatabaseHelper.TABLE_NAME_WORKOUTS, null, workoutValue);
         }
-        
-        if (cursor != null) {
-            cursor.close();
-        }
-        
+
+        cursor.close();
+
         // Now insert the exercise
         ContentValues contentValue = new ContentValues();
         contentValue.put(DatabaseHelper.WORKOUT_ID, dummyWorkoutId);
@@ -922,7 +901,7 @@ public class DBManager {
                 new String[]{exerciseId});
                 
             double weight = 0.0;
-            if (cursor != null && cursor.moveToFirst()) {
+            if (cursor.moveToFirst()) {
                 int weightColumnIndex = cursor.getColumnIndex(DatabaseHelper.WEIGHT);
                 if (weightColumnIndex != -1) {
                     weight = cursor.getDouble(weightColumnIndex);
@@ -1206,18 +1185,17 @@ public class DBManager {
 
     /**
      * Creates a styled confirmation dialog with consistent colors
-     * @param title The dialog title
-     * @param message The dialog message
+     *
+     * @param message        The dialog message
      * @param positiveAction Action to perform on positive button click
-     * @return The styled AlertDialog.Builder
      */
-    private AlertDialog showStyledConfirmationDialog(String title, String message, DialogInterface.OnClickListener positiveAction) {
+    private void showStyledConfirmationDialog(String message, DialogInterface.OnClickListener positiveAction) {
         // Create the AlertDialog with explicit context and style
         Context dialogContext = new ContextThemeWrapper(context, 
             isDarkModeEnabled(context) ? R.style.ModernAlertDialogDark : R.style.ModernAlertDialog);
         
         AlertDialog.Builder builder = new AlertDialog.Builder(dialogContext);
-        builder.setTitle(title);
+        builder.setTitle("Confirm Deletion");
         builder.setMessage(message);
 
         // Set up buttons
@@ -1244,8 +1222,7 @@ public class DBManager {
             negativeButton.setTextColor(ContextCompat.getColor(context, R.color.colorInfo));
             negativeButton.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
         }
-        
-        return dialog;
+
     }
 
     /**

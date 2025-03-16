@@ -294,7 +294,7 @@ public class MergeAdapter extends BaseAdapter implements SectionIndexer {
             }
         }
 
-        if (sections.size() == 0) {
+        if (sections.isEmpty()) {
             return (null);
         }
 

@@ -40,7 +40,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     static final String DB_NAME = "YOUR_WORKOUTS.DB";
 
     // database version
-    static final int DB_VERSION = 24;
+    static final int DB_VERSION = 23;
 
     // Creating WORKOUTS table query
     private static final String CREATE_WORKOUTS_TABLE = "create table " + TABLE_NAME_WORKOUTS + "(" + WORKOUT_ID
@@ -88,14 +88,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             //Updates the new column with data - populates with 0 value which means the workout is not archived
             db.execSQL("UPDATE " + TABLE_NAME_WORKOUTS + " SET " + ARCHIVE + " = 0 WHERE 1=1;");
         }
-        else if (oldVersion < 24) {  // Increase DB_VERSION to 24
-            // Add ARCHIVE column to EXERCISES table if it doesn't exist
-            try {
-                db.execSQL("ALTER TABLE " + TABLE_NAME_EXERCISES + " ADD COLUMN " + ARCHIVE + " INTEGER DEFAULT 0;");
-            } catch (Exception e) {
-                // Column might already exist
-            }
-        }
+
         else {
             /* TODO Make a plan for upgraded SQLite version
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_WORKOUTS);

@@ -40,6 +40,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class MainActivityExerciseList extends AppCompatActivity implements ExerciseRecyclerViewAdapter.OnItemLongSelectedListener, ExerciseRecyclerViewAdapter.OnButtonClickListener {
 
@@ -49,15 +50,12 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
     private final List<ExerciseItem> exerciseItems = new ArrayList<>();
     // Custom Recycler View Adaptor
     private ExerciseRecyclerViewAdapter adapter;
-    private ToggleButton toggleWeightUnit;
     private final NumberFormat nf = new DecimalFormat("##.#");
     private View back_drop;
     private boolean rotate = false;
     private View lyt_add_exercise;
     private View lyt_start_selected_exercises;
     private FloatingActionButton fab_add;
-    private FloatingActionButton fab_add_exercise;
-    private FloatingActionButton fab_start_selected;
     private Parcelable recyclerViewState;
     private Toolbar toolbar;
 
@@ -155,9 +153,9 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         // Initialize CardViews and FABs
         fab_add = findViewById(R.id.fab_add);
         CardView cv_add_exercise = findViewById(R.id.cv_add_exercise);
-        fab_add_exercise = findViewById(R.id.fab_add_exercise);
+        FloatingActionButton fab_add_exercise = findViewById(R.id.fab_add_exercise);
         CardView cv_start_selected = findViewById(R.id.cv_start_selected);
-        fab_start_selected = findViewById(R.id.fab_start_selected);
+        FloatingActionButton fab_start_selected = findViewById(R.id.fab_start_selected);
         
         // Display instructions for selecting exercises
         TextView empty = findViewById(R.id.empty);
@@ -186,14 +184,14 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             fab_add_exercise.setOnClickListener(v -> showCustomAddDialog());
         }
         if (cv_start_selected != null) {
-            cv_start_selected.setOnClickListener(v -> startSelectedExercises(v));
+            cv_start_selected.setOnClickListener(this::startSelectedExercises);
         }
         if (fab_start_selected != null) {
-            fab_start_selected.setOnClickListener(v -> startSelectedExercises(v));
+            fab_start_selected.setOnClickListener(this::startSelectedExercises);
         }
 
         // Initialize weight unit toggle if needed
-        toggleWeightUnit = findViewById(R.id.toggle_weight_unit);
+        ToggleButton toggleWeightUnit = findViewById(R.id.toggle_weight_unit);
         if (toggleWeightUnit != null) {
             toggleWeightUnit.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 // You can implement unit conversion logic here if needed
@@ -240,7 +238,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
 
         //Handles side navigation menu clicks
         nav_view.setNavigationItemSelectedListener(item -> {
-            String itemCLicked = item.getTitle().toString();
+            String itemCLicked = Objects.requireNonNull(item.getTitle()).toString();
             Intent intent;
 
             switch (itemCLicked) {
@@ -344,60 +342,59 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         exerciseItems.clear();
         
         // Get all unarchived exercises - this way archived ones won't show in the main list
-        Cursor cursor = dbManager.fetchUnarchivedExercises();
 
-        try {
+        try (Cursor cursor = dbManager.fetchUnarchivedExercises()) {
             //If the cursor has a value in it then hide the empty textview
             if (cursor != null && cursor.getCount() > 0) {
                 TextView empty = findViewById(R.id.empty);
                 if (empty != null) {
                     empty.setVisibility(View.GONE);
                 }
-    
+
                 // Iterate through the cursor and populate the list
                 cursor.moveToFirst(); // Move to the first row
-    
+
                 while (!cursor.isAfterLast()) {
                     ExerciseItem item = new ExerciseItem();
-    
+
                     // Get column indices
                     int exerciseIdColumnIndex = cursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
                     int exerciseColumnIndex = cursor.getColumnIndex(DatabaseHelper.EXERCISE);
                     int weightColumnIndex = cursor.getColumnIndex(DatabaseHelper.WEIGHT);
-    
+
                     if (exerciseIdColumnIndex != -1 && exerciseColumnIndex != -1) {
                         // Retrieve values from the cursor
                         String exerciseId = cursor.getString(exerciseIdColumnIndex);
                         String exercise = cursor.getString(exerciseColumnIndex);
                         double weight = 0;
-                        
+
                         if (weightColumnIndex != -1) {
                             weight = cursor.getDouble(weightColumnIndex);
                         }
-    
+
                         // Set values to the item
                         item.setId(exerciseId);
                         item.setTitle(exercise);
                         item.setWeight(weight);
-                        
+
                         // Set default reps
                         item.setButton1("5");
                         item.setButton2("5");
                         item.setButton3("5");
                         item.setButton4("5");
                         item.setButton5("5");
-                        
+
                         // Set default colors
                         item.setButton1Colour(R.drawable.button_shape_default);
                         item.setButton2Colour(R.drawable.button_shape_default);
                         item.setButton3Colour(R.drawable.button_shape_default);
                         item.setButton4Colour(R.drawable.button_shape_default);
                         item.setButton5Colour(R.drawable.button_shape_default);
-    
+
                         // Add the item to the list
                         exerciseItems.add(item);
                     }
-    
+
                     cursor.moveToNext(); // Move to the next row
                 }
             } else {
@@ -408,13 +405,9 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
                     empty.setText(R.string.empty_exercise_list_text);
                 }
             }
-        } finally {
-            // Always close cursor when done
-            if (cursor != null) {
-                cursor.close();
-            }
         }
-        
+        // Always close cursor when done
+
         // Notify adapter of data changes if it exists
         if (adapter != null) {
             adapter.notifyDataSetChanged();
@@ -466,7 +459,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         dialog.setCancelable(true);
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-        lp.copyFrom(dialog.getWindow().getAttributes());
+        lp.copyFrom(Objects.requireNonNull(dialog.getWindow()).getAttributes());
         lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
 
@@ -488,7 +481,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
 
         Button addButton = dialog.findViewById(R.id.btn_add);
         addButton.setOnClickListener(v -> {
-            if (exerciseNameInput == null || TextUtils.isEmpty(exerciseNameInput.getText())) {
+            if (TextUtils.isEmpty(exerciseNameInput.getText())) {
                 Toast.makeText(getApplicationContext(), "Exercise name cannot be empty", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -497,7 +490,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             
             // Get the weight if provided
             Double weight = null;
-            if (weightInput != null && !TextUtils.isEmpty(weightInput.getText())) {
+            if (!TextUtils.isEmpty(weightInput.getText())) {
                 try {
                     weight = Double.parseDouble(weightInput.getText().toString());
                     
@@ -524,6 +517,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             Toast.makeText(getApplicationContext(), "Exercise added", Toast.LENGTH_SHORT).show();
         });
 
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.modern_dialog_background);
         dialog.show();
         dialog.getWindow().setAttributes(lp);
     }
@@ -536,7 +530,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         dialog.setCancelable(true);
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-        lp.copyFrom(dialog.getWindow().getAttributes());
+        lp.copyFrom(Objects.requireNonNull(dialog.getWindow()).getAttributes());
         lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
 
@@ -553,7 +547,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
 
         Button modifyButton = dialog.findViewById(R.id.btn_update);
         modifyButton.setOnClickListener(v -> {
-            if (exerciseNameInput == null || TextUtils.isEmpty(exerciseNameInput.getText())) {
+            if (TextUtils.isEmpty(exerciseNameInput.getText())) {
                 Toast.makeText(getApplicationContext(), "Exercise name cannot be empty", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -598,6 +592,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             builder.setNegativeButton("No", (dialog1, which) -> {
                 // Do nothing
             });
+            // Set the custom background
             builder.show();
         });
         
@@ -613,6 +608,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             });
         }
 
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.modern_dialog_background);
         dialog.show();
         dialog.getWindow().setAttributes(lp);
     }

@@ -172,7 +172,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
 
         //Handles side navigation menu clicks
         nav_view.setNavigationItemSelectedListener(item -> {
-            String itemCLicked = item.getTitle().toString();
+            String itemCLicked = Objects.requireNonNull(item.getTitle()).toString();
             Intent intent;
 
             switch (itemCLicked) {
@@ -413,7 +413,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
 
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-        lp.copyFrom(dialog.getWindow().getAttributes());
+        lp.copyFrom(Objects.requireNonNull(dialog.getWindow()).getAttributes());
         lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
 
@@ -451,7 +451,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
                     public void onClick(DialogInterface dialogInterface, int i) {
                         // User wants to use the same exercise, so directly add it
                         double exerciseWeight = 0.0;
-                        if (weightEditText.getText().toString().trim().length() > 0) {
+                        if (!weightEditText.getText().toString().trim().isEmpty()) {
                             exerciseWeight = Double.parseDouble(weightEditText.getText().toString());
                             if (!toggleWeightUnit.isChecked()) {
                                 exerciseWeight = Double.parseDouble(nf.format(exerciseWeight / 2.20462));
@@ -472,7 +472,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
             } else {
                 // Exercise name doesn't exist, proceed with adding it
                 double exerciseWeight = 0.0;
-                if (weightEditText.getText().toString().trim().length() > 0) {
+                if (!weightEditText.getText().toString().trim().isEmpty()) {
                     exerciseWeight = Double.parseDouble(weightEditText.getText().toString());
                     if (!toggleWeightUnit.isChecked()) {
                         exerciseWeight = Double.parseDouble(nf.format(exerciseWeight / 2.20462));
@@ -491,6 +491,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
 
         (dialog.findViewById(R.id.bt_close)).setOnClickListener(v -> dialog.dismiss());
 
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.modern_dialog_background);
         dialog.show();
         dialog.getWindow().setAttributes(lp);
     }
@@ -503,7 +504,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
         dialog.setCancelable(true);
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-        lp.copyFrom(dialog.getWindow().getAttributes());
+        lp.copyFrom(Objects.requireNonNull(dialog.getWindow()).getAttributes());
         lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
 
@@ -555,7 +556,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
                                 dbManager.updateExerciseName(_id, newExerciseName);
 
                                 // If there is a weight given, update the database
-                                if (weightEditText.getText().toString().trim().length() > 0) {
+                                if (!weightEditText.getText().toString().trim().isEmpty()) {
                                     double newExerciseWeight = Double.parseDouble(weightEditText.getText().toString());
 
                                     // Convert the entered weight to kg if lbs is selected
@@ -594,7 +595,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
                     dbManager.updateExerciseName(_id, newExerciseName);
 
                     // If there is a weight given, update the database
-                    if (weightEditText.getText().toString().trim().length() > 0) {
+                    if (!weightEditText.getText().toString().trim().isEmpty()) {
                         double newExerciseWeight = Double.parseDouble(weightEditText.getText().toString());
 
                         // Convert the entered weight to kg if lbs is selected
@@ -635,6 +636,7 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
 
         (dialog.findViewById(R.id.bt_close)).setOnClickListener(v -> dialog.dismiss());
 
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.modern_dialog_background);
         dialog.show();
         dialog.getWindow().setAttributes(lp);
     }

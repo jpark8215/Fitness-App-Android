@@ -10,7 +10,6 @@ import android.widget.Chronometer;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -26,6 +25,8 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.material.navigation.NavigationView;
+
+import java.util.Objects;
 
 
 public class ColorSchemeActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
@@ -148,7 +149,7 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
 
         //Handles side navigation menu clicks
         nav_view.setNavigationItemSelectedListener(item -> {
-            String itemCLicked = item.getTitle().toString();
+            String itemCLicked = Objects.requireNonNull(item.getTitle()).toString();
             Intent intent;
 
             switch (itemCLicked) {
