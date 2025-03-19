@@ -82,15 +82,13 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         initToolbar();
         initNavigationMenu();
 
-
         compactCalendarView = findViewById(R.id.compactcalendar_view);
         compactCalendarView.shouldDrawIndicatorsBelowSelectedDays(true);
 
         recyclerView = findViewById(R.id.recycler_view);
 
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 1));
 
         //Shows the current month and year
         txtTitle.setText(dateFormatForMonth.format(compactCalendarView.getFirstDayOfCurrentMonth()));
@@ -99,7 +97,6 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         dbManager.open();
         Cursor cursor = dbManager.fetchAllExerciseLogsForCalendar();
         dbManager.close();
-
 
         //Adds all of the events to the calendar
         for( cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext() ) {
@@ -116,7 +113,6 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
             if (dateColumnIndex != -1) {
                 calendarItem.setDate(cursor.getString(dateColumnIndex));
             }            listItem.add(calendarItem);
-
 
             //String log_id = calendarItem.getLogId();
             String workout_id = calendarItem.getWorkoutId();
@@ -136,16 +132,11 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
                 Event newEvent = new Event(Color.argb(255, 0, 191, 255), milliseconds, "workout_id: " + workout_id);
                 compactCalendarView.addEvent(newEvent);
 
-                //Useful logs if app needs debugging
-                //Log.d(LOG_TAG, "Converted date value: " + d.toString());
-                //Log.d(LOG_TAG, "date value in milliseconds: " + Long.toString(milliseconds));
-
             } catch (ParseException pe) {
                 Log.d(LOG_TAG, "ERROR Parsing date time");
                 pe.printStackTrace();
 
             }
-            //Log.d(LOG_TAG, "CURSOR - WORKOUT_ID: " + workout_id + " LOG_ID: " + log_id + " DATETIME " + date);
         }
 
         Log.d(LOG_TAG, "TODAY'S DATE: " + Calendar.getInstance().getTime());
@@ -155,11 +146,9 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         int calendaryear = Calendar.getInstance().get(Calendar.YEAR);
         Log.d(LOG_TAG, "TODAY'S DATE TRANSFORMED: " + calendartest + " " + calendaryear);
 
-
         //Shows workouts which were completed today
         Date todaysDate = Calendar.getInstance().getTime();
         showEvents(todaysDate);
-
 
         // define a listener to receive callbacks when certain events happen.
         compactCalendarView.setListener(new CompactCalendarView.CompactCalendarViewListener() {
@@ -169,7 +158,6 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
                 showEvents(dateClicked);
 
             }
-
 
             @Override
             public void onMonthScroll(Date firstDayOfNewMonth) {
@@ -197,7 +185,6 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
 
         txtTitle = findViewById(R.id.txtTitle);
         txtTitle.setText("Workouts");
-
 
         //Hides the chronometer as we don't need it for this activity
         Chronometer simpleChronometer = findViewById(R.id.simpleChronometer);

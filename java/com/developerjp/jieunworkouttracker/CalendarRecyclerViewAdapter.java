@@ -1,11 +1,11 @@
 package com.developerjp.jieunworkouttracker;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -31,7 +31,6 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarRe
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_style, parent, false);
-
         return new ViewHolder(v);
     }
 
@@ -45,42 +44,38 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarRe
         final String date = myList.getDate();
 
         holder.itemView.setOnClickListener(v -> {
-
-            TextView text = v.findViewById(R.id.textViewHead);
             Context context = v.getContext();
-            Intent intent = new Intent();
             if (itemSelectedListener != null) {
                 itemSelectedListener.onItemSelected(currentId, currentTitle, date);
+            } else {
+                Log.e("CalendarRecyclerViewAdapter", "ItemSelectedListener is null");
             }
         });
 
-
         holder.itemView.setOnLongClickListener(v -> {
-            TextView text = v.findViewById(R.id.textViewHead);
             Context context = v.getContext();
-            Intent intent = new Intent();
             if (itemLongSelectedListener != null) {
                 itemLongSelectedListener.onItemLongSelected(currentId, currentTitle);
+            } else {
+                Log.e("CalendarRecyclerViewAdapter", "ItemLongSelectedListener is null");
             }
             return true;
         });
     }
 
-
     @Override
     public int getItemCount() {
-
         return list.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-
         public TextView textViewHead;
         public TextView textViewId;
 
         public ViewHolder(View itemView) {
             super(itemView);
             textViewHead = itemView.findViewById(R.id.textViewHead);
+//            textViewId = itemView.findViewById(R.id.textViewId);
         }
     }
 
