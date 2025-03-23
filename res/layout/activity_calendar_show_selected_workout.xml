@@ -7,10 +7,10 @@
     tools:context="com.developerjp.jieunworkouttracker.MainActivityExerciseList">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay"
-        android:id="@+id/appBarLayout">
+        android:theme="@style/AppTheme.AppBarOverlay">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -46,9 +46,9 @@
         android:layout_marginBottom="70dp"
         android:clickable="true"
         android:dividerHeight="1dp"
+        android:focusable="true"
         android:longClickable="true"
-        android:padding="10dp"
-        android:focusable="true"></androidx.recyclerview.widget.RecyclerView>
+        android:padding="10dp"></androidx.recyclerview.widget.RecyclerView>
 
     <View
         android:id="@+id/back_drop"
@@ -95,10 +95,10 @@
                     android:layout_width="?attr/actionBarSize"
                     android:layout_height="?attr/actionBarSize"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:onClick="bottomNavigationHomeClick"
                     android:contentDescription="Home View Button"
-                    app:tint="@color/colorPrimaryLight"
-                    app:srcCompat="@drawable/ic_home_round" />
+                    android:onClick="bottomNavigationHomeClick"
+                    app:srcCompat="@drawable/ic_home_round"
+                    app:tint="@color/colorPrimaryLight" />
 
             </LinearLayout>
 
@@ -117,10 +117,10 @@
                     android:layout_width="?attr/actionBarSize"
                     android:layout_height="?attr/actionBarSize"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:onClick="bottomNavigationCalendarClick"
                     android:contentDescription="Calendar View Button"
-                    app:tint="@color/colorPrimaryLight"
-                    app:srcCompat="@drawable/ic_calendar_round" />
+                    android:onClick="bottomNavigationCalendarClick"
+                    app:srcCompat="@drawable/ic_calendar_round"
+                    app:tint="@color/colorPrimaryLight" />
 
             </LinearLayout>
 
@@ -133,7 +133,7 @@
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="50dp"/>
+        android:layout_marginBottom="50dp" />
 
 
     <LinearLayout
@@ -251,11 +251,11 @@
             android:layout_marginBottom="@dimen/spacing_mlarge"
             android:clickable="true"
             android:contentDescription="Main Add Button"
+            android:focusable="true"
             app:backgroundTint="@color/colorAccent"
             app:fabSize="normal"
             app:rippleColor="@android:color/white"
-            app:srcCompat="@drawable/fab_add_icon"
-            android:focusable="true" />
+            app:srcCompat="@drawable/fab_add_icon" />
 
     </LinearLayout>
 

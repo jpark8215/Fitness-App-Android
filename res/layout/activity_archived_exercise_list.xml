@@ -48,12 +48,12 @@
         android:layout_marginRight="@dimen/spacing_middle"
         android:layout_marginBottom="70dp"
         android:clickable="true"
+        android:contentDescription="Restore Exercise"
         android:focusable="true"
         android:tint="@android:color/white"
         app:backgroundTint="@color/colorAccent"
         app:fabSize="normal"
-        app:srcCompat="@drawable/fab_resume_workout"
-        android:contentDescription="Restore Exercise" />
+        app:srcCompat="@drawable/fab_resume_workout" />
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -55,7 +55,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="20dp"/>
+            android:padding="20dp" />
 
     </LinearLayout>
 
@@ -88,10 +88,10 @@
                     android:layout_width="?attr/actionBarSize"
                     android:layout_height="?attr/actionBarSize"
                     android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Home"
                     android:onClick="bottomNavigationHomeClick"
                     app:srcCompat="@drawable/ic_home_round"
                     app:tint="@color/colorPrimaryLight"
-                    android:contentDescription="Home"
                     tools:ignore="UsingOnClickInXml" />
 
             </LinearLayout>
@@ -111,10 +111,10 @@
                     android:layout_width="?attr/actionBarSize"
                     android:layout_height="?attr/actionBarSize"
                     android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Calendar"
                     android:onClick="bottomNavigationCalendarClick"
                     app:srcCompat="@drawable/ic_calendar_round"
                     app:tint="@color/colorPrimaryLight"
-                    android:contentDescription="Calendar"
                     tools:ignore="UsingOnClickInXml" />
 
             </LinearLayout>

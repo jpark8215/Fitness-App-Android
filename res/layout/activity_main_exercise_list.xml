@@ -26,7 +26,7 @@
         android:background="@color/overlay_dark_30"
         android:clickable="true"
         android:fitsSystemWindows="true"
-        android:importantForAccessibility="no"/>
+        android:importantForAccessibility="no" />
 
     <TextView
         android:id="@+id/empty"
@@ -66,10 +66,10 @@
                     android:layout_width="?attr/actionBarSize"
                     android:layout_height="?attr/actionBarSize"
                     android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Home"
                     android:onClick="bottomNavigationHomeClick"
                     app:srcCompat="@drawable/ic_home_round"
-                    app:tint="@color/colorPrimaryLight"
-                    android:contentDescription="Home" />
+                    app:tint="@color/colorPrimaryLight" />
 
             </LinearLayout>
 
@@ -89,10 +89,10 @@
                     android:layout_width="?attr/actionBarSize"
                     android:layout_height="?attr/actionBarSize"
                     android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Calendar"
                     android:onClick="bottomNavigationCalendarClick"
                     app:srcCompat="@drawable/ic_calendar_round"
-                    app:tint="@color/colorPrimaryLight"
-                    android:contentDescription="Calendar" />
+                    app:tint="@color/colorPrimaryLight" />
 
 
             </LinearLayout>
@@ -152,13 +152,13 @@
                 android:layout_marginRight="@dimen/spacing_middle"
                 android:layout_marginBottom="@dimen/spacing_middle"
                 android:clickable="true"
+                android:contentDescription="Add"
                 android:focusable="true"
                 android:tint="@android:color/white"
                 app:backgroundTint="@color/colorAccent"
                 app:fabSize="normal"
                 app:rippleColor="@android:color/white"
-                app:srcCompat="@drawable/fab_add_icon"
-                android:contentDescription="Add" />
+                app:srcCompat="@drawable/fab_add_icon" />
 
         </LinearLayout>
 

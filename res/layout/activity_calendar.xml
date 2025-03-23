@@ -22,20 +22,17 @@
         app:compactCalendarTextSize="12sp" />
 
 
-
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/compactcalendar_view"
         android:layout_marginBottom="50dp"
-        android:clickable="true"
-        android:dividerHeight="1dp"
+        android:clickable="false"
+        android:dividerHeight="10dp"
+        android:focusable="true"
         android:longClickable="true"
-        android:padding="10dp"
-        android:focusable="true" />
-
+        android:padding="10dp" />
 
 
     <LinearLayout
@@ -46,7 +43,7 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="4dp"
+            android:layout_height="5dp"
             android:background="@drawable/bg_gradient_soft" />
 
         <LinearLayout
