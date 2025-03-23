@@ -37,14 +37,12 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
 
     // Item List
     private final List<com.developerjp.jieunworkouttracker.ExerciseItem> ExerciseItem = new ArrayList<>();
-
-    private Double exerciseWeight;
     private final NumberFormat nf = new DecimalFormat("##.#");
-
+    private final boolean rotate = false;
+    private Double exerciseWeight;
     private String id;
     private String title;
     private String date;
-    private final boolean rotate = false;
     private Parcelable recyclerViewState;
     private Toolbar toolbar;
 
@@ -59,7 +57,7 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
         boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
 
         // If dark mode is enabled then do the following
-        if (darkModeEnabled){
+        if (darkModeEnabled) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             setTheme(R.style.DarkAppTheme_NoActionBar);
             // Otherwise do this
@@ -181,7 +179,7 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
     }
 
 
-    public void loadExerciseData(){
+    public void loadExerciseData() {
         //We pass the database manager the id AND title variable in case the user has entered in two workouts which
         //have the same name. We obviously only want to return the one they clicked on rather than everything
         //with that duplicate workout name
@@ -207,7 +205,7 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
         int intSet4Improvement = 0;
         int intSet5Improvement = 0;
 
-        for( cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext() ) {
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
             ExerciseItem exerciseItem = new ExerciseItem();
             //uses the cursor to populate the item WORKOUT_ID value
             int idColumnIndex = cursor.getColumnIndex("log_id");
@@ -273,9 +271,8 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
             }
 
 
-
             //All of the switch statements to determine which colour button to display for the sets
-            switch(intSet1Improvement){
+            switch (intSet1Improvement) {
                 case 0:
                     //If the value is null the int returns 0 so this is always the default case
                     //If no improvement was recorded then make the button show the default colour
@@ -292,7 +289,7 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
             }
 
 
-            switch(intSet2Improvement){
+            switch (intSet2Improvement) {
                 case 0:
                     exerciseItem.setButton2Colour(R.drawable.button_shape_default);
                     break;
@@ -305,7 +302,7 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
             }
 
 
-            switch(intSet3Improvement){
+            switch (intSet3Improvement) {
                 case 0:
                     exerciseItem.setButton3Colour(R.drawable.button_shape_default);
                     break;
@@ -318,7 +315,7 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
             }
 
 
-            switch(intSet4Improvement){
+            switch (intSet4Improvement) {
                 case 0:
                     exerciseItem.setButton4Colour(R.drawable.button_shape_default);
                     break;
@@ -331,7 +328,7 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
             }
 
 
-            switch(intSet5Improvement){
+            switch (intSet5Improvement) {
                 case 0:
                     exerciseItem.setButton5Colour(R.drawable.button_shape_default);
                     break;
@@ -357,7 +354,7 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
-    public void bottomNavigationHomeClick(View view){
+    public void bottomNavigationHomeClick(View view) {
         Intent intent = new Intent(getApplicationContext(), MainActivityExerciseList.class);
         startActivity(intent);
     }

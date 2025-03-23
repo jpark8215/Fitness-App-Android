@@ -74,6 +74,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
 
+    public interface OnItemSelectedListener {
+        void OnBackPressedDispatcher();
+
+        void onItemSelected(String itemId, String itemTitle);
+    }
+
+    public interface OnItemLongSelectedListener {
+        void onItemLongSelected(String itemId, String itemTitle);
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView textViewHead;
@@ -83,15 +93,5 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             super(itemView);
             textViewHead = itemView.findViewById(R.id.textViewHead);
         }
-    }
-
-    public interface OnItemSelectedListener {
-        void OnBackPressedDispatcher();
-
-        void onItemSelected(String itemId, String itemTitle);
-    }
-
-    public interface OnItemLongSelectedListener {
-        void onItemLongSelected(String itemId, String itemTitle);
     }
 }

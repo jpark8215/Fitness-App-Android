@@ -40,15 +40,13 @@ import java.util.Objects;
 
 public class ShowProgressActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
-    private Toolbar toolbar;
-
-    private BarChart chart;
-    private DBManager dbManager;
-
     // Item List
     private final List<Item> listItem = new ArrayList<>();
     private final List<String> exerciseNames = new ArrayList<>();
     private final Map<String, String> exerciseIdMap = new HashMap<>();
+    private Toolbar toolbar;
+    private BarChart chart;
+    private DBManager dbManager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,7 +55,7 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
         boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
 
-        if (darkModeEnabled){
+        if (darkModeEnabled) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             setTheme(R.style.DarkAppTheme_NoActionBar);
         } else {
@@ -76,7 +74,7 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         initChart();
     }
 
-    private void initChart(){
+    private void initChart() {
         chart = findViewById(R.id.chart1);
         chart.getDescription().setEnabled(false);
 
@@ -190,14 +188,14 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         try {
             chart.clear();
             dbManager.open();
-    
+
             String selectedExerciseName = parent.getItemAtPosition(pos).toString();
             Log.d("Selected Exercise", "Name: " + selectedExerciseName);
-    
+
             // Retrieve all exercise IDs from the map
             List<String> selectedExerciseIds = new ArrayList<>(exerciseIdMap.keySet());
             Log.d("Selected Exercise", "IDs: " + selectedExerciseIds);
-    
+
             // Check if we have valid exercise IDs
             if (selectedExerciseIds.isEmpty()) {
                 Log.w("ShowProgressActivity", "No exercise IDs found");
@@ -205,31 +203,31 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
                 chart.invalidate();
                 return;
             }
-    
+
             Cursor cursor = dbManager.getExerciseLogProgress(selectedExerciseIds);
             ArrayList<BarEntry> values = new ArrayList<>();
-    
+
             // Log cursor data for debugging before processing it
             logCursor(cursor);
-    
+
             // Iterate through the cursor to retrieve log data
             if (cursor != null && cursor.moveToFirst()) {
                 do {
                     int weightColumnIndex = cursor.getColumnIndex("weight");
                     int dateColumnIndex = cursor.getColumnIndex("date");
-    
+
                     if (weightColumnIndex != -1 && dateColumnIndex != -1) {
                         String exerciseWeight = cursor.getString(weightColumnIndex);
                         String exerciseDate = cursor.getString(dateColumnIndex);
-                        
+
                         // Skip if either value is null
                         if (exerciseWeight == null || exerciseDate == null) {
                             Log.w("ShowProgressActivity", "Skipping null data: weight=" + exerciseWeight + ", date=" + exerciseDate);
                             continue;
                         }
-                        
+
                         String dayOfTheYear = convertDate(exerciseDate);
-    
+
                         try {
                             // Check that converted values are not null before parsing
                             if (dayOfTheYear != null && !dayOfTheYear.isEmpty()) {
@@ -244,12 +242,12 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
                         }
                     }
                 } while (cursor.moveToNext());
-    
+
                 cursor.close(); // Close the cursor after processing
             }
-            
+
             dbManager.close();
-    
+
             // If no data was found, add a placeholder
             if (values.isEmpty()) {
                 Log.i("ShowProgressActivity", "No data available for the selected exercise");
@@ -257,19 +255,19 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
                 chart.invalidate();
                 return;
             }
-    
+
             BarDataSet set1 = new BarDataSet(values, "Data Set");
-    
+
             // Set additional configurations for the BarDataSet
             set1.setColors(ColorTemplate.VORDIPLOM_COLORS);
             set1.setDrawValues(false);
-    
+
             // Create a BarData object and add the BarDataSet to it
             BarData data = new BarData(set1);
-    
+
             // Set the data to your chart
             chart.setData(data);
-    
+
             // Refresh the chart to reflect the changes
             chart.invalidate();
         } catch (Exception e) {

@@ -4,8 +4,7 @@ import com.github.mikephil.charting.charts.BarLineChartBase;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 
 
-public class DayAxisValueFormatter extends ValueFormatter
-{
+public class DayAxisValueFormatter extends ValueFormatter {
 
     private final String[] mMonths = new String[]{
             "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"

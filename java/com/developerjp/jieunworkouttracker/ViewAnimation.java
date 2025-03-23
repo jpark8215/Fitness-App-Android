@@ -218,11 +218,6 @@ public class ViewAnimation {
         return rotate;
     }
 
-
-    public interface AnimListener {
-        void onFinish();
-    }
-
     public static void fadeOutIn(View view) {
         view.setAlpha(0.f);
         AnimatorSet animatorSet = new AnimatorSet();
@@ -232,7 +227,6 @@ public class ViewAnimation {
         animatorSet.play(animatorAlpha);
         animatorSet.start();
     }
-
 
     public static void showScale(final View v) {
         ViewAnimation.showScale(v, null);
@@ -307,5 +301,9 @@ public class ViewAnimation {
                     }
                 })
                 .rotation(0f);
+    }
+
+    public interface AnimListener {
+        void onFinish();
     }
 }

@@ -15,7 +15,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Table columns
     public static final String WORKOUT_ID = "workout_id";
     public static final String WORKOUT = "workout";
-    public static final String EXERCISE ="exercise";
+    public static final String EXERCISE = "exercise";
     public static final String EXERCISE_ID = "exercise_id";
     public static final String LOG_ID = "log_id";
     public static final String SET1 = "set1";
@@ -47,7 +47,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + " INTEGER PRIMARY KEY AUTOINCREMENT, " + WORKOUT + " TEXT NOT NULL, " + ARCHIVE + " INTEGER);";
 
 
-//TODO Find a way to de-primary key Exercise ID so duplicated exerciseID can be generated
+    //TODO Find a way to de-primary key Exercise ID so duplicated exerciseID can be generated
     //Create EXERCISES table query
     private static final String CREATE_EXERCISES_TABLE = "CREATE TABLE " + TABLE_NAME_EXERCISES + " (" +
             EXERCISE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -87,9 +87,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("ALTER TABLE " + TABLE_NAME_WORKOUTS + " ADD COLUMN " + ARCHIVE + " TEXT;");
             //Updates the new column with data - populates with 0 value which means the workout is not archived
             db.execSQL("UPDATE " + TABLE_NAME_WORKOUTS + " SET " + ARCHIVE + " = 0 WHERE 1=1;");
-        }
-
-        else {
+        } else {
             /* TODO Make a plan for upgraded SQLite version
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_WORKOUTS);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_EXERCISES);

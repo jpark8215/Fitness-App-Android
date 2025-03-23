@@ -16,7 +16,6 @@ import java.util.Collections;
  * Adapters used as pieces within MergeAdapter must have view type IDs
  * monotonically increasing from 0. Ideally, adapters also have distinct ranges
  * for their row ids, as returned by getItemId().
- *
  */
 public class MergeAdapter extends BaseAdapter implements SectionIndexer {
     protected ArrayList<ListAdapter> pieces = new ArrayList<>();
@@ -33,8 +32,7 @@ public class MergeAdapter extends BaseAdapter implements SectionIndexer {
      * Adds a new adapter to the roster of things to appear in the aggregate
      * list.
      *
-     * @param adapter
-     *            Source for row views for this section
+     * @param adapter Source for row views for this section
      */
     public void addAdapter(ListAdapter adapter) {
         pieces.add(adapter);
@@ -44,8 +42,7 @@ public class MergeAdapter extends BaseAdapter implements SectionIndexer {
     /**
      * Get the data item associated with the specified position in the data set.
      *
-     * @param position
-     *            Position of the item whose data we want
+     * @param position Position of the item whose data we want
      */
     public Object getItem(int position) {
         for (ListAdapter piece : pieces) {
@@ -61,15 +58,14 @@ public class MergeAdapter extends BaseAdapter implements SectionIndexer {
         return (null);
     }
 
-    public void setNoItemsText(String text){
+    public void setNoItemsText(String text) {
         noItemsText = text;
     }
 
     /**
      * Get the adapter associated with the specified position in the data set.
      *
-     * @param position
-     *            Position of the item whose adapter we want
+     * @param position Position of the item whose adapter we want
      */
     public ListAdapter getAdapter(int position) {
         for (ListAdapter piece : pieces) {
@@ -95,7 +91,7 @@ public class MergeAdapter extends BaseAdapter implements SectionIndexer {
             total += piece.getCount();
         }
 
-        if(total == 0 && noItemsText != null){
+        if (total == 0 && noItemsText != null) {
             total = 1;
         }
 
@@ -121,8 +117,7 @@ public class MergeAdapter extends BaseAdapter implements SectionIndexer {
      * Get the type of View that will be created by getView() for the specified
      * item.
      *
-     * @param position
-     *            Position of the item whose data we want
+     * @param position Position of the item whose data we want
      */
     @Override
     public int getItemViewType(int position) {
@@ -156,8 +151,7 @@ public class MergeAdapter extends BaseAdapter implements SectionIndexer {
     /**
      * Returns true if the item at the specified position is not a separator.
      *
-     * @param position
-     *            Position of the item whose data we want
+     * @param position Position of the item whose data we want
      */
     @Override
     public boolean isEnabled(int position) {
@@ -178,12 +172,9 @@ public class MergeAdapter extends BaseAdapter implements SectionIndexer {
      * Get a View that displays the data at the specified position in the data
      * set.
      *
-     * @param position
-     *            Position of the item whose data we want
-     * @param convertView
-     *            View to recycle, if not null
-     * @param parent
-     *            ViewGroup containing the returned View
+     * @param position    Position of the item whose data we want
+     * @param convertView View to recycle, if not null
+     * @param parent      ViewGroup containing the returned View
      */
     public View getView(int position, View convertView, ViewGroup parent) {
         for (ListAdapter piece : pieces) {
@@ -197,7 +188,7 @@ public class MergeAdapter extends BaseAdapter implements SectionIndexer {
             position -= size;
         }
 
-        if(noItemsText != null){
+        if (noItemsText != null) {
             TextView text = new TextView(parent.getContext());
             text.setText(noItemsText);
             return text;
@@ -209,8 +200,7 @@ public class MergeAdapter extends BaseAdapter implements SectionIndexer {
     /**
      * Get the row id associated with the specified position in the list.
      *
-     * @param position
-     *            Position of the item whose data we want
+     * @param position Position of the item whose data we want
      */
     public long getItemId(int position) {
         for (ListAdapter piece : pieces) {

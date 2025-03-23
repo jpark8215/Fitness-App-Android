@@ -43,18 +43,17 @@ import java.util.Objects;
 
 public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerViewAdapter.OnItemLongSelectedListener, ExerciseRecyclerViewAdapter.OnButtonClickListener {
 
+    // Item List
+    private final List<ExerciseItem> ExerciseItem = new ArrayList<>();
+    private final NumberFormat nf = new DecimalFormat("##.#");
     //Public variables which are used across classes/voids
     public String id;
     public String title;
     private DBManager dbManager;
     private RecyclerView recyclerView;
-    // Item List
-    private final List<ExerciseItem> ExerciseItem = new ArrayList<>();
     // Custom Recycler View Adaptor
     private ExerciseRecyclerViewAdapter adapter;
     private ToggleButton toggleWeightUnit;
-
-    private final NumberFormat nf = new DecimalFormat("##.#");
     private View back_drop;
     private boolean rotate = false;
     private View lyt_add_exercise;

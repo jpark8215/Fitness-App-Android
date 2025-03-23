@@ -19,10 +19,10 @@ import java.util.List;
 public class
 WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapter.ViewHolder> {
 
+    private static final String LOG_TAG = "WorkoutRecyclerViewAdaptor";
     private final List<ExerciseItem> list;
     private final OnItemLongSelectedListener itemLongSelectedListener;
     private final OnButtonClickListener buttonClickListener;
-    private static final String LOG_TAG = "WorkoutRecyclerViewAdaptor";
 
 
     public WorkoutRecyclerViewAdapter(List<ExerciseItem> list,
@@ -97,7 +97,7 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
 
                     //If its the first button click we just want to change the button colour to keep track of the workout & record an improvement value in the LOGS table
                     //If its the second button click then we will increment the rep and record it to the database
-                    if (holder.button1FirstClick){
+                    if (holder.button1FirstClick) {
                         Log.d(LOG_TAG, "1st button1");
                         holder.button1FirstClick = false;
                         holder.button1.setBackgroundResource(R.drawable.button_shape_green);
@@ -107,8 +107,7 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
                         String setSelected = "set1";
                         Integer intReps = Integer.parseInt(holder.button1.getText().toString());
                         buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps, 2);
-                    }
-                    else{
+                    } else {
                         Log.d(LOG_TAG, "2nd button1");
                         String setSelected = "set1";
                         int intReps = Integer.parseInt(holder.button1.getText().toString());
@@ -129,7 +128,7 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
             public void onClick(View v) {
                 if (buttonClickListener != null) {
 
-                    if (holder.button2FirstClick){
+                    if (holder.button2FirstClick) {
                         Log.d(LOG_TAG, "1st button2");
                         holder.button2FirstClick = false;
                         holder.button2.setBackgroundResource(R.drawable.button_shape_green);
@@ -139,8 +138,7 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
                         String setSelected = "set2";
                         Integer intReps = Integer.parseInt(holder.button2.getText().toString());
                         buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps, 2);
-                    }
-                    else{
+                    } else {
                         Log.d(LOG_TAG, "2nd button2");
                         String setSelected = "set2";
                         int intReps = Integer.parseInt(holder.button2.getText().toString());
@@ -161,7 +159,7 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
             public void onClick(View v) {
                 if (buttonClickListener != null) {
 
-                    if (holder.button3FirstClick){
+                    if (holder.button3FirstClick) {
                         Log.d(LOG_TAG, "1st button3");
                         holder.button3FirstClick = false;
                         holder.button3.setBackgroundResource(R.drawable.button_shape_green);
@@ -171,8 +169,7 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
                         String setSelected = "set3";
                         Integer intReps = Integer.parseInt(holder.button3.getText().toString());
                         buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps, 2);
-                    }
-                    else{
+                    } else {
                         Log.d(LOG_TAG, "2nd button3");
                         String setSelected = "set3";
                         int intReps = Integer.parseInt(holder.button3.getText().toString());
@@ -193,7 +190,7 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
             public void onClick(View v) {
                 if (buttonClickListener != null) {
 
-                    if (holder.button4FirstClick){
+                    if (holder.button4FirstClick) {
                         Log.d(LOG_TAG, "1st button4");
                         holder.button4FirstClick = false;
                         holder.button4.setBackgroundResource(R.drawable.button_shape_green);
@@ -203,8 +200,7 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
                         String setSelected = "set4";
                         Integer intReps = Integer.parseInt(holder.button4.getText().toString());
                         buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps, 2);
-                    }
-                    else{
+                    } else {
                         Log.d(LOG_TAG, "2nd button4");
                         String setSelected = "set4";
                         int intReps = Integer.parseInt(holder.button4.getText().toString());
@@ -225,7 +221,7 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
             public void onClick(View v) {
                 if (buttonClickListener != null) {
 
-                    if (holder.button5FirstClick){
+                    if (holder.button5FirstClick) {
                         Log.d(LOG_TAG, "1st button5");
                         holder.button5FirstClick = false;
                         holder.button5.setBackgroundResource(R.drawable.button_shape_green);
@@ -235,8 +231,7 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
                         String setSelected = "set5";
                         Integer intReps = Integer.parseInt(holder.button5.getText().toString());
                         buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps, 2);
-                    }
-                    else{
+                    } else {
                         Log.d(LOG_TAG, "2nd button5");
                         String setSelected = "set5";
                         int intReps = Integer.parseInt(holder.button5.getText().toString());
@@ -364,6 +359,16 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
     }
 
 
+    public interface OnItemLongSelectedListener {
+        void onItemLongSelected(String itemId, String itemTitle, Double itemWeight);
+    }
+
+    public interface OnButtonClickListener {
+        void OnBackPressedDispatcher();
+
+        void onButtonClick(String itemId, String itemTitle, String setSelected, Integer intReps, Integer intImprovement);
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView textViewExercise;
@@ -391,15 +396,5 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
             button5 = itemView.findViewById(R.id.button5);
             textViewWeight = itemView.findViewById(R.id.weight);
         }
-    }
-
-    public interface OnItemLongSelectedListener {
-        void onItemLongSelected(String itemId, String itemTitle, Double itemWeight);
-    }
-
-    public interface OnButtonClickListener {
-        void OnBackPressedDispatcher();
-
-        void onButtonClick(String itemId, String itemTitle, String setSelected, Integer intReps, Integer intImprovement);
     }
 }

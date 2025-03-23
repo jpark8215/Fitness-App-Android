@@ -51,7 +51,7 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
         boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
 
         // If dark mode is enabled then do the following
-        if (darkModeEnabled){
+        if (darkModeEnabled) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             setTheme(R.style.DarkAppTheme_NoActionBar);
         } else {
@@ -77,6 +77,7 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
                         public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                             Log.e("Ads", "Ad failed to load: " + loadAdError.getMessage());
                         }
+
                         @Override
                         public void onAdLoaded() {
                             Log.d("Ads", "Ad loaded successfully");
@@ -99,16 +100,16 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
         initSwitch(darkModeEnabled);
     }
 
-    private void initSwitch(Boolean darkModeEnabled){
+    private void initSwitch(Boolean darkModeEnabled) {
         //Used for the light/dark theme switch
         switchTheme = findViewById(R.id.switchTheme);
 
-        if (darkModeEnabled){
+        if (darkModeEnabled) {
             switchTheme.setOnCheckedChangeListener(null);
             switchTheme.setChecked(true);
             switchTheme.setText("Dark");
             switchTheme.setOnCheckedChangeListener(this);
-        } else{
+        } else {
             switchTheme.setOnCheckedChangeListener(null);
             switchTheme.setChecked(false);
             switchTheme.setText("Light");
@@ -188,7 +189,7 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
         });
     }
 
-    public void bottomNavigationHomeClick(View view){
+    public void bottomNavigationHomeClick(View view) {
         Intent intent = new Intent(getApplicationContext(), MainActivityExerciseList.class);
         startActivity(intent);
     }
@@ -244,7 +245,7 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
         }
         super.onPause();
     }
-    
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -258,7 +259,7 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
             Log.e("Ads", "Error resuming AdView: " + e.getMessage());
         }
     }
-    
+
     @Override
     protected void onDestroy() {
         // Destroy the AdView to prevent memory leaks

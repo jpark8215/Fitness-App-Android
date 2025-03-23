@@ -8,19 +8,14 @@ public class CalendarItem {
     private String duration;
     private String time;
 
-    // Setter method to set the workout ID of the calendar item.
-    public void setWorkoutId(String workoutId) {
-        this.workoutId = workoutId;
-    }
-
     // Getter method to retrieve the workout ID of the calendar item.
     public String getWorkoutId() {
         return workoutId;
     }
 
-    // Setter method to set the title of the calendar item.
-    public void setTitle(String title) {
-        this.title = title;
+    // Setter method to set the workout ID of the calendar item.
+    public void setWorkoutId(String workoutId) {
+        this.workoutId = workoutId;
     }
 
     // Getter method to retrieve the title of the calendar item.
@@ -28,14 +23,19 @@ public class CalendarItem {
         return title;
     }
 
-    // Setter method to set the date of the calendar item.
-    public void setDate(String date) {
-        this.date = date;
+    // Setter method to set the title of the calendar item.
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     // Getter method to retrieve the date of the calendar item.
     public String getDate() {
         return date;
+    }
+
+    // Setter method to set the date of the calendar item.
+    public void setDate(String date) {
+        this.date = date;
     }
 
     public String getLogId() {

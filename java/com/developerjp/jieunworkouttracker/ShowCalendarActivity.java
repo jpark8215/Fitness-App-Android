@@ -40,14 +40,13 @@ import java.util.Objects;
 public class ShowCalendarActivity extends AppCompatActivity implements CalendarRecyclerViewAdapter.OnItemSelectedListener {
 
     private static final String LOG_TAG = "Calendar";
-    private DBManager dbManager;
-
     // Item List
     private final List<CalendarItem> listItem = new ArrayList<>();
     private final List<CalendarItem> workoutListItem = new ArrayList<>();
+    private final SimpleDateFormat dateFormatForMonth = new SimpleDateFormat("MMM - yyyy", Locale.getDefault());
+    private DBManager dbManager;
     private CompactCalendarView compactCalendarView;
     private RecyclerView recyclerView;
-    private final SimpleDateFormat dateFormatForMonth = new SimpleDateFormat("MMM - yyyy", Locale.getDefault());
     private Toolbar toolbar;
     private TextView txtTitle;
 
@@ -62,7 +61,7 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
 
         // If dark mode is enabled then do the following
-        if (darkModeEnabled){
+        if (darkModeEnabled) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             setTheme(R.style.DarkAppTheme_NoActionBar);
             // Otherwise do this
@@ -99,7 +98,7 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         dbManager.close();
 
         //Adds all of the events to the calendar
-        for( cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext() ) {
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
             CalendarItem calendarItem = new CalendarItem();
 
             //uses the cursor to populate the calendar WORKOUT_ID value
@@ -112,7 +111,8 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
             int dateColumnIndex = cursor.getColumnIndex("date");
             if (dateColumnIndex != -1) {
                 calendarItem.setDate(cursor.getString(dateColumnIndex));
-            }            listItem.add(calendarItem);
+            }
+            listItem.add(calendarItem);
 
             //String log_id = calendarItem.getLogId();
             String workout_id = calendarItem.getWorkoutId();
@@ -142,7 +142,7 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         Log.d(LOG_TAG, "TODAY'S DATE: " + Calendar.getInstance().getTime());
 
         String calendartest = Calendar.getInstance().getTime().toString();
-        calendartest = calendartest.substring(0,10);
+        calendartest = calendartest.substring(0, 10);
         int calendaryear = Calendar.getInstance().get(Calendar.YEAR);
         Log.d(LOG_TAG, "TODAY'S DATE TRANSFORMED: " + calendartest + " " + calendaryear);
 
@@ -259,7 +259,7 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
     }
 
 
-    public void showEvents(Date dateClicked){
+    public void showEvents(Date dateClicked) {
         List<Event> events = compactCalendarView.getEvents(dateClicked);
         Log.d(LOG_TAG, "Day was clicked: " + dateClicked + " with events " + events);
 
@@ -269,10 +269,10 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         Log.d("*********strDate", strDate);
 
         dbManager.open();
-        
+
         // Get all exercises completed on the selected date with their details
         Cursor exerciseCursor = dbManager.fetchExerciseDetailsForDate(strDate);
-        
+
         //Clears the workoutListItem so that it doesn't keep the values from previous days in it
         workoutListItem.clear();
 
@@ -280,13 +280,13 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
             SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
             // Use a format that can parse the full datetime string from the database
             SimpleDateFormat fullDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
-            
+
             // Group exercises by session (workouts completed within 30 minutes of each other)
             Map<String, List<ExerciseSession>> sessionMap = new HashMap<>();
-            
+
             for (exerciseCursor.moveToFirst(); !exerciseCursor.isAfterLast(); exerciseCursor.moveToNext()) {
                 ExerciseSession session = new ExerciseSession();
-                
+
                 // Get exercise details
                 int exerciseIdColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
                 int exerciseNameColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.EXERCISE);
@@ -294,31 +294,31 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
                 int durationColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.DURATION);
                 int dateColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.DATE);
                 int datetimeColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.DATETIME);
-                
+
                 if (exerciseNameColumnIndex != -1) {
                     session.exerciseName = exerciseCursor.getString(exerciseNameColumnIndex);
                 }
-                
+
                 if (exerciseIdColumnIndex != -1) {
                     session.exerciseId = exerciseCursor.getString(exerciseIdColumnIndex);
                 }
-                
+
                 if (logIdColumnIndex != -1) {
                     session.logId = exerciseCursor.getString(logIdColumnIndex);
                 }
-                
+
                 if (dateColumnIndex != -1) {
                     session.date = exerciseCursor.getString(dateColumnIndex);
                 }
-                
+
                 if (datetimeColumnIndex != -1) {
                     session.datetime = exerciseCursor.getString(datetimeColumnIndex);
                 }
-                
+
                 if (durationColumnIndex != -1) {
                     session.duration = exerciseCursor.getLong(durationColumnIndex);
                 }
-                
+
                 // Determine which session this exercise belongs to
                 String sessionKey = "unknown";
                 try {
@@ -347,21 +347,21 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
                     // Fallback to "Other" session if we can't parse the time
                     sessionKey = "Other";
                 }
-                
+
                 // Add to session map
                 if (!sessionMap.containsKey(sessionKey)) {
                     sessionMap.put(sessionKey, new ArrayList<>());
                 }
                 Objects.requireNonNull(sessionMap.get(sessionKey)).add(session);
             }
-            
+
             exerciseCursor.close();
-            
+
             // Create display items from session map
             for (Map.Entry<String, List<ExerciseSession>> entry : sessionMap.entrySet()) {
                 String sessionName = entry.getKey();
                 List<ExerciseSession> exercises = entry.getValue();
-                
+
                 if (!exercises.isEmpty()) {
                     // First create a session header if there are multiple sessions
                     if (sessionMap.size() > 1) {
@@ -369,17 +369,17 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
                         headerItem.setTitle("--- " + sessionName + " ---");
                         workoutListItem.add(headerItem);
                     }
-                    
+
                     // Then add all exercises in this session
                     for (ExerciseSession exercise : exercises) {
                         CalendarItem item = new CalendarItem();
-                        
+
                         // Set basic properties
                         item.setTitle(exercise.exerciseName);
                         item.setWorkoutId(exercise.exerciseId);
                         item.setLogId(exercise.logId);
                         item.setDate(exercise.date);
-                        
+
                         try {
                             // Format time and duration
                             if (exercise.datetime != null) {
@@ -387,11 +387,11 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
                                 Date date = fullDateFormat.parse(exercise.datetime);
                                 if (date != null) {
                                     String timeStr = timeFormat.format(date);
-                                    
+
                                     // Format duration in minutes
                                     int minutes = (int) (exercise.duration / 60);
                                     String durationStr = minutes + " min";
-                                    
+
                                     // Append time and duration to the title
                                     String displayTitle = exercise.exerciseName + " (" + timeStr + ", " + durationStr + ")";
                                     item.setTitle(displayTitle);
@@ -402,7 +402,7 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
                             // Use the exercise name without time if we can't parse the datetime
                             item.setTitle(exercise.exerciseName + " (time unknown)");
                         }
-                        
+
                         workoutListItem.add(item);
                     }
                 }
@@ -413,15 +413,14 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         }
 
         dbManager.close();
-        
+
         // Custom Recycler View Adaptor
         CalendarRecyclerViewAdapter adapter = new CalendarRecyclerViewAdapter(workoutListItem, ShowCalendarActivity.this, null, ShowCalendarActivity.this);
         recyclerView.setAdapter(adapter);
     }
 
 
-
-    public void bottomNavigationHomeClick(View view){
+    public void bottomNavigationHomeClick(View view) {
         Intent intent = new Intent(getApplicationContext(), MainActivityExerciseList.class);
         startActivity(intent);
     }

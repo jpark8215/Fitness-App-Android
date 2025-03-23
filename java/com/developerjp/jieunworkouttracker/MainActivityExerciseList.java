@@ -44,13 +44,13 @@ import java.util.Objects;
 
 public class MainActivityExerciseList extends AppCompatActivity implements ExerciseRecyclerViewAdapter.OnItemLongSelectedListener, ExerciseRecyclerViewAdapter.OnButtonClickListener {
 
-    private DBManager dbManager;
-    private RecyclerView recyclerView;
     // Item List
     private final List<ExerciseItem> exerciseItems = new ArrayList<>();
+    private final NumberFormat nf = new DecimalFormat("##.#");
+    private DBManager dbManager;
+    private RecyclerView recyclerView;
     // Custom Recycler View Adaptor
     private ExerciseRecyclerViewAdapter adapter;
-    private final NumberFormat nf = new DecimalFormat("##.#");
     private View back_drop;
     private boolean rotate = false;
     private View lyt_add_exercise;
@@ -76,7 +76,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             dbManager.open();
         }
         loadExerciseData();
-        
+
         if (recyclerViewState != null && recyclerView.getLayoutManager() != null) {
             recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
         }
@@ -87,7 +87,8 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         super.onCreate(savedInstanceState);
 
         // Initialize MobileAds
-        MobileAds.initialize(this, initializationStatus -> {});
+        MobileAds.initialize(this, initializationStatus -> {
+        });
 
         // Get a reference to the Shared Preferences object
         SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
@@ -96,7 +97,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
 
         // If dark mode is enabled then do the following
-        if (darkModeEnabled){
+        if (darkModeEnabled) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             setTheme(R.style.DarkAppTheme_NoActionBar);
             // Otherwise do this
@@ -111,7 +112,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         ViewStub stub = findViewById(R.id.main_view_stub);
         stub.setLayoutResource(R.layout.activity_main_exercise_list);
         View inflatedView = stub.inflate();
-        
+
         // Make sure the layout is visible
         if (inflatedView != null) {
             inflatedView.setVisibility(View.VISIBLE);
@@ -131,12 +132,12 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         if (back_drop != null) {
             back_drop.setVisibility(View.GONE);
         }
-        
+
         // Initialize the add button layouts initially to GONE
         if (lyt_add_exercise != null) {
             lyt_add_exercise.setVisibility(View.GONE);
         }
-        
+
         if (lyt_start_selected_exercises != null) {
             lyt_start_selected_exercises.setVisibility(View.GONE);
         }
@@ -156,18 +157,18 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         FloatingActionButton fab_add_exercise = findViewById(R.id.fab_add_exercise);
         CardView cv_start_selected = findViewById(R.id.cv_start_selected);
         FloatingActionButton fab_start_selected = findViewById(R.id.fab_start_selected);
-        
+
         // Display instructions for selecting exercises
         TextView empty = findViewById(R.id.empty);
         if (empty != null) {
             empty.setText("Tap on exercises to select them, then use the 'Start Selected Exercises' button to begin your workout.");
         }
-        
+
         // Make sure animations are properly initialized
         if (lyt_add_exercise != null) {
             ViewAnimation.initShowOut(lyt_add_exercise);
         }
-        
+
         if (lyt_start_selected_exercises != null) {
             ViewAnimation.initShowOut(lyt_start_selected_exercises);
         }
@@ -176,7 +177,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         if (fab_add != null) {
             fab_add.setOnClickListener(v -> toggleFabMenu());
         }
-        
+
         if (cv_add_exercise != null) {
             cv_add_exercise.setOnClickListener(v -> showCustomAddDialog());
         }
@@ -321,7 +322,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         loadExerciseData();
     }
 
-    public void bottomNavigationHomeClick(View view){
+    public void bottomNavigationHomeClick(View view) {
         Intent intent = new Intent(getApplicationContext(), MainActivityExerciseList.class);
         startActivity(intent);
     }
@@ -337,10 +338,10 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             dbManager = new DBManager(this);
             dbManager.open();
         }
-        
+
         // Clear existing items
         exerciseItems.clear();
-        
+
         // Get all unarchived exercises - this way archived ones won't show in the main list
 
         try (Cursor cursor = dbManager.fetchUnarchivedExercises()) {
@@ -412,7 +413,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         if (adapter != null) {
             adapter.notifyDataSetChanged();
         }
-        
+
         // Important: Don't close the database here, as it might be needed by other functions
         // We'll close it in onDestroy
     }
@@ -420,22 +421,22 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
     private void startSelectedExercises(View v) {
         // Get selected exercises
         List<String> selectedExerciseIds = adapter.getSelectedExerciseIds();
-        
+
         if (selectedExerciseIds.isEmpty()) {
             Toast.makeText(this, "Please select at least one exercise to start", Toast.LENGTH_SHORT).show();
             return;
         }
-        
+
         // Start the selected exercises
         if (dbManager != null) {
             dbManager.startSelectedExercises(selectedExerciseIds);
         }
-        
+
         // Navigate to StartWorkoutActivity with the selected exercises
         Intent intent = new Intent(getApplicationContext(), StartWorkoutActivity.class);
         intent.putStringArrayListExtra("selected_exercise_ids", new ArrayList<>(selectedExerciseIds));
         startActivity(intent);
-        
+
         // Clear selections after starting
         if (adapter != null) {
             adapter.clearSelections();
@@ -444,7 +445,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
 
     /**
      * Toggle selection of an exercise in the list
-     * 
+     *
      * @param itemId ID of the exercise to toggle selection
      */
     private void toggleSelection(String itemId) {
@@ -487,13 +488,13 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             }
 
             String exerciseName = exerciseNameInput.getText().toString();
-            
+
             // Get the weight if provided
             Double weight = null;
             if (!TextUtils.isEmpty(weightInput.getText())) {
                 try {
                     weight = Double.parseDouble(weightInput.getText().toString());
-                    
+
                     // Convert to kg if needed (if toggle is set to lbs)
                     if (weightUnitToggle != null && !weightUnitToggle.isChecked()) {
                         // Convert lbs to kg: kg = lbs * 0.453592
@@ -507,12 +508,12 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
 
             // Insert the exercise directly
             dbManager.insertExerciseDirectly(exerciseName, weight);
-            
+
             // Refresh the exercise list
             exerciseItems.clear();
             loadExerciseData();
             adapter.notifyDataSetChanged();
-            
+
             dialog.dismiss();
             Toast.makeText(getApplicationContext(), "Exercise added", Toast.LENGTH_SHORT).show();
         });
@@ -554,7 +555,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
 
             // Get the updated exercise name
             String newTitle = exerciseNameInput.getText().toString();
-            
+
             // Get the updated weight
             Double newWeight = null;
             if (weightInput != null && !TextUtils.isEmpty(weightInput.getText())) {
@@ -568,10 +569,10 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
 
             // Update the exercise in the database
             dbManager.updateExercise(itemId, newTitle, newWeight);
-            
+
             // Refresh the exercise list
             loadExerciseData();
-            
+
             dialog.dismiss();
             Toast.makeText(getApplicationContext(), "Exercise updated", Toast.LENGTH_SHORT).show();
         });
@@ -602,7 +603,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             // Show the dialog
             confirmationDialog.show();
         });
-        
+
         // Add archive button functionality
         Button archiveButton = dialog.findViewById(R.id.btn_archive);
         if (archiveButton != null) {
@@ -622,13 +623,13 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
 
     private void toggleFabMenu() {
         rotate = !rotate;
-        
+
         // If we're showing the menu, make sure the backdrop is visible
         if (rotate) {
             if (back_drop != null) {
                 back_drop.setVisibility(View.VISIBLE);
             }
-            
+
             // Show the option layouts with animation
             if (lyt_add_exercise != null) {
                 ViewAnimation.showIn(lyt_add_exercise);
@@ -636,7 +637,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             if (lyt_start_selected_exercises != null) {
                 ViewAnimation.showIn(lyt_start_selected_exercises);
             }
-            
+
             // Rotate the FAB button
             ViewAnimation.rotateForward(fab_add);
         } else {
@@ -647,10 +648,10 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             if (lyt_start_selected_exercises != null) {
                 ViewAnimation.showOut(lyt_start_selected_exercises);
             }
-            
+
             // Rotate the FAB button back
             ViewAnimation.rotateBackward(fab_add);
-            
+
             // Hide the backdrop after a delay
             new Handler().postDelayed(() -> {
                 if (back_drop != null) {
@@ -658,7 +659,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
                 }
             }, 300);
         }
-        
+
         // Make the menu items clickable
         if (back_drop != null) {
             back_drop.setOnClickListener(v -> toggleFabMenu());

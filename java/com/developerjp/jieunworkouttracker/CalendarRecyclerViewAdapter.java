@@ -1,11 +1,11 @@
 package com.developerjp.jieunworkouttracker;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -68,6 +68,14 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarRe
         return list.size();
     }
 
+    public interface OnItemSelectedListener {
+        void onItemSelected(String itemId, String itemTitle, String itemDate);
+    }
+
+    public interface OnItemLongSelectedListener {
+        void onItemLongSelected(String itemId, String itemTitle);
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView textViewHead;
         public TextView textViewId;
@@ -77,13 +85,5 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarRe
             textViewHead = itemView.findViewById(R.id.textViewHead);
 //            textViewId = itemView.findViewById(R.id.textViewId);
         }
-    }
-
-    public interface OnItemSelectedListener {
-        void onItemSelected(String itemId, String itemTitle, String itemDate);
-    }
-
-    public interface OnItemLongSelectedListener {
-        void onItemLongSelected(String itemId, String itemTitle);
     }
 }

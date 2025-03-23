@@ -1,5 +1,6 @@
 package com.developerjp.jieunworkouttracker;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -14,8 +15,6 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.Log;
 import android.widget.Chronometer;
-import android.Manifest;
-
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
@@ -28,10 +27,10 @@ public class WorkoutService extends Service {
     private static final String LOG_TAG_BOUND = "BoundService";
     //TODO Use this instead of hardcoded values
     private static final String NOTIFICATION_CHANNEL_ID = "1";
-    //Chronometer is used for the counter timer
-    private Chronometer chronometer;
     // interface for clients that bind
     private final IBinder mBinder = new MyBinder();
+    //Chronometer is used for the counter timer
+    private Chronometer chronometer;
 
     @Override
     public void onCreate() {
@@ -87,12 +86,6 @@ public class WorkoutService extends Service {
         return super.onUnbind(intent);
     }
 
-    public class MyBinder extends Binder {
-        WorkoutService getService() {
-            return WorkoutService.this;
-        }
-    }
-
     // Is used to return the value of the chronometer
     public long getTime() {
         return chronometer.getBase();
@@ -133,6 +126,12 @@ public class WorkoutService extends Service {
             // or other notification behaviors after this
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    public class MyBinder extends Binder {
+        WorkoutService getService() {
+            return WorkoutService.this;
         }
     }
 }

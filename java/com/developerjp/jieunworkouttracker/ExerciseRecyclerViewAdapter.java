@@ -22,22 +22,30 @@ import java.util.Set;
 
 public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRecyclerViewAdapter.ViewHolder> {
 
+    private static final String LOG_TAG = "ExerciseRecyclerViewAdapter";
     private final List<ExerciseItem> list;
     private final OnItemLongSelectedListener itemLongSelectedListener;
     private final OnButtonClickListener buttonClickListener;
-    private static final String LOG_TAG = "ExerciseRecyclerViewAdapter";
-
     // Add a set to track selected exercises
     private final Set<String> selectedExerciseIds = new HashSet<>();
-    
+
+    public ExerciseRecyclerViewAdapter(List<ExerciseItem> list,
+                                       Context context,
+                                       OnItemLongSelectedListener listener, OnButtonClickListener buttonlistener) {
+        this.list = list;
+        this.itemLongSelectedListener = listener;
+        this.buttonClickListener = buttonlistener;
+    }
+
     /**
      * Get the list of selected exercise IDs
+     *
      * @return List of selected exercise IDs
      */
     public List<String> getSelectedExerciseIds() {
         return new ArrayList<>(selectedExerciseIds);
     }
-    
+
     /**
      * Clear all selections
      */
@@ -45,9 +53,10 @@ public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRe
         selectedExerciseIds.clear();
         notifyDataSetChanged();
     }
-    
+
     /**
      * Toggle selection of an exercise
+     *
      * @param exerciseId ID of the exercise to toggle
      */
     public void toggleSelection(String exerciseId) {
@@ -57,14 +66,6 @@ public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRe
             selectedExerciseIds.add(exerciseId);
         }
         notifyDataSetChanged();
-    }
-
-    public ExerciseRecyclerViewAdapter(List<ExerciseItem> list,
-                                       Context context,
-                                       OnItemLongSelectedListener listener, OnButtonClickListener buttonlistener) {
-        this.list = list;
-        this.itemLongSelectedListener = listener;
-        this.buttonClickListener = buttonlistener;
     }
 
     @NonNull
@@ -82,7 +83,7 @@ public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRe
         ExerciseItem myList = list.get(position);
 
         holder.textViewExercise.setText(myList.getTitle());
-        
+
         // Show selection state with a more visible indicator
         final String currentId = myList.getId();
         if (selectedExerciseIds.contains(currentId)) {
@@ -94,7 +95,7 @@ public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRe
             holder.itemView.setBackgroundResource(android.R.color.transparent);
             holder.textViewExercise.setText(myList.getTitle());
         }
-        
+
         // Set up click listener for selection
         holder.itemView.setOnClickListener(v -> {
             toggleSelection(currentId);
@@ -105,7 +106,7 @@ public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRe
                 Toast.makeText(v.getContext(), "Exercise unselected", Toast.LENGTH_SHORT).show();
             }
         });
-        
+
         holder.button1.setText(myList.getButton1());
         holder.button2.setText(myList.getButton2());
         holder.button3.setText(myList.getButton3());
@@ -266,6 +267,16 @@ public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRe
         return list.size();
     }
 
+    public interface OnItemLongSelectedListener {
+        void onItemLongSelected(String itemId, String itemTitle, Double itemWeight);
+    }
+
+    public interface OnButtonClickListener {
+        void OnBackPressedDispatcher();
+
+        void onButtonClick(String itemId, String itemTitle, String setSelected, Integer intReps);
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView textViewExercise;
@@ -295,15 +306,5 @@ public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRe
             button5 = itemView.findViewById(R.id.button5);
             textViewWeight = itemView.findViewById(R.id.weight);
         }
-    }
-
-    public interface OnItemLongSelectedListener {
-        void onItemLongSelected(String itemId, String itemTitle, Double itemWeight);
-    }
-
-    public interface OnButtonClickListener {
-        void OnBackPressedDispatcher();
-
-        void onButtonClick(String itemId, String itemTitle, String setSelected, Integer intReps);
     }
 }
