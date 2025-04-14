@@ -512,13 +512,13 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
 
                 //If there is a weight given then update the database
-                if (weightEditText.getText().toString().trim().length() > 0) {
+                if (!weightEditText.getText().toString().trim().isEmpty()) {
                     Double newExerciseWeight = Double.parseDouble(weightEditText.getText().toString());
-                    dbManager.updateExerciseWeight(_id, newExerciseWeight);
+                    dbManager.updateExerciseWeight(String.valueOf(_id), newExerciseWeight);
                 } else {
                     //If no weight value was given then update with a default value of 0
                     Double newExerciseWeight = 0.0;
-                    dbManager.updateExerciseWeight(_id, newExerciseWeight);
+                    dbManager.updateExerciseWeight(String.valueOf(_id), newExerciseWeight);
                 }
 
 

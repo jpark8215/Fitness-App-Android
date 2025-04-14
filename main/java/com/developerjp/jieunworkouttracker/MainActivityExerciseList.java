@@ -58,6 +58,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
     private FloatingActionButton fab_add;
     private Parcelable recyclerViewState;
     private Toolbar toolbar;
+    private boolean isKgUnit = true; // Default to kg
 
     @Override
     protected void onPause() {
@@ -75,7 +76,15 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             dbManager = new DBManager(this);
             dbManager.open();
         }
+        
+        // Get the current weight unit preference
+        isKgUnit = WeightUnitManager.isKgUnit(this);
+        
+        // Load exercise data from database
         loadExerciseData();
+        
+        // Update the display based on current weight unit settings
+        updateWeightDisplay();
 
         if (recyclerViewState != null && recyclerView.getLayoutManager() != null) {
             recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
@@ -189,14 +198,6 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         }
         if (fab_start_selected != null) {
             fab_start_selected.setOnClickListener(this::startSelectedExercises);
-        }
-
-        // Initialize weight unit toggle if needed
-        ToggleButton toggleWeightUnit = findViewById(R.id.toggle_weight_unit);
-        if (toggleWeightUnit != null) {
-            toggleWeightUnit.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                // You can implement unit conversion logic here if needed
-            });
         }
 
         // Load exercises
@@ -663,6 +664,28 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         // Make the menu items clickable
         if (back_drop != null) {
             back_drop.setOnClickListener(v -> toggleFabMenu());
+        }
+    }
+
+    private void updateWeightDisplay() {
+        if (exerciseItems != null && adapter != null) {
+            boolean isKgUnit = WeightUnitManager.isKgUnit(this);
+            for (ExerciseItem exercise : exerciseItems) {
+                double weight = exercise.getWeight();
+                String formattedWeight;
+                
+                if (isKgUnit) {
+                    // Already in kg, just format it
+                    formattedWeight = WeightUtils.formatWeight(weight, true);
+                } else {
+                    // Convert to lbs and format
+                    double weightInLbs = WeightUtils.kgToLbs(weight);
+                    formattedWeight = WeightUtils.formatWeight(weightInLbs, false);
+                }
+                
+                exercise.setDisplayWeight(formattedWeight);
+            }
+            adapter.notifyDataSetChanged();
         }
     }
 }

@@ -52,7 +52,7 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
         holder.button3.setText(myList.getButton3());
         holder.button4.setText(myList.getButton4());
         holder.button5.setText(myList.getButton5());
-        holder.textViewWeight.setText(myList.getWeight().toString() + "kg");
+        holder.textViewWeight.setText(myList.getDisplayWeight());
 
 
         //Sets the background colour of the buttons
@@ -397,4 +397,5 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
             textViewWeight = itemView.findViewById(R.id.weight);
         }
     }
+
 }

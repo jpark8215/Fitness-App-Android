@@ -81,21 +81,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
-        if (oldVersion == 22) {
-            //Inserts the new column if you're on an older version of the database
-            db.execSQL("ALTER TABLE " + TABLE_NAME_WORKOUTS + " ADD COLUMN " + ARCHIVE + " TEXT;");
-            //Updates the new column with data - populates with 0 value which means the workout is not archived
-            db.execSQL("UPDATE " + TABLE_NAME_WORKOUTS + " SET " + ARCHIVE + " = 0 WHERE 1=1;");
-        } else {
-            /* TODO Make a plan for upgraded SQLite version
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_WORKOUTS);
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_EXERCISES);
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_LOGS);
-            onCreate(db);
-             */
+        // Handle upgrades between specific versions
+        if (oldVersion < 23) {
+            // Apply all migrations necessary to get to the current version
+            
+            // Add ARCHIVE column if it doesn't exist
+            try {
+                db.execSQL("ALTER TABLE " + TABLE_NAME_WORKOUTS + " ADD COLUMN " + ARCHIVE + " TEXT;");
+                db.execSQL("UPDATE " + TABLE_NAME_WORKOUTS + " SET " + ARCHIVE + " = 0 WHERE 1=1;");
+            } catch (Exception e) {
+                // Column might already exist, ignore
+            }
         }
-
+        
+        // For future migrations, add more conditions here
+        // if (oldVersion < 24) { ... }
     }
 
 

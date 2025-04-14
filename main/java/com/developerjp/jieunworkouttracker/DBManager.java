@@ -18,6 +18,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -382,68 +383,59 @@ public class DBManager {
         }
     }
 
-    public void updateExerciseWeight(long _id, Double exerciseWeight) {
-        // First check if this is an exercise ID directly in the exercises table
-        Cursor exerciseCursor = database.query(
-                DatabaseHelper.TABLE_NAME_EXERCISES,
-                new String[]{DatabaseHelper.EXERCISE_ID},
-                DatabaseHelper.EXERCISE_ID + " = ?",
-                new String[]{Long.toString(_id)},
-                null, null, null
+    /**
+     * Updates the weight of an exercise in the database
+     * @param exerciseId The ID of the exercise to update
+     * @param weight The weight value to set (in kg)
+     * @return true if update was successful, false otherwise
+     */
+    public boolean updateExerciseWeight(String exerciseId, double weight) {
+        // Format to one decimal place
+        DecimalFormat df = new DecimalFormat("#.#");
+        weight = Double.parseDouble(df.format(weight));
+        
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.WEIGHT, weight);
+        
+        // Update in EXERCISES table
+        int exercisesUpdated = database.update(
+            DatabaseHelper.TABLE_NAME_EXERCISES,
+            values,
+            DatabaseHelper.EXERCISE_ID + " = ?",
+            new String[]{exerciseId}
         );
+        
+        // Also update the most recent log entry for this exercise
+        ContentValues logValues = new ContentValues();
+        logValues.put(DatabaseHelper.WEIGHT, weight);
+        
+        int logsUpdated = database.update(
+            DatabaseHelper.TABLE_NAME_LOGS,
+            logValues,
+            DatabaseHelper.EXERCISE_ID + " = ? AND " + DatabaseHelper.DATETIME + " = (SELECT MAX(" + 
+            DatabaseHelper.DATETIME + ") FROM " + DatabaseHelper.TABLE_NAME_LOGS + 
+            " WHERE " + DatabaseHelper.EXERCISE_ID + " = ?)",
+            new String[]{exerciseId, exerciseId}
+        );
+        
+        return exercisesUpdated > 0 || logsUpdated > 0;
+    }
 
-        boolean isExerciseId = false;
-        long exerciseId = -1;
-
-        // If found in exercises table, use it directly
-        if (exerciseCursor.moveToFirst()) {
-            exerciseId = _id;
-            isExerciseId = true;
-            exerciseCursor.close();
-        } else {
-            exerciseCursor.close();
+    /**
+     * Updates the weight of an exercise in the database with unit conversion
+     * @param exerciseId The ID of the exercise to update
+     * @param weight The weight value to set
+     * @param isKg Whether the provided weight is in kg (true) or lbs (false)
+     * @return true if update was successful, false otherwise
+     */
+    public boolean updateExerciseWeight(String exerciseId, double weight, boolean isKg) {
+        // If weight is in lbs, convert to kg before saving
+        if (!isKg) {
+            weight = WeightUtils.lbsToKg(weight);
         }
-
-        // If not an exercise ID, try to find it from logs
-        if (!isExerciseId) {
-            // Get today's date in the format "YYYY-MM-DD"
-            String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-
-            // Prepare the SQL query to fetch the exercise ID associated with the provided log ID
-            String[] projection = {DatabaseHelper.EXERCISE_ID};
-            String selection = DatabaseHelper.LOG_ID + " = ?";
-            String[] selectionArgs = {String.valueOf(_id)};
-
-            // Execute the query to fetch the exercise ID
-            Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_LOGS, projection, selection, selectionArgs, null, null, null);
-
-            if (cursor.moveToFirst()) {
-                int exerciseIdColumnIndex = cursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
-                if (exerciseIdColumnIndex != -1) {
-                    exerciseId = cursor.getLong(exerciseIdColumnIndex);
-                }
-                cursor.close();
-            }
-        }
-
-        // Only proceed if we have a valid exercise ID
-        if (exerciseId != -1) {
-            // Get today's date for filtering
-            String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-
-            // Update any log entries for today with this exercise ID
-            String selectionUpdate = "LOGS.EXERCISE_ID = ? AND strftime('%Y-%m-%d', LOGS.DATE) = ?";
-            String[] selectionArgsUpdate = {String.valueOf(exerciseId), todayDate};
-
-            ContentValues logValues = new ContentValues();
-            logValues.put(DatabaseHelper.WEIGHT, exerciseWeight);
-
-            int logsUpdated = database.update(DatabaseHelper.TABLE_NAME_LOGS, logValues, selectionUpdate, selectionArgsUpdate);
-
-            Log.d("DBManager", "Updated exercise weight. Logs table rows: " + logsUpdated);
-        } else {
-            Log.e("DBManager", "Failed to find exercise ID for weight update");
-        }
+        
+        // Call the existing method with the converted weight
+        return updateExerciseWeight(exerciseId, weight);
     }
 
 
@@ -985,7 +977,7 @@ public class DBManager {
 
             // Update the exercise weight if provided
             if (exerciseWeight != null) {
-                updateExerciseWeight(longId, exerciseWeight);
+                updateExerciseWeight(exerciseId, exerciseWeight);
             }
         } catch (NumberFormatException e) {
             Log.e("DBManager", "Error parsing exercise ID: " + e.getMessage());

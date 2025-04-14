@@ -1,5 +1,6 @@
 package com.developerjp.jieunworkouttracker;
 
+import java.text.DecimalFormat;
 
 public class ExerciseItem {
     private String id;
@@ -14,7 +15,8 @@ public class ExerciseItem {
     private int button4colour;
     private String button5;
     private int button5colour;
-    private Double weight;
+    private double weight;
+    private String displayWeight;
 
     public void setButton1Colour(int button1colour) {
         this.button1colour = button1colour;
@@ -112,12 +114,22 @@ public class ExerciseItem {
         return button5colour;
     }
 
-    public Double getWeight() {
+    public void setWeight(double weight) {
+        // Store the weight with exactly one decimal place
+        this.weight = WeightUtils.formatToOneDecimal(weight);
+        // Set a default display format in kg, will be updated by updateWeightDisplay if needed
+        this.displayWeight = WeightUtils.formatWeight(this.weight, true);
+    }
+
+    public double getWeight() {
         return weight;
     }
 
-    public void setWeight(Double weight) {
-        this.weight = weight;
+    public void setDisplayWeight(String displayWeight) {
+        this.displayWeight = displayWeight;
     }
 
+    public String getDisplayWeight() {
+        return displayWeight;
+    }
 }

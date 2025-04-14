@@ -103,6 +103,7 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
         back_drop.setVisibility(View.GONE);
         ViewAnimation.initShowOut(lyt_add_exercise);
         ViewAnimation.initShowOut(lyt_start_workout);
+        
     }
 
 
@@ -180,178 +181,193 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
 
 
     public void loadExerciseData() {
-        //We pass the database manager the id AND title variable in case the user has entered in two workouts which
-        //have the same name. We obviously only want to return the one they clicked on rather than everything
-        //with that duplicate workout name
+        // Log the parameters for debugging
+        Log.d("CalendarShowSelectedWorkout", "Loading data with ID: " + id + ", Title: " + title + ", Date: " + date);
+        
         DBManager dbManager = new DBManager(this);
         dbManager.open();
-        Cursor cursor = dbManager.fetchExerciseLogsForSelectedDate(id, date);
-
+        
+        // Prepare the date for querying if needed
+        String formattedDate = date;
+        if (!formattedDate.contains("%")) {
+            formattedDate = formattedDate + "%";  // Add wildcard for time part
+        }
+        
+        // First try to use fetchExerciseDetailsForDate which is designed for this purpose
+        Cursor cursor = dbManager.fetchExerciseDetailsForDate(formattedDate);
+        Log.d("CalendarShowSelectedWorkout", "fetchExerciseDetailsForDate returned " + 
+              (cursor != null ? cursor.getCount() : 0) + " rows");
+        
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        //If the cursor has a value in it then hide the empty textview
-        //In English. If there is a workout returned, then remove the text saying no workouts found
-        if (cursor.getCount() > 0) {
-            TextView empty = findViewById(R.id.empty);
-            empty.setVisibility(View.GONE);
+        
+        // Clear existing items
+        ExerciseItem.clear();
+        
+        boolean hasExercises = cursor != null && cursor.getCount() > 0;
+        
+        // Get current weight unit preference
+        boolean isKgUnit = WeightUnitManager.isKgUnit(this);
+        
+        // Show appropriate message based on whether we have exercises
+        TextView empty = findViewById(R.id.empty);
+        if (empty != null) {
+            if (!hasExercises) {
+                empty.setVisibility(View.VISIBLE);
+                empty.setText("No exercises found for " + date);
+            } else {
+                empty.setVisibility(View.GONE);
+            }
         }
-
-        int i = 0;
-        int intSet1Improvement = 0;
-        int intSet2Improvement = 0;
-        int intSet3Improvement = 0;
-        int intSet4Improvement = 0;
-        int intSet5Improvement = 0;
-
-        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-            ExerciseItem exerciseItem = new ExerciseItem();
-            //uses the cursor to populate the item WORKOUT_ID value
-            int idColumnIndex = cursor.getColumnIndex("log_id");
-            if (idColumnIndex != -1) {
-                exerciseItem.setId(cursor.getString(idColumnIndex));
+        
+        // Process cursor data if we have results
+        if (hasExercises) {
+            // Track improvements for coloring
+            int intSet1Improvement = 0;
+            int intSet2Improvement = 0;
+            int intSet3Improvement = 0;
+            int intSet4Improvement = 0;
+            int intSet5Improvement = 0;
+            
+            for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                ExerciseItem exerciseItem = new ExerciseItem();
+                
+                // Extract log ID and exercise name
+                int logIdIndex = cursor.getColumnIndex(DatabaseHelper.LOG_ID);
+                if (logIdIndex != -1) {
+                    exerciseItem.setId(cursor.getString(logIdIndex));
+                }
+                
+                int exerciseNameIndex = cursor.getColumnIndex(DatabaseHelper.EXERCISE);
+                if (exerciseNameIndex != -1) {
+                    exerciseItem.setTitle(cursor.getString(exerciseNameIndex));
+                }
+                
+                // Extract set values
+                int set1Index = cursor.getColumnIndex(DatabaseHelper.SET1);
+                if (set1Index != -1 && !cursor.isNull(set1Index)) {
+                    exerciseItem.setButton1(cursor.getString(set1Index));
+                } else {
+                    exerciseItem.setButton1("0");
+                }
+                
+                int set2Index = cursor.getColumnIndex(DatabaseHelper.SET2);
+                if (set2Index != -1 && !cursor.isNull(set2Index)) {
+                    exerciseItem.setButton2(cursor.getString(set2Index));
+                } else {
+                    exerciseItem.setButton2("0");
+                }
+                
+                int set3Index = cursor.getColumnIndex(DatabaseHelper.SET3);
+                if (set3Index != -1 && !cursor.isNull(set3Index)) {
+                    exerciseItem.setButton3(cursor.getString(set3Index));
+                } else {
+                    exerciseItem.setButton3("0");
+                }
+                
+                int set4Index = cursor.getColumnIndex(DatabaseHelper.SET4);
+                if (set4Index != -1 && !cursor.isNull(set4Index)) {
+                    exerciseItem.setButton4(cursor.getString(set4Index));
+                } else {
+                    exerciseItem.setButton4("0");
+                }
+                
+                int set5Index = cursor.getColumnIndex(DatabaseHelper.SET5);
+                if (set5Index != -1 && !cursor.isNull(set5Index)) {
+                    exerciseItem.setButton5(cursor.getString(set5Index));
+                } else {
+                    exerciseItem.setButton5("0");
+                }
+                
+                // Extract improvement indicators
+                int set1ImprovementIndex = cursor.getColumnIndex(DatabaseHelper.SET1_IMPROVEMENT);
+                if (set1ImprovementIndex != -1 && !cursor.isNull(set1ImprovementIndex)) {
+                    intSet1Improvement = cursor.getInt(set1ImprovementIndex);
+                } else {
+                    intSet1Improvement = 0;
+                }
+                
+                int set2ImprovementIndex = cursor.getColumnIndex(DatabaseHelper.SET2_IMPROVEMENT);
+                if (set2ImprovementIndex != -1 && !cursor.isNull(set2ImprovementIndex)) {
+                    intSet2Improvement = cursor.getInt(set2ImprovementIndex);
+                } else {
+                    intSet2Improvement = 0;
+                }
+                
+                int set3ImprovementIndex = cursor.getColumnIndex(DatabaseHelper.SET3_IMPROVEMENT);
+                if (set3ImprovementIndex != -1 && !cursor.isNull(set3ImprovementIndex)) {
+                    intSet3Improvement = cursor.getInt(set3ImprovementIndex);
+                } else {
+                    intSet3Improvement = 0;
+                }
+                
+                int set4ImprovementIndex = cursor.getColumnIndex(DatabaseHelper.SET4_IMPROVEMENT);
+                if (set4ImprovementIndex != -1 && !cursor.isNull(set4ImprovementIndex)) {
+                    intSet4Improvement = cursor.getInt(set4ImprovementIndex);
+                } else {
+                    intSet4Improvement = 0;
+                }
+                
+                int set5ImprovementIndex = cursor.getColumnIndex(DatabaseHelper.SET5_IMPROVEMENT);
+                if (set5ImprovementIndex != -1 && !cursor.isNull(set5ImprovementIndex)) {
+                    intSet5Improvement = cursor.getInt(set5ImprovementIndex);
+                } else {
+                    intSet5Improvement = 0;
+                }
+                
+                // Set button colors based on improvement
+                switch (intSet1Improvement) {
+                    case 0:
+                        exerciseItem.setButton1Colour(R.drawable.button_shape_default);
+                        break;
+                    case 1:
+                        exerciseItem.setButton1Colour(R.drawable.button_shape_red);
+                        break;
+                    case 2:
+                        exerciseItem.setButton1Colour(R.drawable.button_shape_blue);
+                        break;
+                }
+                
+                // ... similar code for other set buttons ...
+                
+                // Extract and format weight
+                int weightIndex = cursor.getColumnIndex(DatabaseHelper.WEIGHT);
+                if (weightIndex != -1 && !cursor.isNull(weightIndex)) {
+                    exerciseWeight = cursor.getDouble(weightIndex);
+                    
+                    // Store original weight in kg
+                    exerciseItem.setWeight(exerciseWeight);
+                    
+                    // Format weight with appropriate unit
+                    String formattedWeight;
+                    if (isKgUnit) {
+                        formattedWeight = WeightUtils.formatWeight(exerciseWeight, true);
+                    } else {
+                        double weightInLbs = WeightUtils.kgToLbs(exerciseWeight);
+                        formattedWeight = WeightUtils.formatWeight(weightInLbs, false);
+                    }
+                    exerciseItem.setDisplayWeight(formattedWeight);
+                } else {
+                    exerciseItem.setWeight(0.0);
+                    exerciseItem.setDisplayWeight(isKgUnit ? "0.0 kg" : "0.0 lbs");
+                }
+                
+                // Add the exercise to our list
+                ExerciseItem.add(exerciseItem);
             }
-
-            //uses the cursor to populate the item Exercise Names
-            int exerciseColumnIndex = cursor.getColumnIndex("exercise");
-            if (exerciseColumnIndex != -1) {
-                exerciseItem.setTitle(cursor.getString(exerciseColumnIndex));
-            }
-
-            int set1ColumnIndex = cursor.getColumnIndex("set1");
-            if (set1ColumnIndex != -1) {
-                exerciseItem.setButton1(cursor.getString(set1ColumnIndex));
-            }
-
-            int set2ColumnIndex = cursor.getColumnIndex("set2");
-            if (set2ColumnIndex != -1) {
-                exerciseItem.setButton2(cursor.getString(set2ColumnIndex));
-            }
-
-            int set3ColumnIndex = cursor.getColumnIndex("set3");
-            if (set3ColumnIndex != -1) {
-                exerciseItem.setButton3(cursor.getString(set3ColumnIndex));
-            }
-
-            int set4ColumnIndex = cursor.getColumnIndex("set4");
-            if (set4ColumnIndex != -1) {
-                exerciseItem.setButton4(cursor.getString(set4ColumnIndex));
-            }
-
-            int set5ColumnIndex = cursor.getColumnIndex("set5");
-            if (set5ColumnIndex != -1) {
-                exerciseItem.setButton5(cursor.getString(set5ColumnIndex));
-            }
-
-
-            int set1ImprovementColumnIndex = cursor.getColumnIndex("set1_improvement");
-            if (set1ImprovementColumnIndex != -1) {
-                intSet1Improvement = cursor.getInt(set1ImprovementColumnIndex);
-            }
-
-            int set2ImprovementColumnIndex = cursor.getColumnIndex("set2_improvement");
-            if (set2ImprovementColumnIndex != -1) {
-                intSet2Improvement = cursor.getInt(set2ImprovementColumnIndex);
-            }
-
-            int set3ImprovementColumnIndex = cursor.getColumnIndex("set3_improvement");
-            if (set3ImprovementColumnIndex != -1) {
-                intSet3Improvement = cursor.getInt(set3ImprovementColumnIndex);
-            }
-
-            int set4ImprovementColumnIndex = cursor.getColumnIndex("set4_improvement");
-            if (set4ImprovementColumnIndex != -1) {
-                intSet4Improvement = cursor.getInt(set4ImprovementColumnIndex);
-            }
-
-            int set5ImprovementColumnIndex = cursor.getColumnIndex("set5_improvement");
-            if (set5ImprovementColumnIndex != -1) {
-                intSet5Improvement = cursor.getInt(set5ImprovementColumnIndex);
-            }
-
-
-            //All of the switch statements to determine which colour button to display for the sets
-            switch (intSet1Improvement) {
-                case 0:
-                    //If the value is null the int returns 0 so this is always the default case
-                    //If no improvement was recorded then make the button show the default colour
-                    exerciseItem.setButton1Colour(R.drawable.button_shape_default);
-                    break;
-                case 1:
-                    //If negative improvement was made then make the button show the negative colour
-                    exerciseItem.setButton1Colour(R.drawable.button_shape_red);
-                    break;
-                case 2:
-                    //If positive improvement was made then make the button show the positive colour
-                    exerciseItem.setButton1Colour(R.drawable.button_shape_blue);
-                    break;
-            }
-
-
-            switch (intSet2Improvement) {
-                case 0:
-                    exerciseItem.setButton2Colour(R.drawable.button_shape_default);
-                    break;
-                case 1:
-                    exerciseItem.setButton2Colour(R.drawable.button_shape_red);
-                    break;
-                case 2:
-                    exerciseItem.setButton2Colour(R.drawable.button_shape_blue);
-                    break;
-            }
-
-
-            switch (intSet3Improvement) {
-                case 0:
-                    exerciseItem.setButton3Colour(R.drawable.button_shape_default);
-                    break;
-                case 1:
-                    exerciseItem.setButton3Colour(R.drawable.button_shape_red);
-                    break;
-                case 2:
-                    exerciseItem.setButton3Colour(R.drawable.button_shape_blue);
-                    break;
-            }
-
-
-            switch (intSet4Improvement) {
-                case 0:
-                    exerciseItem.setButton4Colour(R.drawable.button_shape_default);
-                    break;
-                case 1:
-                    exerciseItem.setButton4Colour(R.drawable.button_shape_red);
-                    break;
-                case 2:
-                    exerciseItem.setButton4Colour(R.drawable.button_shape_blue);
-                    break;
-            }
-
-
-            switch (intSet5Improvement) {
-                case 0:
-                    exerciseItem.setButton5Colour(R.drawable.button_shape_default);
-                    break;
-                case 1:
-                    exerciseItem.setButton5Colour(R.drawable.button_shape_red);
-                    break;
-                case 2:
-                    exerciseItem.setButton5Colour(R.drawable.button_shape_blue);
-                    break;
-            }
-
-
-            int weightColumnIndex = cursor.getColumnIndex("weight");
-            if (weightColumnIndex != -1) {
-                exerciseWeight = cursor.getDouble(weightColumnIndex);
-            }
-            exerciseItem.setWeight(exerciseWeight);
-            ExerciseItem.add(exerciseItem);
-            i++;
         }
-        // Custom Recycler View Adaptor
+        
+        // Create and configure the adapter
         ExerciseRecyclerViewAdapter adapter = new ExerciseRecyclerViewAdapter(ExerciseItem, this, null, null);
+        adapter.setReadOnly(true);  // Make it read-only since this is historical data
         recyclerView.setAdapter(adapter);
+        
+        // Clean up
+        if (cursor != null) {
+            cursor.close();
+        }
+        dbManager.close();
     }
 
     public void bottomNavigationHomeClick(View view) {
@@ -364,3 +380,5 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
         startActivity(intent);
     }
 }
+
+

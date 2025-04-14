@@ -28,6 +28,7 @@ public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRe
     private final OnButtonClickListener buttonClickListener;
     // Add a set to track selected exercises
     private final Set<String> selectedExerciseIds = new HashSet<>();
+    private boolean readOnly = false;
 
     public ExerciseRecyclerViewAdapter(List<ExerciseItem> list,
                                        Context context,
@@ -68,6 +69,11 @@ public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRe
         notifyDataSetChanged();
     }
 
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -84,6 +90,41 @@ public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRe
 
         holder.textViewExercise.setText(myList.getTitle());
 
+        // Display weight correctly using the displayWeight property 
+        // which contains the properly formatted weight with units
+        holder.textViewWeight.setText(myList.getDisplayWeight());
+
+        // Handle read-only mode
+        if (readOnly) {
+            // In read-only mode, disable all interactions
+            holder.itemView.setClickable(false);
+            holder.itemView.setLongClickable(false);
+            holder.button1.setClickable(false);
+            holder.button2.setClickable(false);
+            holder.button3.setClickable(false);
+            holder.button4.setClickable(false);
+            holder.button5.setClickable(false);
+
+            // Just display the data with proper colors
+            holder.textViewExercise.setText(myList.getTitle());
+            holder.button1.setText(myList.getButton1());
+            holder.button2.setText(myList.getButton2());
+            holder.button3.setText(myList.getButton3());
+            holder.button4.setText(myList.getButton4());
+            holder.button5.setText(myList.getButton5());
+
+            // Set colors based on improvements
+            holder.button1.setBackgroundResource(myList.getButton1colour());
+            holder.button2.setBackgroundResource(myList.getButton2colour());
+            holder.button3.setBackgroundResource(myList.getButton3colour());
+            holder.button4.setBackgroundResource(myList.getButton4colour());
+            holder.button5.setBackgroundResource(myList.getButton5colour());
+            
+            // Exit early since we don't need to set up click listeners in read-only mode
+            return;
+        }
+
+        // The rest of the method remains the same for interactive mode
         // Show selection state with a more visible indicator
         final String currentId = myList.getId();
         if (selectedExerciseIds.contains(currentId)) {
@@ -112,7 +153,6 @@ public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRe
         holder.button3.setText(myList.getButton3());
         holder.button4.setText(myList.getButton4());
         holder.button5.setText(myList.getButton5());
-        holder.textViewWeight.setText(myList.getWeight().toString() + "kg");
 
 
         //Sets the background colour of the buttons

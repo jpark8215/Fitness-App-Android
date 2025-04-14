@@ -8,8 +8,11 @@ import android.view.View;
 import android.view.ViewStub;
 import android.widget.Chronometer;
 import android.widget.CompoundButton;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -33,6 +36,9 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
 
     private Toolbar toolbar;
     private Switch switchTheme;
+    private RadioGroup weightUnitRadioGroup;
+    private RadioButton radioKg;
+    private RadioButton radioLbs;
 
 
     @Override
@@ -98,6 +104,37 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
         initToolbar();
         initNavigationMenu();
         initSwitch(darkModeEnabled);
+        initWeightUnitControls();
+    }
+
+    private void initWeightUnitControls() {
+        // Initialize the weight unit setting controls
+        weightUnitRadioGroup = findViewById(R.id.weightUnitRadioGroup);
+        radioKg = findViewById(R.id.radioKg);
+        radioLbs = findViewById(R.id.radioLbs);
+
+        // Load current setting from WeightUnitManager
+        boolean isKgUnit = WeightUnitManager.isKgUnit(this);
+
+        // Set the radio button
+        if (isKgUnit) {
+            radioKg.setChecked(true);
+        } else {
+            radioLbs.setChecked(true);
+        }
+
+        // Handle changes in selection
+        weightUnitRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            boolean newIsKgUnit = (checkedId == R.id.radioKg);
+            // Save the setting
+            WeightUnitManager.setKgUnit(this, newIsKgUnit);
+            Log.d("Weight Unit", "Changed to: " + (newIsKgUnit ? "kg" : "lbs"));
+            
+            // Notify user that the setting has been changed
+            Toast.makeText(this, 
+                "Weight unit changed to " + (newIsKgUnit ? "kilograms" : "pounds"), 
+                Toast.LENGTH_SHORT).show();
+        });
     }
 
     private void initSwitch(Boolean darkModeEnabled) {
