@@ -38,10 +38,59 @@
         </LinearLayout>
 
         <View
-            android:id="@+id/view2"
             android:layout_width="match_parent"
             android:layout_height="4dp"
             android:background="@drawable/bg_gradient_soft" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:layout_weight="5"
+                android:text="Weight Unit"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:id="@+id/weightUnitRadioGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/radioKg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:text="kg" />
+
+                <RadioButton
+                    android:id="@+id/radioLbs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="lbs" />
+            </RadioGroup>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:background="@drawable/bg_gradient_soft" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="20dp" />
 
         <com.google.android.gms.ads.AdView
             android:id="@+id/adView2"
@@ -50,12 +99,6 @@
             android:layout_marginTop="10dp"
             app:adSize="BANNER"
             app:adUnitId="ca-app-pub-2201141547916408/6715184560" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="20dp" />
 
     </LinearLayout>
 
