@@ -193,10 +193,22 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
             formattedDate = formattedDate + "%";  // Add wildcard for time part
         }
         
-        // First try to use fetchExerciseDetailsForDate which is designed for this purpose
-        Cursor cursor = dbManager.fetchExerciseDetailsForDate(formattedDate);
-        Log.d("CalendarShowSelectedWorkout", "fetchExerciseDetailsForDate returned " + 
+        // Try with workout_id filter first
+        Cursor cursor = dbManager.fetchExerciseDetailsForDate(formattedDate, id);
+        Log.d("CalendarShowSelectedWorkout", "fetchExerciseDetailsForDate with workout_id returned " + 
               (cursor != null ? cursor.getCount() : 0) + " rows");
+        
+        // If no results with workout_id, try without filtering by workout_id (might be an exercise_id or just a date issue)
+        if (cursor == null || cursor.getCount() == 0) {
+            Log.d("CalendarShowSelectedWorkout", "No results with workout_id filter, trying without filter");
+            if (cursor != null) {
+                cursor.close();
+            }
+            
+            cursor = dbManager.fetchExerciseDetailsForDate(formattedDate);
+            Log.d("CalendarShowSelectedWorkout", "fetchExerciseDetailsForDate without workout_id returned " + 
+                  (cursor != null ? cursor.getCount() : 0) + " rows");
+        }
         
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
@@ -216,8 +228,10 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
             if (!hasExercises) {
                 empty.setVisibility(View.VISIBLE);
                 empty.setText("No exercises found for " + date);
+                Log.d("CalendarShowSelectedWorkout", "No exercises found for date: " + date);
             } else {
                 empty.setVisibility(View.GONE);
+                Log.d("CalendarShowSelectedWorkout", "Found " + cursor.getCount() + " exercises");
             }
         }
         

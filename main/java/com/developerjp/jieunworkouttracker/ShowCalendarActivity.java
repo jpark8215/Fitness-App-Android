@@ -248,13 +248,17 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
 
     @Override
     public void onItemSelected(String itemId, String itemTitle, String itemDate) {
-
         //Passes through the workout title and id
         //Starts the exercise list class
         Intent modify_intent = new Intent(getApplicationContext(), CalendarShowSelectedWorkout.class);
         modify_intent.putExtra("title", itemTitle);
         modify_intent.putExtra("id", itemId);
         modify_intent.putExtra("date", itemDate);
+        
+        // Log the values being passed
+        Log.d(LOG_TAG, "Passing to CalendarShowSelectedWorkout - ID: " + itemId + 
+                      ", Title: " + itemTitle + ", Date: " + itemDate);
+                      
         startActivity(modify_intent);
     }
 
@@ -263,15 +267,18 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         List<Event> events = compactCalendarView.getEvents(dateClicked);
         Log.d(LOG_TAG, "Day was clicked: " + dateClicked + " with events " + events);
 
-        String strDate = dateClicked.toString();
-        strDate = strDate.substring(0, 10) + "%" + strDate.substring(24, 28);
-
-        Log.d("*********strDate", strDate);
+        // Format the date for database query - YYYY-MM-DD format with wildcard
+        SimpleDateFormat dbDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        String strDate = dbDateFormat.format(dateClicked) + "%";
+        
+        Log.d(LOG_TAG, "Formatted date for DB query: " + strDate);
 
         dbManager.open();
 
         // Get all exercises completed on the selected date with their details
         Cursor exerciseCursor = dbManager.fetchExerciseDetailsForDate(strDate);
+        Log.d(LOG_TAG, "fetchExerciseDetailsForDate returned " + 
+              (exerciseCursor != null ? exerciseCursor.getCount() : 0) + " rows for date: " + strDate);
 
         //Clears the workoutListItem so that it doesn't keep the values from previous days in it
         workoutListItem.clear();
@@ -294,6 +301,13 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
                 int durationColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.DURATION);
                 int dateColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.DATE);
                 int datetimeColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.DATETIME);
+                int workoutIdColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.WORKOUT_ID);
+
+                // Log all column indexes for debugging
+                Log.d(LOG_TAG, "Column indexes - exerciseId: " + exerciseIdColumnIndex + 
+                            ", exerciseName: " + exerciseNameColumnIndex + 
+                            ", logId: " + logIdColumnIndex + 
+                            ", workoutId: " + workoutIdColumnIndex);
 
                 if (exerciseNameColumnIndex != -1) {
                     session.exerciseName = exerciseCursor.getString(exerciseNameColumnIndex);
@@ -305,6 +319,13 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
 
                 if (logIdColumnIndex != -1) {
                     session.logId = exerciseCursor.getString(logIdColumnIndex);
+                }
+                
+                if (workoutIdColumnIndex != -1) {
+                    session.workoutId = exerciseCursor.getString(workoutIdColumnIndex);
+                    Log.d(LOG_TAG, "Found workout_id: " + session.workoutId + " for exercise: " + session.exerciseName);
+                } else {
+                    Log.w(LOG_TAG, "workout_id column not found in cursor");
                 }
 
                 if (dateColumnIndex != -1) {
@@ -318,6 +339,14 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
                 if (durationColumnIndex != -1) {
                     session.duration = exerciseCursor.getLong(durationColumnIndex);
                 }
+
+                // Dump all column values for debugging
+                Log.d(LOG_TAG, "Exercise data - name: " + session.exerciseName + 
+                            ", id: " + session.exerciseId + 
+                            ", logId: " + session.logId + 
+                            ", workoutId: " + session.workoutId + 
+                            ", date: " + session.date + 
+                            ", datetime: " + session.datetime);
 
                 // Determine which session this exercise belongs to
                 String sessionKey = "unknown";
@@ -368,17 +397,24 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
                         CalendarItem headerItem = new CalendarItem();
                         headerItem.setTitle("--- " + sessionName + " ---");
                         workoutListItem.add(headerItem);
+                        Log.d(LOG_TAG, "Adding session header: " + sessionName);
                     }
 
                     // Then add all exercises in this session
                     for (ExerciseSession exercise : exercises) {
                         CalendarItem item = new CalendarItem();
 
-                        // Set basic properties
+                        // Set basic properties - IMPORTANT: Now we also set the workout_id
                         item.setTitle(exercise.exerciseName);
-                        item.setWorkoutId(exercise.exerciseId);
+                        // Set workoutId properly - this is the key fix
+                        item.setWorkoutId(exercise.workoutId);
                         item.setLogId(exercise.logId);
                         item.setDate(exercise.date);
+                        
+                        Log.d(LOG_TAG, "Adding item to RecyclerView: " + exercise.exerciseName + 
+                                      ", exercise_id: " + exercise.exerciseId + 
+                                      ", log_id: " + exercise.logId + 
+                                      ", workout_id: " + exercise.workoutId);
 
                         try {
                             // Format time and duration
@@ -408,8 +444,12 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
                 }
             }
         } else {
-            // No exercises found for this date
+            // No exercises found for this date - add a placeholder item
             Log.d(LOG_TAG, "No exercises found for date: " + strDate);
+            CalendarItem placeholderItem = new CalendarItem();
+            placeholderItem.setTitle("No exercises found for this date");
+            placeholderItem.setDate(dbDateFormat.format(dateClicked));
+            workoutListItem.add(placeholderItem);
         }
 
         dbManager.close();
@@ -417,6 +457,11 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         // Custom Recycler View Adaptor
         CalendarRecyclerViewAdapter adapter = new CalendarRecyclerViewAdapter(workoutListItem, ShowCalendarActivity.this, null, ShowCalendarActivity.this);
         recyclerView.setAdapter(adapter);
+        
+        // Notify adapter that data has changed
+        adapter.notifyDataSetChanged();
+        
+        Log.d(LOG_TAG, "Finished setting up RecyclerView with " + workoutListItem.size() + " items");
     }
 
 
@@ -458,5 +503,6 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         String date;
         String datetime;
         long duration;
+        String workoutId;
     }
 }

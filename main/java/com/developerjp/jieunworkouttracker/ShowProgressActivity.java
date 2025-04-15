@@ -23,6 +23,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
@@ -96,7 +97,6 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
             } while (cursor.moveToNext());
         }
 
-
         dbManager.close();
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
@@ -116,9 +116,17 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         ValueFormatter xAxisFormatter = new DayAxisValueFormatter(chart);
         xAxis.setValueFormatter(xAxisFormatter);
 
-        chart.getAxisLeft().setGranularity(1f);
-        chart.getAxisRight().setGranularity(1f);
-        chart.getAxisLeft().setDrawGridLines(false);
+        // Configure Y-axis with the proper unit label
+        YAxis leftAxis = chart.getAxisLeft();
+        leftAxis.setGranularity(1f);
+        leftAxis.setDrawGridLines(false);
+        
+        // Check weight unit preference and set y-axis label formatter
+        boolean isKgUnit = WeightUnitManager.isKgUnit(this);
+        leftAxis.setValueFormatter(new WeightAxisValueFormatter(isKgUnit));
+        
+        // Hide right axis
+        chart.getAxisRight().setEnabled(false);
 
         chart.animateY(500);
         chart.getLegend().setEnabled(false);
@@ -192,9 +200,27 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
             String selectedExerciseName = parent.getItemAtPosition(pos).toString();
             Log.d("Selected Exercise", "Name: " + selectedExerciseName);
 
-            // Retrieve all exercise IDs from the map
-            List<String> selectedExerciseIds = new ArrayList<>(exerciseIdMap.keySet());
-            Log.d("Selected Exercise", "IDs: " + selectedExerciseIds);
+            // Find the exercise ID for the selected exercise name instead of getting all exercise IDs
+            String selectedExerciseId = null;
+            for (Map.Entry<String, String> entry : exerciseIdMap.entrySet()) {
+                if (entry.getValue().equals(selectedExerciseName)) {
+                    selectedExerciseId = entry.getKey();
+                    break;
+                }
+            }
+
+            if (selectedExerciseId == null) {
+                Log.w("ShowProgressActivity", "Could not find ID for selected exercise: " + selectedExerciseName);
+                chart.setNoDataText("No exercise data available");
+                chart.invalidate();
+                return;
+            }
+
+            Log.d("Selected Exercise", "ID: " + selectedExerciseId);
+            
+            // Create a list with just the selected exercise ID
+            List<String> selectedExerciseIds = new ArrayList<>();
+            selectedExerciseIds.add(selectedExerciseId);
 
             // Check if we have valid exercise IDs
             if (selectedExerciseIds.isEmpty()) {
@@ -206,6 +232,9 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
 
             Cursor cursor = dbManager.getExerciseLogProgress(selectedExerciseIds);
             ArrayList<BarEntry> values = new ArrayList<>();
+
+            // Get user's weight unit preference
+            boolean isKgUnit = WeightUnitManager.isKgUnit(this);
 
             // Log cursor data for debugging before processing it
             logCursor(cursor);
@@ -231,7 +260,14 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
                         try {
                             // Check that converted values are not null before parsing
                             if (dayOfTheYear != null && !dayOfTheYear.isEmpty()) {
+                                // Parse the weight value
                                 float weight = Float.parseFloat(exerciseWeight);
+                                
+                                // Convert weight to lbs if needed based on user preference
+                                if (!isKgUnit) {
+                                    weight = (float) WeightUtils.kgToLbs(weight);
+                                }
+                                
                                 int day = Integer.parseInt(dayOfTheYear);
                                 values.add(new BarEntry(day, weight));
                             } else {
@@ -267,6 +303,10 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
 
             // Set the data to your chart
             chart.setData(data);
+            
+            // Update y-axis label based on current weight unit preference
+            YAxis leftAxis = chart.getAxisLeft();
+            leftAxis.setValueFormatter(new WeightAxisValueFormatter(isKgUnit));
 
             // Refresh the chart to reflect the changes
             chart.invalidate();
@@ -361,6 +401,19 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
     @Override
     protected void onResume() {
         super.onResume();
+        
+        // Check if weight unit preference has changed and refresh chart if needed
+        if (chart != null && chart.getData() != null) {
+            boolean isKgUnit = WeightUnitManager.isKgUnit(this);
+            YAxis leftAxis = chart.getAxisLeft();
+            leftAxis.setValueFormatter(new WeightAxisValueFormatter(isKgUnit));
+            
+            // If we have a spinner with a selected position, trigger onItemSelected again
+            Spinner spinner = findViewById(R.id.progress_spinner);
+            if (spinner != null && spinner.getSelectedItemPosition() >= 0) {
+                onItemSelected(spinner, null, spinner.getSelectedItemPosition(), spinner.getSelectedItemId());
+            }
+        }
     }
 
     @Override
@@ -368,4 +421,19 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         super.onDestroy();
     }
 
+    /**
+     * Custom formatter for the y-axis that shows units (kg or lbs)
+     */
+    private static class WeightAxisValueFormatter extends ValueFormatter {
+        private final boolean isKgUnit;
+        
+        public WeightAxisValueFormatter(boolean isKgUnit) {
+            this.isKgUnit = isKgUnit;
+        }
+        
+        @Override
+        public String getFormattedValue(float value) {
+            return String.format("%.1f %s", value, isKgUnit ? "kg" : "lbs");
+        }
+    }
 }

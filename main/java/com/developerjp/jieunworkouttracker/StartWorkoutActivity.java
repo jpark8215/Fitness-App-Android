@@ -302,9 +302,11 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                 int exerciseIdColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
                 int exerciseNameColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.EXERCISE);
                 int weightColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.WEIGHT);
+                int logIdColumnIndex = exerciseCursor.getColumnIndex(DatabaseHelper.LOG_ID);
 
-                if (exerciseIdColumnIndex != -1 && exerciseNameColumnIndex != -1 && weightColumnIndex != -1) {
-                    item.setId(exerciseCursor.getString(exerciseIdColumnIndex));
+                if (exerciseIdColumnIndex != -1 && exerciseNameColumnIndex != -1 && weightColumnIndex != -1 && logIdColumnIndex != -1) {
+                    // Store the log_id instead of exercise_id in the item's id field
+                    item.setId(exerciseCursor.getString(logIdColumnIndex));
                     item.setTitle(exerciseCursor.getString(exerciseNameColumnIndex));
                     item.setWeight(exerciseCursor.getDouble(weightColumnIndex));
 
@@ -350,6 +352,11 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         // Set up the adapter
         adapter = new WorkoutRecyclerViewAdapter(ExerciseItem, this, this, this);
         recyclerView.setAdapter(adapter);
+        
+        // Log the loaded exercise items for debugging
+        for (com.developerjp.jieunworkouttracker.ExerciseItem item : ExerciseItem) {
+            Log.d("StartWorkoutActivity", "Loaded exercise: " + item.getTitle() + ", log_id: " + item.getId());
+        }
     }
 
     /**
@@ -376,7 +383,8 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                 item.setButton5(String.valueOf(setReps));
             }
 
-            if (improvement > 0) {
+            // Value of 2 means positive improvement (green)
+            if (improvement == 2) {
                 // Positive improvement (green)
                 if (buttonNumber == 1) {
                     item.setButton1Colour(R.drawable.button_shape_green);
@@ -389,7 +397,9 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                 } else if (buttonNumber == 5) {
                     item.setButton5Colour(R.drawable.button_shape_green);
                 }
-            } else if (improvement < 0) {
+            } 
+            // Value of 1 means negative improvement (red)
+            else if (improvement == 1) {
                 // Negative improvement (red)
                 if (buttonNumber == 1) {
                     item.setButton1Colour(R.drawable.button_shape_red);
@@ -403,6 +413,8 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                     item.setButton5Colour(R.drawable.button_shape_red);
                 }
             }
+            
+            Log.d("StartWorkoutActivity", "Set " + buttonNumber + " reps: " + setReps + ", improvement: " + improvement);
         }
     }
 
@@ -647,17 +659,69 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
     @Override
     public void onButtonClick(String itemId, String itemTitle, String setSelected, Integer intReps, Integer intImprovement) {
-        //itemId is currently being stored as a string, covert it to an integer value
-        int intItemId = Integer.parseInt(itemId);
-
-        //Validation to make sure reps can never be less than zero
-        if (intReps < 0) {
-            intReps = 0;
-        }
-
         try {
-            //We pass through the itemId, set selected, number of reps & integer value of if there was an improvement made
-            dbManager.updateExerciseLogsWithImprovement(intItemId, setSelected, intReps, intImprovement);
+            // itemId is now the log_id, not the exercise_id
+            long logId = Long.parseLong(itemId);
+
+            //Validation to make sure reps can never be less than zero
+            if (intReps < 0) {
+                intReps = 0;
+            }
+
+            Log.d("StartWorkoutActivity", "Updating log: " + logId + ", set: " + setSelected + 
+                ", reps: " + intReps + ", improvement: " + intImprovement);
+            
+            //We pass through the log_id, set selected, number of reps & integer value of if there was an improvement made
+            dbManager.updateExerciseLogsWithImprovement(logId, setSelected, intReps, intImprovement);
+
+            // Find the item in the list and update its button text value
+            for (int i = 0; i < ExerciseItem.size(); i++) {
+                ExerciseItem item = ExerciseItem.get(i);
+                if (item.getId().equals(itemId)) {
+                    // Update the button text based on which set was clicked
+                    if (setSelected.equals("set1")) {
+                        item.setButton1(String.valueOf(intReps));
+                        // Also update the button color based on improvement
+                        if (intImprovement == 2) {
+                            item.setButton1Colour(R.drawable.button_shape_green);
+                        } else if (intImprovement == 1) {
+                            item.setButton1Colour(R.drawable.button_shape_red);
+                        }
+                    } else if (setSelected.equals("set2")) {
+                        item.setButton2(String.valueOf(intReps));
+                        if (intImprovement == 2) {
+                            item.setButton2Colour(R.drawable.button_shape_green);
+                        } else if (intImprovement == 1) {
+                            item.setButton2Colour(R.drawable.button_shape_red);
+                        }
+                    } else if (setSelected.equals("set3")) {
+                        item.setButton3(String.valueOf(intReps));
+                        if (intImprovement == 2) {
+                            item.setButton3Colour(R.drawable.button_shape_green);
+                        } else if (intImprovement == 1) {
+                            item.setButton3Colour(R.drawable.button_shape_red);
+                        }
+                    } else if (setSelected.equals("set4")) {
+                        item.setButton4(String.valueOf(intReps));
+                        if (intImprovement == 2) {
+                            item.setButton4Colour(R.drawable.button_shape_green);
+                        } else if (intImprovement == 1) {
+                            item.setButton4Colour(R.drawable.button_shape_red);
+                        }
+                    } else if (setSelected.equals("set5")) {
+                        item.setButton5(String.valueOf(intReps));
+                        if (intImprovement == 2) {
+                            item.setButton5Colour(R.drawable.button_shape_green);
+                        } else if (intImprovement == 1) {
+                            item.setButton5Colour(R.drawable.button_shape_red);
+                        }
+                    }
+                    
+                    Log.d("StartWorkoutActivity", "Updated ExerciseItem at position " + i + 
+                        ", set: " + setSelected + ", reps: " + intReps);
+                    break;
+                }
+            }
 
             // Save state - used when user clicks on an item far down the recycler view list
             // It remembers the state or position
@@ -865,10 +929,12 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                     int exerciseIdIndex = cursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
                     int exerciseNameIndex = cursor.getColumnIndex(DatabaseHelper.EXERCISE);
                     int weightIndex = cursor.getColumnIndex(DatabaseHelper.WEIGHT);
+                    int logIdIndex = cursor.getColumnIndex(DatabaseHelper.LOG_ID);
 
                     // Set exercise properties
                     if (exerciseIdIndex != -1) {
-                        item.setId(cursor.getString(exerciseIdIndex));
+                        String exerciseId = cursor.getString(exerciseIdIndex);
+                        // Don't set item.setId here, we'll set it with the log_id below
                     }
 
                     if (exerciseNameIndex != -1) {
@@ -878,20 +944,105 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                     if (weightIndex != -1) {
                         item.setWeight(cursor.getDouble(weightIndex));
                     }
+                    
+                    // Set the log_id from today's log
+                    if (logIdIndex != -1) {
+                        item.setId(cursor.getString(logIdIndex));
+                        log_id = cursor.getString(logIdIndex); // Also store in activity-level variable
+                        Log.d("StartWorkoutActivity", "Loading exercise with log_id: " + log_id);
+                    }
 
-                    // Set default reps
-                    item.setButton1("5");
-                    item.setButton2("5");
-                    item.setButton3("5");
-                    item.setButton4("5");
-                    item.setButton5("5");
-
-                    // Set default colors
-                    item.setButton1Colour(R.drawable.button_shape_default);
-                    item.setButton2Colour(R.drawable.button_shape_default);
-                    item.setButton3Colour(R.drawable.button_shape_default);
-                    item.setButton4Colour(R.drawable.button_shape_default);
-                    item.setButton5Colour(R.drawable.button_shape_default);
+                    // Now check for set values and improvements in the log
+                    if (cursor != null) {
+                        int set1Index = cursor.getColumnIndex(DatabaseHelper.SET1);
+                        int set2Index = cursor.getColumnIndex(DatabaseHelper.SET2);
+                        int set3Index = cursor.getColumnIndex(DatabaseHelper.SET3);
+                        int set4Index = cursor.getColumnIndex(DatabaseHelper.SET4);
+                        int set5Index = cursor.getColumnIndex(DatabaseHelper.SET5);
+                        
+                        int imp1Index = cursor.getColumnIndex(DatabaseHelper.SET1_IMPROVEMENT);
+                        int imp2Index = cursor.getColumnIndex(DatabaseHelper.SET2_IMPROVEMENT);
+                        int imp3Index = cursor.getColumnIndex(DatabaseHelper.SET3_IMPROVEMENT);
+                        int imp4Index = cursor.getColumnIndex(DatabaseHelper.SET4_IMPROVEMENT);
+                        int imp5Index = cursor.getColumnIndex(DatabaseHelper.SET5_IMPROVEMENT);
+                        
+                        // Set reps if available in the cursor
+                        if (set1Index != -1) {
+                            item.setButton1(cursor.getString(set1Index));
+                        } else {
+                            item.setButton1("5");
+                        }
+                        
+                        if (set2Index != -1) {
+                            item.setButton2(cursor.getString(set2Index));
+                        } else {
+                            item.setButton2("5");
+                        }
+                        
+                        if (set3Index != -1) {
+                            item.setButton3(cursor.getString(set3Index));
+                        } else {
+                            item.setButton3("5");
+                        }
+                        
+                        if (set4Index != -1) {
+                            item.setButton4(cursor.getString(set4Index));
+                        } else {
+                            item.setButton4("5");
+                        }
+                        
+                        if (set5Index != -1) {
+                            item.setButton5(cursor.getString(set5Index));
+                        } else {
+                            item.setButton5("5");
+                        }
+                        
+                        // Set colors based on improvement values
+                        if (imp1Index != -1) {
+                            int imp = cursor.getInt(imp1Index);
+                            if (imp == 2) item.setButton1Colour(R.drawable.button_shape_green);
+                            else if (imp == 1) item.setButton1Colour(R.drawable.button_shape_red);
+                            else item.setButton1Colour(R.drawable.button_shape_default);
+                        } else {
+                            item.setButton1Colour(R.drawable.button_shape_default);
+                        }
+                        
+                        if (imp2Index != -1) {
+                            int imp = cursor.getInt(imp2Index);
+                            if (imp == 2) item.setButton2Colour(R.drawable.button_shape_green);
+                            else if (imp == 1) item.setButton2Colour(R.drawable.button_shape_red);
+                            else item.setButton2Colour(R.drawable.button_shape_default);
+                        } else {
+                            item.setButton2Colour(R.drawable.button_shape_default);
+                        }
+                        
+                        if (imp3Index != -1) {
+                            int imp = cursor.getInt(imp3Index);
+                            if (imp == 2) item.setButton3Colour(R.drawable.button_shape_green);
+                            else if (imp == 1) item.setButton3Colour(R.drawable.button_shape_red);
+                            else item.setButton3Colour(R.drawable.button_shape_default);
+                        } else {
+                            item.setButton3Colour(R.drawable.button_shape_default);
+                        }
+                        
+                        if (imp4Index != -1) {
+                            int imp = cursor.getInt(imp4Index);
+                            if (imp == 2) item.setButton4Colour(R.drawable.button_shape_green);
+                            else if (imp == 1) item.setButton4Colour(R.drawable.button_shape_red);
+                            else item.setButton4Colour(R.drawable.button_shape_default);
+                        } else {
+                            item.setButton4Colour(R.drawable.button_shape_default);
+                        }
+                        
+                        if (imp5Index != -1) {
+                            int imp = cursor.getInt(imp5Index);
+                            if (imp == 2) item.setButton5Colour(R.drawable.button_shape_green);
+                            else if (imp == 1) item.setButton5Colour(R.drawable.button_shape_red);
+                            else item.setButton5Colour(R.drawable.button_shape_default);
+                        } else {
+                            item.setButton5Colour(R.drawable.button_shape_default);
+                        }
+                    }
 
                     // Add the item to the list
                     ExerciseItem.add(item);

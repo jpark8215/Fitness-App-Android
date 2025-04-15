@@ -106,6 +106,8 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
 
                         String setSelected = "set1";
                         Integer intReps = Integer.parseInt(holder.button1.getText().toString());
+                        // Save the text back to the item
+                        list.get(position).setButton1(String.valueOf(intReps));
                         buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps, 2);
                     } else {
                         Log.d(LOG_TAG, "2nd button1");
@@ -116,7 +118,10 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
                         holder.button1.setBackgroundResource(R.drawable.button_shape_green);
                         // Save the color in the item
                         list.get(position).setButton1Colour(R.drawable.button_shape_green);
+                        // Update UI and data model
                         holder.button1.setText(Integer.toString(intReps));
+                        list.get(position).setButton1(Integer.toString(intReps));
+                        Log.d(LOG_TAG, "Button1 updated to: " + intReps);
                     }
                 }
             }
@@ -137,6 +142,8 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
 
                         String setSelected = "set2";
                         Integer intReps = Integer.parseInt(holder.button2.getText().toString());
+                        // Save the text back to the item
+                        list.get(position).setButton2(String.valueOf(intReps));
                         buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps, 2);
                     } else {
                         Log.d(LOG_TAG, "2nd button2");
@@ -147,7 +154,10 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
                         holder.button2.setBackgroundResource(R.drawable.button_shape_green);
                         // Save the color in the item
                         list.get(position).setButton2Colour(R.drawable.button_shape_green);
+                        // Update UI and data model
                         holder.button2.setText(Integer.toString(intReps));
+                        list.get(position).setButton2(Integer.toString(intReps));
+                        Log.d(LOG_TAG, "Button2 updated to: " + intReps);
                     }
                 }
             }
@@ -168,6 +178,8 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
 
                         String setSelected = "set3";
                         Integer intReps = Integer.parseInt(holder.button3.getText().toString());
+                        // Save the text back to the item
+                        list.get(position).setButton3(String.valueOf(intReps));
                         buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps, 2);
                     } else {
                         Log.d(LOG_TAG, "2nd button3");
@@ -178,7 +190,10 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
                         holder.button3.setBackgroundResource(R.drawable.button_shape_green);
                         // Save the color in the item
                         list.get(position).setButton3Colour(R.drawable.button_shape_green);
+                        // Update UI and data model
                         holder.button3.setText(Integer.toString(intReps));
+                        list.get(position).setButton3(Integer.toString(intReps));
+                        Log.d(LOG_TAG, "Button3 updated to: " + intReps);
                     }
                 }
             }
@@ -199,6 +214,8 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
 
                         String setSelected = "set4";
                         Integer intReps = Integer.parseInt(holder.button4.getText().toString());
+                        // Save the text back to the item
+                        list.get(position).setButton4(String.valueOf(intReps));
                         buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps, 2);
                     } else {
                         Log.d(LOG_TAG, "2nd button4");
@@ -209,7 +226,10 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
                         holder.button4.setBackgroundResource(R.drawable.button_shape_green);
                         // Save the color in the item
                         list.get(position).setButton4Colour(R.drawable.button_shape_green);
+                        // Update UI and data model
                         holder.button4.setText(Integer.toString(intReps));
+                        list.get(position).setButton4(Integer.toString(intReps));
+                        Log.d(LOG_TAG, "Button4 updated to: " + intReps);
                     }
                 }
             }
@@ -230,6 +250,8 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
 
                         String setSelected = "set5";
                         Integer intReps = Integer.parseInt(holder.button5.getText().toString());
+                        // Save the text back to the item
+                        list.get(position).setButton5(String.valueOf(intReps));
                         buttonClickListener.onButtonClick(currentId, currentTitle, setSelected, intReps, 2);
                     } else {
                         Log.d(LOG_TAG, "2nd button5");
@@ -240,7 +262,10 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
                         holder.button5.setBackgroundResource(R.drawable.button_shape_green);
                         // Save the color in the item
                         list.get(position).setButton5Colour(R.drawable.button_shape_green);
+                        // Update UI and data model
                         holder.button5.setText(Integer.toString(intReps));
+                        list.get(position).setButton5(Integer.toString(intReps));
+                        Log.d(LOG_TAG, "Button5 updated to: " + intReps);
                     }
                 }
             }
@@ -263,7 +288,10 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
                     holder.button1.setBackgroundResource(R.drawable.button_shape_red);
                     // Save the color in the item
                     list.get(position).setButton1Colour(R.drawable.button_shape_red);
+                    // Update UI and data model
                     holder.button1.setText(Integer.toString(intReps));
+                    list.get(position).setButton1(Integer.toString(intReps));
+                    Log.d(LOG_TAG, "Button1 updated to: " + intReps + " (long press)");
                 }
                 return true;
             }
@@ -283,7 +311,10 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
                     holder.button2.setBackgroundResource(R.drawable.button_shape_red);
                     // Save the color in the item
                     list.get(position).setButton2Colour(R.drawable.button_shape_red);
+                    // Update UI and data model
                     holder.button2.setText(Integer.toString(intReps));
+                    list.get(position).setButton2(Integer.toString(intReps));
+                    Log.d(LOG_TAG, "Button2 updated to: " + intReps + " (long press)");
                 }
                 return true;
             }
@@ -303,7 +334,10 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
                     holder.button3.setBackgroundResource(R.drawable.button_shape_red);
                     // Save the color in the item
                     list.get(position).setButton3Colour(R.drawable.button_shape_red);
+                    // Update UI and data model
                     holder.button3.setText(Integer.toString(intReps));
+                    list.get(position).setButton3(Integer.toString(intReps));
+                    Log.d(LOG_TAG, "Button3 updated to: " + intReps + " (long press)");
                 }
                 return true;
             }
@@ -323,7 +357,10 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
                     holder.button4.setBackgroundResource(R.drawable.button_shape_red);
                     // Save the color in the item
                     list.get(position).setButton4Colour(R.drawable.button_shape_red);
+                    // Update UI and data model
                     holder.button4.setText(Integer.toString(intReps));
+                    list.get(position).setButton4(Integer.toString(intReps));
+                    Log.d(LOG_TAG, "Button4 updated to: " + intReps + " (long press)");
                 }
                 return true;
             }
@@ -343,7 +380,10 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
                     holder.button5.setBackgroundResource(R.drawable.button_shape_red);
                     // Save the color in the item
                     list.get(position).setButton5Colour(R.drawable.button_shape_red);
+                    // Update UI and data model
                     holder.button5.setText(Integer.toString(intReps));
+                    list.get(position).setButton5(Integer.toString(intReps));
+                    Log.d(LOG_TAG, "Button5 updated to: " + intReps + " (long press)");
                 }
                 return true;
             }
