@@ -30,8 +30,8 @@ import java.util.Objects;
 public class DBManager {
 
     private final Context context;
+    SQLiteDatabase database;
     private DatabaseHelper dbHelper;
-    private SQLiteDatabase database;
 
     public DBManager(Context c) {
         context = c;
@@ -171,6 +171,7 @@ public class DBManager {
         return cursor;
     }
 
+
     public Cursor fetchArchivedWorkouts() {
         String[] columns = new String[]{DatabaseHelper.WORKOUT_ID, DatabaseHelper.WORKOUT};
 
@@ -265,15 +266,9 @@ public class DBManager {
 
     public Cursor fetchExerciseLogs(String id, String numOfExercises) {
 
-        //Uses a prepared statement to help protect against SQL injection attacks
-        //Read more here --> http://www.informit.com/articles/article.aspx?p=2268753&seqNum=5
-
         String[] columns = new String[]{"EXERCISES.WORKOUT_ID", "LOGS.EXERCISE_ID", DatabaseHelper.LOG_ID, DatabaseHelper.EXERCISE, "MAX(datetime)", DatabaseHelper.SET1, DatabaseHelper.SET1_IMPROVEMENT, DatabaseHelper.SET2, DatabaseHelper.SET2_IMPROVEMENT, DatabaseHelper.SET3, DatabaseHelper.SET3_IMPROVEMENT, DatabaseHelper.SET4, DatabaseHelper.SET4_IMPROVEMENT, DatabaseHelper.SET5, DatabaseHelper.SET5_IMPROVEMENT, DatabaseHelper.WEIGHT};
 
         Cursor cursor = database.query(true, DatabaseHelper.TABLE_NAME_LOGS + " LEFT OUTER JOIN " + DatabaseHelper.TABLE_NAME_EXERCISES + " ON " + "LOGS.EXERCISE_ID" + "=" + "EXERCISES.EXERCISE_ID", columns, "LOGS.WORKOUT_ID = ?", new String[]{id}, "LOGS.LOG_ID", null, "LOGS.LOG_ID DESC", numOfExercises);
-        //Cursor cursor2 = database.rawQuery()
-
-        // Cursor cursor = database.query( true,DatabaseHelper.TABLE_NAME_LOGS + " LEFT OUTER JOIN " + DatabaseHelper.TABLE_NAME_EXERCISES + " ON " + "LOGS.EXERCISE_ID" + "=" + "EXERCISES.EXERCISE_ID", columns, "EXERCISES.WORKOUT_ID = ?" + " AND " + "LOGS.DATE=(SELECT MAX(date) FROM LOGS)", new String[]{id}, "LOGS.EXERCISE_ID", null, DatabaseHelper.LOG_ID, null);
 
         cursor.moveToFirst();
         return cursor;
@@ -282,11 +277,7 @@ public class DBManager {
 
     public Cursor fetchExerciseLogsForSelectedDate(String id, String date) {
 
-        //Uses a prepared statement to help protect against SQL injection attacks
-        //Read more here --> http://www.informit.com/articles/article.aspx?p=2268753&seqNum=5
-
         String[] columns = new String[]{"EXERCISES.WORKOUT_ID", "LOGS.EXERCISE_ID", DatabaseHelper.LOG_ID, DatabaseHelper.EXERCISE, "MAX(datetime)", DatabaseHelper.SET1, DatabaseHelper.SET1_IMPROVEMENT, DatabaseHelper.SET2, DatabaseHelper.SET2_IMPROVEMENT, DatabaseHelper.SET3, DatabaseHelper.SET3_IMPROVEMENT, DatabaseHelper.SET4, DatabaseHelper.SET4_IMPROVEMENT, DatabaseHelper.SET5, DatabaseHelper.SET5_IMPROVEMENT, DatabaseHelper.WEIGHT};
-        // Cursor cursor = database.query( DatabaseHelper.TABLE_NAME_EXERCISES + " LEFT OUTER JOIN " + DatabaseHelper.TABLE_NAME_LOGS + " ON " + "EXERCISES.EXERCISE_ID" + "=" + "LOGS.EXERCISE_ID", columns, "EXERCISES.WORKOUT_ID = ?", new String[]{id}, "LOGS.EXERCISE_ID", null, null);
 
         Cursor cursor = database.query(true, DatabaseHelper.TABLE_NAME_LOGS + " LEFT OUTER JOIN " + DatabaseHelper.TABLE_NAME_EXERCISES + " ON " + "LOGS.EXERCISE_ID" + "=" + "EXERCISES.EXERCISE_ID", columns, "EXERCISES.WORKOUT_ID = ?" + " AND " + "LOGS.DATE = ?", new String[]{id, date}, "LOGS.EXERCISE_ID", null, DatabaseHelper.LOG_ID, null);
 
@@ -301,6 +292,7 @@ public class DBManager {
         cursor.moveToFirst();
         return cursor;
     }
+
 
     //The logs table only gives us the workout ID
     public Cursor fetchWorkoutsOnSelectedDateForCalendar(String strDate) {
@@ -385,47 +377,49 @@ public class DBManager {
 
     /**
      * Updates the weight of an exercise in the database
+     *
      * @param exerciseId The ID of the exercise to update
-     * @param weight The weight value to set (in kg)
+     * @param weight     The weight value to set (in kg)
      * @return true if update was successful, false otherwise
      */
     public boolean updateExerciseWeight(String exerciseId, double weight) {
         // Format to one decimal place
         DecimalFormat df = new DecimalFormat("#.#");
         weight = Double.parseDouble(df.format(weight));
-        
+
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.WEIGHT, weight);
-        
+
         // Update in EXERCISES table
         int exercisesUpdated = database.update(
-            DatabaseHelper.TABLE_NAME_EXERCISES,
-            values,
-            DatabaseHelper.EXERCISE_ID + " = ?",
-            new String[]{exerciseId}
+                DatabaseHelper.TABLE_NAME_EXERCISES,
+                values,
+                DatabaseHelper.EXERCISE_ID + " = ?",
+                new String[]{exerciseId}
         );
-        
+
         // Also update the most recent log entry for this exercise
         ContentValues logValues = new ContentValues();
         logValues.put(DatabaseHelper.WEIGHT, weight);
-        
+
         int logsUpdated = database.update(
-            DatabaseHelper.TABLE_NAME_LOGS,
-            logValues,
-            DatabaseHelper.EXERCISE_ID + " = ? AND " + DatabaseHelper.DATETIME + " = (SELECT MAX(" + 
-            DatabaseHelper.DATETIME + ") FROM " + DatabaseHelper.TABLE_NAME_LOGS + 
-            " WHERE " + DatabaseHelper.EXERCISE_ID + " = ?)",
-            new String[]{exerciseId, exerciseId}
+                DatabaseHelper.TABLE_NAME_LOGS,
+                logValues,
+                DatabaseHelper.EXERCISE_ID + " = ? AND " + DatabaseHelper.DATETIME + " = (SELECT MAX(" +
+                        DatabaseHelper.DATETIME + ") FROM " + DatabaseHelper.TABLE_NAME_LOGS +
+                        " WHERE " + DatabaseHelper.EXERCISE_ID + " = ?)",
+                new String[]{exerciseId, exerciseId}
         );
-        
+
         return exercisesUpdated > 0 || logsUpdated > 0;
     }
 
     /**
      * Updates the weight of an exercise in the database with unit conversion
+     *
      * @param exerciseId The ID of the exercise to update
-     * @param weight The weight value to set
-     * @param isKg Whether the provided weight is in kg (true) or lbs (false)
+     * @param weight     The weight value to set
+     * @param isKg       Whether the provided weight is in kg (true) or lbs (false)
      * @return true if update was successful, false otherwise
      */
     public boolean updateExerciseWeight(String exerciseId, double weight, boolean isKg) {
@@ -433,7 +427,7 @@ public class DBManager {
         if (!isKg) {
             weight = WeightUtils.lbsToKg(weight);
         }
-        
+
         // Call the existing method with the converted weight
         return updateExerciseWeight(exerciseId, weight);
     }
@@ -451,73 +445,69 @@ public class DBManager {
             ContentValues contentValues = new ContentValues();
             String setImprovement = setSelected + "_improvement";
 
-            Log.d("DBManager", "Updating log_id: " + log_id + 
-                  ", set: " + setSelected + 
-                  ", reps: " + intReps + 
-                  ", improvement: " + intImprovement);
+            Log.d("DBManager", "Updating log_id: " + log_id +
+                    ", set: " + setSelected +
+                    ", reps: " + intReps +
+                    ", improvement: " + intImprovement);
 
             // First check if the log_id exists
             Cursor checkCursor = database.query(
-                DatabaseHelper.TABLE_NAME_LOGS,
-                new String[]{DatabaseHelper.LOG_ID},
-                DatabaseHelper.LOG_ID + " = ?",
-                new String[]{String.valueOf(log_id)},
-                null, null, null
-            );
-
-            if (checkCursor != null && checkCursor.moveToFirst()) {
-                Log.d("DBManager", "Found log_id " + log_id + " in the database");
-                checkCursor.close();
-            } else {
-                if (checkCursor != null) {
-                    checkCursor.close();
-                }
-                Log.e("DBManager", "log_id " + log_id + " NOT found in the database!");
-                
-                // Try to get the most recent log for this exercise instead
-                Cursor exerciseCursor = database.query(
                     DatabaseHelper.TABLE_NAME_LOGS,
-                    new String[]{DatabaseHelper.EXERCISE_ID},
+                    new String[]{DatabaseHelper.LOG_ID},
                     DatabaseHelper.LOG_ID + " = ?",
                     new String[]{String.valueOf(log_id)},
                     null, null, null
+            );
+
+            if (checkCursor.moveToFirst()) {
+                Log.d("DBManager", "Found log_id " + log_id + " in the database");
+                checkCursor.close();
+            } else {
+                checkCursor.close();
+                Log.e("DBManager", "log_id " + log_id + " NOT found in the database!");
+
+                // Try to get the most recent log for this exercise instead
+                Cursor exerciseCursor = database.query(
+                        DatabaseHelper.TABLE_NAME_LOGS,
+                        new String[]{DatabaseHelper.EXERCISE_ID},
+                        DatabaseHelper.LOG_ID + " = ?",
+                        new String[]{String.valueOf(log_id)},
+                        null, null, null
                 );
-                
-                if (exerciseCursor != null && exerciseCursor.moveToFirst()) {
+
+                if (exerciseCursor.moveToFirst()) {
                     int exerciseIdIndex = exerciseCursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
                     if (exerciseIdIndex != -1) {
                         String exerciseId = exerciseCursor.getString(exerciseIdIndex);
                         exerciseCursor.close();
-                        
+
                         Log.d("DBManager", "Attempting to find most recent log for exercise_id: " + exerciseId);
-                        
+
                         // Get today's date
                         String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-                        
+
                         // Query for the most recent log for this exercise today
                         Cursor recentCursor = database.rawQuery(
-                            "SELECT " + DatabaseHelper.LOG_ID + " FROM " + DatabaseHelper.TABLE_NAME_LOGS +
-                            " WHERE " + DatabaseHelper.EXERCISE_ID + " = ? AND " + 
-                            DatabaseHelper.DATE + " = ? ORDER BY " + DatabaseHelper.DATETIME + 
-                            " DESC LIMIT 1",
-                            new String[]{exerciseId, todayDate}
+                                "SELECT " + DatabaseHelper.LOG_ID + " FROM " + DatabaseHelper.TABLE_NAME_LOGS +
+                                        " WHERE " + DatabaseHelper.EXERCISE_ID + " = ? AND " +
+                                        DatabaseHelper.DATE + " = ? ORDER BY " + DatabaseHelper.DATETIME +
+                                        " DESC LIMIT 1",
+                                new String[]{exerciseId, todayDate}
                         );
-                        
-                        if (recentCursor != null && recentCursor.moveToFirst()) {
+
+                        if (recentCursor.moveToFirst()) {
                             int logIdIndex = recentCursor.getColumnIndex(DatabaseHelper.LOG_ID);
                             if (logIdIndex != -1) {
                                 long newLogId = recentCursor.getLong(logIdIndex);
                                 recentCursor.close();
-                                
+
                                 Log.d("DBManager", "Found most recent log_id: " + newLogId + " for exercise_id: " + exerciseId);
                                 log_id = newLogId;
                             } else {
                                 recentCursor.close();
                             }
                         } else {
-                            if (recentCursor != null) {
-                                recentCursor.close();
-                            }
+                            recentCursor.close();
                             Log.e("DBManager", "Could not find a recent log for exercise_id: " + exerciseId);
                             return;
                         }
@@ -527,9 +517,7 @@ public class DBManager {
                         return;
                     }
                 } else {
-                    if (exerciseCursor != null) {
-                        exerciseCursor.close();
-                    }
+                    exerciseCursor.close();
                     Log.e("DBManager", "Could not find the exercise ID for log_id: " + log_id);
                     return;
                 }
@@ -546,42 +534,38 @@ public class DBManager {
                         ", reps: " + intReps + ", improvement: " + intImprovement);
             } else {
                 Log.w("DBManager", "No rows updated for log_id: " + log_id + ". Possible invalid ID.");
-                
+
                 // Dump table schema and contents for debugging
                 Cursor schemaCursor = database.rawQuery("PRAGMA table_info(" + DatabaseHelper.TABLE_NAME_LOGS + ")", null);
                 Log.d("DBManager", "LOGS table schema:");
-                if (schemaCursor != null) {
-                    while (schemaCursor.moveToNext()) {
-                        String colName = schemaCursor.getString(1);
-                        String colType = schemaCursor.getString(2);
-                        Log.d("DBManager", "Column: " + colName + ", Type: " + colType);
-                    }
-                    schemaCursor.close();
+                while (schemaCursor.moveToNext()) {
+                    String colName = schemaCursor.getString(1);
+                    String colType = schemaCursor.getString(2);
+                    Log.d("DBManager", "Column: " + colName + ", Type: " + colType);
                 }
-                
+                schemaCursor.close();
+
                 // Sample a few rows
                 Cursor debugCursor = database.query(
-                    DatabaseHelper.TABLE_NAME_LOGS,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    DatabaseHelper.LOG_ID + " DESC",
-                    "5"
+                        DatabaseHelper.TABLE_NAME_LOGS,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        DatabaseHelper.LOG_ID + " DESC",
+                        "5"
                 );
-                
+
                 Log.d("DBManager", "Sample LOGS table rows:");
-                if (debugCursor != null) {
-                    String[] columnNames = debugCursor.getColumnNames();
-                    while (debugCursor.moveToNext()) {
-                        StringBuilder row = new StringBuilder();
-                        row.append("LOG_ID: ").append(debugCursor.getLong(debugCursor.getColumnIndex(DatabaseHelper.LOG_ID)));
-                        row.append(", EXERCISE_ID: ").append(debugCursor.getLong(debugCursor.getColumnIndex(DatabaseHelper.EXERCISE_ID)));
-                        Log.d("DBManager", row.toString());
-                    }
-                    debugCursor.close();
+                String[] columnNames = debugCursor.getColumnNames();
+                while (debugCursor.moveToNext()) {
+                    StringBuilder row = new StringBuilder();
+                    row.append("LOG_ID: ").append(debugCursor.getLong(debugCursor.getColumnIndex(DatabaseHelper.LOG_ID)));
+                    row.append(", EXERCISE_ID: ").append(debugCursor.getLong(debugCursor.getColumnIndex(DatabaseHelper.EXERCISE_ID)));
+                    Log.d("DBManager", row.toString());
                 }
+                debugCursor.close();
             }
         } catch (Exception e) {
             Log.e("DBManager", "Error updating exercise log: " + e.getMessage(), e);
@@ -790,30 +774,7 @@ public class DBManager {
         // Only proceed if we found exercise IDs
         if (!exerciseIds.isEmpty()) {
             // Create the confirmation dialog
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
-            builder.setTitle("Delete Exercise");
-            builder.setMessage("Are you sure you want to delete this exercise and its associated log(s)?");
-            builder.setPositiveButton("Yes", (dialog1, which) -> {
-                try {
-                    // Delete logs associated with each exercise ID
-                    for (String exerciseId : exerciseIds) {
-                        Log.d("DBManager", "Deleting exercise ID: " + exerciseId);
-                        database.delete(DatabaseHelper.TABLE_NAME_LOGS, DatabaseHelper.EXERCISE_ID + "=?", new String[]{exerciseId});
-                        database.delete(DatabaseHelper.TABLE_NAME_EXERCISES, DatabaseHelper.EXERCISE_ID + "=?", new String[]{exerciseId});
-                    }
-
-                    // Show a success message
-                    Toast.makeText(context, "Exercise deleted successfully", Toast.LENGTH_SHORT).show();
-
-                    // Refresh the activity to renew the page
-                    ((Activity) context).recreate();
-
-                } catch (Exception e) {
-                    // Log an error if an exception occurs during deletion
-                    Log.e("DeleteExercise", "Error deleting exercise and logs.", e);
-                    Toast.makeText(context, "Error deleting exercise: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
+            AlertDialog.Builder builder = getBuilder(exerciseIds);
             builder.setNegativeButton("No", (dialog1, which) -> {
                 // Do nothing
             });
@@ -831,6 +792,34 @@ public class DBManager {
             Toast.makeText(context, "Could not find exercise to delete", Toast.LENGTH_SHORT).show();
             Log.e("DBManager", "No exercise IDs found for deletion with ID: " + _id);
         }
+    }
+
+    private AlertDialog.Builder getBuilder(List<String> exerciseIds) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Delete Exercise");
+        builder.setMessage("Are you sure you want to delete this exercise and its associated log(s)?");
+        builder.setPositiveButton("Yes", (dialog1, which) -> {
+            try {
+                // Delete logs associated with each exercise ID
+                for (String exerciseId : exerciseIds) {
+                    Log.d("DBManager", "Deleting exercise ID: " + exerciseId);
+                    database.delete(DatabaseHelper.TABLE_NAME_LOGS, DatabaseHelper.EXERCISE_ID + "=?", new String[]{exerciseId});
+                    database.delete(DatabaseHelper.TABLE_NAME_EXERCISES, DatabaseHelper.EXERCISE_ID + "=?", new String[]{exerciseId});
+                }
+
+                // Show a success message
+                Toast.makeText(context, "Exercise deleted successfully", Toast.LENGTH_SHORT).show();
+
+                // Refresh the activity to renew the page
+                ((Activity) context).recreate();
+
+            } catch (Exception e) {
+                // Log an error if an exception occurs during deletion
+                Log.e("DeleteExercise", "Error deleting exercise and logs.", e);
+                Toast.makeText(context, "Error deleting exercise: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        return builder;
     }
 
 
@@ -1050,13 +1039,13 @@ public class DBManager {
 
     public Cursor getExerciseDetails(String exerciseId) {
         String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        
+
         String query = "SELECT e." + DatabaseHelper.EXERCISE_ID + ", e." + DatabaseHelper.EXERCISE +
                 ", l." + DatabaseHelper.WEIGHT + ", l." + DatabaseHelper.LOG_ID +
-                ", l." + DatabaseHelper.SET1 + ", l." + DatabaseHelper.SET2 + 
-                ", l." + DatabaseHelper.SET3 + ", l." + DatabaseHelper.SET4 + 
-                ", l." + DatabaseHelper.SET5 + ", l." + DatabaseHelper.SET1_IMPROVEMENT + 
-                ", l." + DatabaseHelper.SET2_IMPROVEMENT + ", l." + DatabaseHelper.SET3_IMPROVEMENT + 
+                ", l." + DatabaseHelper.SET1 + ", l." + DatabaseHelper.SET2 +
+                ", l." + DatabaseHelper.SET3 + ", l." + DatabaseHelper.SET4 +
+                ", l." + DatabaseHelper.SET5 + ", l." + DatabaseHelper.SET1_IMPROVEMENT +
+                ", l." + DatabaseHelper.SET2_IMPROVEMENT + ", l." + DatabaseHelper.SET3_IMPROVEMENT +
                 ", l." + DatabaseHelper.SET4_IMPROVEMENT + ", l." + DatabaseHelper.SET5_IMPROVEMENT +
                 " FROM " + DatabaseHelper.TABLE_NAME_EXERCISES + " e " +
                 " JOIN " + DatabaseHelper.TABLE_NAME_LOGS + " l " +
@@ -1067,7 +1056,7 @@ public class DBManager {
 
         Log.d("DBManager", "Fetching exercise details for exercise_id: " + exerciseId + " on date: " + todayDate);
         Cursor cursor = database.rawQuery(query, new String[]{exerciseId, todayDate});
-        
+
         if (cursor != null && cursor.moveToFirst()) {
             int logIdIndex = cursor.getColumnIndex(DatabaseHelper.LOG_ID);
             if (logIdIndex != -1) {
@@ -1079,7 +1068,7 @@ public class DBManager {
         } else {
             Log.w("DBManager", "No logs found for exercise_id: " + exerciseId + " on date: " + todayDate);
         }
-        
+
         return cursor;
     }
 
@@ -1285,6 +1274,7 @@ public class DBManager {
         return database.rawQuery(query, selectionArgs);
     }
 
+
     /**
      * Fetches detailed exercise information for a specific date
      *
@@ -1292,14 +1282,13 @@ public class DBManager {
      * @return Cursor with exercise details, showing only the latest entry for each exercise
      */
     public Cursor fetchExerciseDetailsForDate(String strDate) {
-        Log.d("DBManager", "fetchExerciseDetailsForDate called with date: " + strDate);
-        
-        // Ensure date has proper format for LIKE query
-        if (strDate != null && !strDate.endsWith("%")) {
-            strDate = strDate + "%";
-            Log.d("DBManager", "Added wildcard to date: " + strDate);
-        }
-        
+        Log.d("DBManager", "Fetching exercise details for date: " + strDate);
+
+        // The date format from the calendar appears to be like "Tue Apr 15%2025"
+        // Let's convert this to the format used in the database (likely YYYY-MM-DD)
+        String formattedDate = convertDateFormat(strDate);
+        Log.d("DBManager", "Converted date format to: " + formattedDate);
+
         // This query selects only the most recent completed exercise log for each unique exercise on a given date
         String query = "SELECT l." + DatabaseHelper.LOG_ID + ", " +
                 "e." + DatabaseHelper.EXERCISE_ID + ", " +
@@ -1321,62 +1310,177 @@ public class DBManager {
                 "l." + DatabaseHelper.WORKOUT_ID + " " +
                 "FROM " + DatabaseHelper.TABLE_NAME_LOGS + " l " +
                 "JOIN " + DatabaseHelper.TABLE_NAME_EXERCISES + " e ON l." + DatabaseHelper.EXERCISE_ID + " = e." + DatabaseHelper.EXERCISE_ID + " " +
-                "WHERE l." + DatabaseHelper.DATETIME + " LIKE ? " +
+                "INNER JOIN ( " +
+                "   SELECT " + DatabaseHelper.EXERCISE_ID + ", MAX(" + DatabaseHelper.DATETIME + ") as max_datetime " +
+                "   FROM " + DatabaseHelper.TABLE_NAME_LOGS + " " +
+                "   WHERE " + DatabaseHelper.DATETIME + " LIKE ? " +  // Fixed: removed l. alias
+                "   AND " + DatabaseHelper.DURATION + " IS NOT NULL " +
+                "   GROUP BY " + DatabaseHelper.EXERCISE_ID +
+                ") latest ON l." + DatabaseHelper.EXERCISE_ID + " = latest." + DatabaseHelper.EXERCISE_ID + " " +
+                "AND l." + DatabaseHelper.DATETIME + " = latest.max_datetime " +
                 "ORDER BY l." + DatabaseHelper.DATETIME + " DESC";
-        
-        Log.d("DBManager", "Executing query with date: " + strDate);
-        Cursor cursor = database.rawQuery(query, new String[]{strDate});
-        
-        if (cursor != null) {
-            Log.d("DBManager", "Query returned " + cursor.getCount() + " rows for date: " + strDate);
-            // Log the first few rows to debug
-            if (cursor.moveToFirst()) {
-                int logIdIndex = cursor.getColumnIndex(DatabaseHelper.LOG_ID);
-                int exerciseIdIndex = cursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
-                int exerciseNameIndex = cursor.getColumnIndex(DatabaseHelper.EXERCISE);
-                int workoutIdIndex = cursor.getColumnIndex(DatabaseHelper.WORKOUT_ID);
-                int dateIndex = cursor.getColumnIndex(DatabaseHelper.DATE);
-                
-                StringBuilder sb = new StringBuilder("First row data: ");
-                if (logIdIndex != -1) sb.append("log_id=").append(cursor.getString(logIdIndex)).append(", ");
-                if (exerciseIdIndex != -1) sb.append("exercise_id=").append(cursor.getString(exerciseIdIndex)).append(", ");
-                if (exerciseNameIndex != -1) sb.append("exercise=").append(cursor.getString(exerciseNameIndex)).append(", ");
-                if (workoutIdIndex != -1) sb.append("workout_id=").append(cursor.getString(workoutIdIndex)).append(", ");
-                if (dateIndex != -1) sb.append("date=").append(cursor.getString(dateIndex));
-                
-                Log.d("DBManager", sb.toString());
-                cursor.moveToPosition(-1); // Reset cursor position
-            }
-        } else {
-            Log.e("DBManager", "Query returned null cursor for date: " + strDate);
-        }
-        
-        return cursor;
+
+        // For debugging, let's also directly check what records exist for this date
+        debugPrintExercisesForDate(formattedDate);
+
+        return database.rawQuery(query, new String[]{formattedDate});
     }
+
+    /**
+     * Convert the date format from "Tue Apr 15%2025" to "2025-04-15%"
+     * This handles the format coming from the calendar view
+     */
+    private String convertDateFormat(String inputDate) {
+        // First, handle case where it's already in a database-compatible format
+        if (inputDate.matches("\\d{4}-\\d{2}-\\d{2}.*")) {
+            return inputDate.contains("%") ? inputDate : inputDate + "%";
+        }
+
+        try {
+            // Clean up the input - remove %20 (URL encoding for space) and any % wildcards
+            String cleanDate = inputDate.replace("%20", " ").replace("%", "");
+
+            // Try to parse the date format
+            SimpleDateFormat inputFormat;
+            if (cleanDate.matches("\\w{3} \\w{3} \\d{1,2} \\d{4}")) {
+                // Format: "Tue Apr 15 2025"
+                inputFormat = new SimpleDateFormat("EEE MMM dd yyyy", Locale.US);
+            } else if (cleanDate.matches("\\w{3} \\w{3} \\d{1,2}")) {
+                // Format: "Tue Apr 15"
+                inputFormat = new SimpleDateFormat("EEE MMM dd", Locale.US);
+                // Add current year since it's missing
+                cleanDate += " " + Calendar.getInstance().get(Calendar.YEAR);
+            } else {
+                // Unknown format, return as is with wildcard
+                Log.w("DBManager", "Unknown date format: " + inputDate);
+                return inputDate;
+            }
+
+            Date date = inputFormat.parse(cleanDate);
+            if (date == null) {
+                // If parsing fails, return original with wildcard
+                return inputDate;
+            }
+
+            // Format the date to YYYY-MM-DD
+            SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            return outputFormat.format(date) + "%";
+
+        } catch (Exception e) {
+            Log.e("DBManager", "Error converting date format", e);
+            // If there's an error, return the original with wildcard
+            return inputDate.contains("%") ? inputDate : inputDate + "%";
+        }
+    }
+
+    /**
+     * Debug method to print all records that have the given date
+     * This helps identify if there are any records for the date in any format
+     */
+    private void debugPrintExercisesForDate(String strDate) {
+        // Extract the date part without the wildcard
+        String basicDatePart = strDate.replace("%", "");
+
+        Log.d("DBManager", "DEBUG: Checking for any exercises with date containing: " + basicDatePart);
+
+        String debugQuery = "SELECT " +
+                DatabaseHelper.LOG_ID + ", " +
+                DatabaseHelper.EXERCISE_ID + ", " +
+                DatabaseHelper.DATE + ", " +
+                DatabaseHelper.DATETIME + " " +
+                "FROM " + DatabaseHelper.TABLE_NAME_LOGS + " " +
+                "WHERE " + DatabaseHelper.DATE + " LIKE '%" + basicDatePart + "%' OR " +
+                DatabaseHelper.DATETIME + " LIKE '%" + basicDatePart + "%'";
+
+        Cursor debugCursor = null;
+        try {
+            debugCursor = database.rawQuery(debugQuery, null);
+            Log.d("DBManager", "DEBUG: Found " + (debugCursor != null ? debugCursor.getCount() : 0) +
+                    " records containing date '" + basicDatePart + "'");
+
+            if (debugCursor != null && debugCursor.getCount() > 0) {
+                for (debugCursor.moveToFirst(); !debugCursor.isAfterLast(); debugCursor.moveToNext()) {
+                    int logIdIdx = debugCursor.getColumnIndex(DatabaseHelper.LOG_ID);
+                    int exerciseIdIdx = debugCursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
+                    int dateIdx = debugCursor.getColumnIndex(DatabaseHelper.DATE);
+                    int dateTimeIdx = debugCursor.getColumnIndex(DatabaseHelper.DATETIME);
+
+                    String logId = logIdIdx != -1 ? debugCursor.getString(logIdIdx) : "unknown";
+                    String exerciseId = exerciseIdIdx != -1 ? debugCursor.getString(exerciseIdIdx) : "unknown";
+                    String date = dateIdx != -1 ? debugCursor.getString(dateIdx) : "unknown";
+                    String dateTime = dateTimeIdx != -1 ? debugCursor.getString(dateTimeIdx) : "unknown";
+
+                    Log.d("DBManager", "DEBUG: Record found - LogID: " + logId +
+                            ", ExerciseID: " + exerciseId +
+                            ", DATE: " + date +
+                            ", DATETIME: " + dateTime);
+                }
+            }
+        } catch (Exception e) {
+            Log.e("DBManager", "Error in debug query", e);
+        } finally {
+            if (debugCursor != null) {
+                debugCursor.close();
+            }
+        }
+    }
+
+
+//    /**
+//     * Fetches detailed exercise information for a specific date
+//     *
+//     * @param strDate The date in the format used in the DATETIME column
+//     * @return Cursor with exercise details, showing only the latest entry for each exercise
+//     */
+//    public Cursor fetchExerciseDetailsForDate(String strDate) {
+//        // This query selects only the most recent completed exercise log for each unique exercise on a given date
+//        String query = "SELECT l." + DatabaseHelper.LOG_ID + ", " +
+//                "e." + DatabaseHelper.EXERCISE_ID + ", " +
+//                "e." + DatabaseHelper.EXERCISE + ", " +
+//                "l." + DatabaseHelper.WEIGHT + ", " +
+//                "l." + DatabaseHelper.DATE + ", " +
+//                "l." + DatabaseHelper.DATETIME + ", " +
+//                "l." + DatabaseHelper.DURATION + ", " +
+//                "l." + DatabaseHelper.SET1 + ", " +
+//                "l." + DatabaseHelper.SET2 + ", " +
+//                "l." + DatabaseHelper.SET3 + ", " +
+//                "l." + DatabaseHelper.SET4 + ", " +
+//                "l." + DatabaseHelper.SET5 + ", " +
+//                "l." + DatabaseHelper.SET1_IMPROVEMENT + ", " +
+//                "l." + DatabaseHelper.SET2_IMPROVEMENT + ", " +
+//                "l." + DatabaseHelper.SET3_IMPROVEMENT + ", " +
+//                "l." + DatabaseHelper.SET4_IMPROVEMENT + ", " +
+//                "l." + DatabaseHelper.SET5_IMPROVEMENT + ", " +
+//                "l." + DatabaseHelper.WORKOUT_ID + " " +
+//                "FROM " + DatabaseHelper.TABLE_NAME_LOGS + " l " +
+//                "JOIN " + DatabaseHelper.TABLE_NAME_EXERCISES + " e ON l." + DatabaseHelper.EXERCISE_ID + " = e." + DatabaseHelper.EXERCISE_ID + " " +
+//                "INNER JOIN ( " +
+//                "   SELECT " + DatabaseHelper.EXERCISE_ID + ", MAX(" + DatabaseHelper.DATETIME + ") as max_datetime " +
+//                "   FROM " + DatabaseHelper.TABLE_NAME_LOGS + " " +
+//                "   WHERE " + DatabaseHelper.DATETIME + " LIKE ? " +
+//                "   AND " + DatabaseHelper.DURATION + " IS NOT NULL " +
+//                "   GROUP BY " + DatabaseHelper.EXERCISE_ID +
+//                ") latest ON l." + DatabaseHelper.EXERCISE_ID + " = latest." + DatabaseHelper.EXERCISE_ID + " " +
+//                "AND l." + DatabaseHelper.DATETIME + " = latest.max_datetime " +
+//                "ORDER BY l." + DatabaseHelper.DATETIME + " DESC";
+//
+//        return database.rawQuery(query, new String[]{strDate});
+//    }
 
     /**
      * Fetches detailed exercise information for a specific date and workout ID
      *
-     * @param strDate The date in the format used in the DATETIME column
+     * @param strDate   The date in the format used in the DATETIME column
      * @param workoutId The ID of the workout to filter by (can be null to get all workouts)
      * @return Cursor with exercise details, showing only the latest entry for each exercise
      */
     public Cursor fetchExerciseDetailsForDate(String strDate, String workoutId) {
-        Log.d("DBManager", "fetchExerciseDetailsForDate called with date: " + strDate + ", workout_id: " + workoutId);
-        
         // If no workout ID provided, use the version that gets all workouts
         if (workoutId == null || workoutId.isEmpty()) {
-            Log.d("DBManager", "No workout_id provided, calling version without workout_id filter");
             return fetchExerciseDetailsForDate(strDate);
         }
-        
-        // Ensure date has proper format for LIKE query
-        if (strDate != null && !strDate.endsWith("%")) {
-            strDate = strDate + "%";
-            Log.d("DBManager", "Added wildcard to date: " + strDate);
-        }
-        
-        // This query selects only the most recent completed exercise log for each unique exercise 
+
+        // This query selects only the most recent completed exercise log for each unique exercise
         // on a given date for a specific workout ID
         String query = "SELECT l." + DatabaseHelper.LOG_ID + ", " +
                 "e." + DatabaseHelper.EXERCISE_ID + ", " +
@@ -1398,39 +1502,39 @@ public class DBManager {
                 "l." + DatabaseHelper.WORKOUT_ID + " " +
                 "FROM " + DatabaseHelper.TABLE_NAME_LOGS + " l " +
                 "JOIN " + DatabaseHelper.TABLE_NAME_EXERCISES + " e ON l." + DatabaseHelper.EXERCISE_ID + " = e." + DatabaseHelper.EXERCISE_ID + " " +
-                "WHERE l." + DatabaseHelper.DATETIME + " LIKE ? " +
+                "INNER JOIN ( " +
+                "   SELECT " + DatabaseHelper.EXERCISE_ID + ", MAX(" + DatabaseHelper.DATETIME + ") as max_datetime " +
+                "   FROM " + DatabaseHelper.TABLE_NAME_LOGS + " " +
+                "   WHERE " + DatabaseHelper.DATETIME + " LIKE ? " +
+                "   AND " + DatabaseHelper.WORKOUT_ID + " = ? " +
+                "   AND " + DatabaseHelper.DURATION + " IS NOT NULL " +
+                "   GROUP BY " + DatabaseHelper.EXERCISE_ID +
+                ") latest ON l." + DatabaseHelper.EXERCISE_ID + " = latest." + DatabaseHelper.EXERCISE_ID + " " +
+                "AND l." + DatabaseHelper.DATETIME + " = latest.max_datetime " +
                 "AND l." + DatabaseHelper.WORKOUT_ID + " = ? " +
                 "ORDER BY l." + DatabaseHelper.DATETIME + " DESC";
 
-        Log.d("DBManager", "Executing query with date: " + strDate + ", workout_id: " + workoutId);
-        Cursor cursor = database.rawQuery(query, new String[]{strDate, workoutId});
-        
-        if (cursor != null) {
-            Log.d("DBManager", "Query returned " + cursor.getCount() + " rows for date: " + strDate + " and workout_id: " + workoutId);
-            // Log the first few rows to debug
-            if (cursor.moveToFirst()) {
-                int logIdIndex = cursor.getColumnIndex(DatabaseHelper.LOG_ID);
-                int exerciseIdIndex = cursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
-                int exerciseNameIndex = cursor.getColumnIndex(DatabaseHelper.EXERCISE);
-                int workoutIdIndex = cursor.getColumnIndex(DatabaseHelper.WORKOUT_ID);
-                int dateIndex = cursor.getColumnIndex(DatabaseHelper.DATE);
-                
-                StringBuilder sb = new StringBuilder("First row data: ");
-                if (logIdIndex != -1) sb.append("log_id=").append(cursor.getString(logIdIndex)).append(", ");
-                if (exerciseIdIndex != -1) sb.append("exercise_id=").append(cursor.getString(exerciseIdIndex)).append(", ");
-                if (exerciseNameIndex != -1) sb.append("exercise=").append(cursor.getString(exerciseNameIndex)).append(", ");
-                if (workoutIdIndex != -1) sb.append("workout_id=").append(cursor.getString(workoutIdIndex)).append(", ");
-                if (dateIndex != -1) sb.append("date=").append(cursor.getString(dateIndex));
-                
-                Log.d("DBManager", sb.toString());
-                cursor.moveToPosition(-1); // Reset cursor position
-            }
-        } else {
-            Log.e("DBManager", "Query returned null cursor for date: " + strDate + " and workout_id: " + workoutId);
-        }
-        
-        return cursor;
+        return database.rawQuery(query, new String[]{strDate, workoutId, workoutId});
     }
+
+
+    /**
+     * Get the latest exercise log entry with improvements for a specific exercise
+     *
+     * @param exerciseId The ID of the exercise to get logs for
+     * @return Cursor containing the latest log with set reps and improvements
+     */
+    public Cursor getLatestLogForExercise(String exerciseId) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        String query = "SELECT * FROM " + DatabaseHelper.TABLE_NAME_LOGS +
+                " WHERE " + DatabaseHelper.EXERCISE_ID + " = ?" +
+                " ORDER BY " + DatabaseHelper.DATETIME + " DESC, " +
+                DatabaseHelper.LOG_ID + " DESC LIMIT 1";
+
+        return db.rawQuery(query, new String[]{exerciseId});
+    }
+
 
     /**
      * Checks if dark mode is enabled
@@ -1442,6 +1546,7 @@ public class DBManager {
         SharedPreferences sharedPreferences = context.getSharedPreferences("my_prefs", Context.MODE_PRIVATE);
         return sharedPreferences.getBoolean("dark_mode", false);
     }
+
 
     /**
      * Creates a styled confirmation dialog with consistent colors
@@ -1484,22 +1589,4 @@ public class DBManager {
         }
 
     }
-
-    /**
-     * Get the latest exercise log entry with improvements for a specific exercise
-     *
-     * @param exerciseId The ID of the exercise to get logs for
-     * @return Cursor containing the latest log with set reps and improvements
-     */
-    public Cursor getLatestLogForExercise(String exerciseId) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-
-        String query = "SELECT * FROM " + DatabaseHelper.TABLE_NAME_LOGS +
-                " WHERE " + DatabaseHelper.EXERCISE_ID + " = ?" +
-                " ORDER BY " + DatabaseHelper.DATETIME + " DESC, " +
-                DatabaseHelper.LOG_ID + " DESC LIMIT 1";
-
-        return db.rawQuery(query, new String[]{exerciseId});
-    }
-
 }
