@@ -265,8 +265,8 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
                     intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
                     startActivity(intent);
                     break;
-                case "Color Scheme":
-                    Log.d("menu item clicked", "Color Scheme");
+                case "Settings":
+                    Log.d("menu item clicked", "Settings");
                     intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
                     startActivity(intent);
                     break;

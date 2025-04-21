@@ -164,7 +164,7 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
         actionBar.setTitle("");
 
         TextView txtTitle = findViewById(R.id.txtTitle);
-        txtTitle.setText("Color Scheme");
+        txtTitle.setText("Settings");
 
         //Hides the chronometer as we don't need it for this activity
         Chronometer simpleChronometer = findViewById(R.id.simpleChronometer);
@@ -214,8 +214,8 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
                     intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
                     startActivity(intent);
                     break;
-                case "Color Scheme":
-                    Log.d("menu item clicked", "Color Scheme");
+                case "Settings":
+                    Log.d("menu item clicked", "Settings");
                     intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
                     startActivity(intent);
                     break;

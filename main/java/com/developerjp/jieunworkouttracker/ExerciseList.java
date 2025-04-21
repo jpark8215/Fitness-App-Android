@@ -176,14 +176,14 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
 
             switch (itemCLicked) {
 
-                case "Workouts":
-                    Log.d("menu item clicked", "Workouts");
+                case "Exercises":
+                    Log.d("menu item clicked", "Exercises");
                     //Starts the MainActivityExerciseList activity
                     intent = new Intent(getApplicationContext(), MainActivityExerciseList.class);
                     startActivity(intent);
                     break;
-                case "Archived":
-                    Log.d("menu item clicked", "Archived");
+                case "Archived Exercises":
+                    Log.d("menu item clicked", "Archived Exercises");
                     intent = new Intent(getApplicationContext(), ArchivedExerciseList.class);
                     startActivity(intent);
                     break;
@@ -198,8 +198,8 @@ public class ExerciseList extends AppCompatActivity implements ExerciseRecyclerV
                     intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
                     startActivity(intent);
                     break;
-                case "Color Scheme":
-                    Log.d("menu item clicked", "Color Scheme");
+                case "Settings":
+                    Log.d("menu item clicked", "Settings");
                     intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
                     startActivity(intent);
                     break;

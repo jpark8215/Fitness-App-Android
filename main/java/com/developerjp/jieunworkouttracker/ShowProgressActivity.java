@@ -180,7 +180,7 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
                     intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
                     startActivity(intent);
                     break;
-                case "Color Scheme":
+                case "Settings":
                     intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
                     startActivity(intent);
                     break;

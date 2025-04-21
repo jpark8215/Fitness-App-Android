@@ -18,9 +18,8 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarRe
     private final OnItemLongSelectedListener itemLongSelectedListener;
     private final OnItemSelectedListener itemSelectedListener;
 
-    public CalendarRecyclerViewAdapter(List<CalendarItem> list,
-                                       Context context,
-                                       OnItemLongSelectedListener longlistener, OnItemSelectedListener listener) {
+
+    public CalendarRecyclerViewAdapter(List<CalendarItem> list, Context context, OnItemLongSelectedListener longlistener, OnItemSelectedListener listener) {
         this.list = list;
         this.itemLongSelectedListener = longlistener;
         this.itemSelectedListener = listener;
@@ -29,14 +28,22 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarRe
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_style, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_style, parent, false);
         return new ViewHolder(v);
     }
 
+
     @Override
     public void onBindViewHolder(final CalendarRecyclerViewAdapter.ViewHolder holder, final int position) {
+        Log.d("CalendarAdapter", "Binding item at position: " + position);
+
+        if (position >= list.size()) {
+            Log.e("CalendarAdapter", "Position out of bounds: " + position + ", list size: " + list.size());
+            return;
+        }
+
         CalendarItem myList = list.get(position);
+        Log.d("CalendarAdapter", "Item at position " + position + ": " + "title=" + myList.getTitle() + ", id=" + myList.getWorkoutId() + ", date=" + myList.getDate());
 
         holder.textViewHead.setText(myList.getTitle());
         final String currentId = myList.getWorkoutId();
@@ -64,9 +71,13 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarRe
     }
 
 
+
+
     @Override
     public int getItemCount() {
-        return list.size();
+        int size = list.size();
+        Log.d("CalendarAdapter", "getItemCount: " + size);
+        return size;
     }
 
     public interface OnItemSelectedListener {

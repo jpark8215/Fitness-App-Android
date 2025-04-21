@@ -234,8 +234,8 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
                     intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
                     startActivity(intent);
                     break;
-                case "Color Scheme":
-                    Log.d("menu item clicked", "Color Scheme");
+                case "Settings":
+                    Log.d("menu item clicked", "Settings");
                     intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
                     startActivity(intent);
                     break;
@@ -255,20 +255,6 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         modify_intent.putExtra("id", itemId);
         modify_intent.putExtra("date", itemDate);
         startActivity(modify_intent);
-    }
-
-
-    /**
-     * Helper class to store exercise session data for grouping
-     */
-    private static class ExerciseSession {
-        String exerciseId;
-        String exerciseName;
-        String logId;
-        String date;
-        String datetime;
-        long duration;
-        String workoutId;
     }
 
     public void showEvents(Date dateClicked) {
@@ -431,7 +417,6 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         recyclerView.setAdapter(adapter);
     }
 
-
     public void bottomNavigationHomeClick(View view) {
         Intent intent = new Intent(getApplicationContext(), MainActivityExerciseList.class);
         startActivity(intent);
@@ -442,22 +427,32 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         startActivity(intent);
     }
 
-
     @Override
     protected void onPause() {
         super.onPause();
     }
-
 
     @Override
     protected void onResume() {
         super.onResume();
     }
 
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+    /**
+     * Helper class to store exercise session data for grouping
+     */
+    private static class ExerciseSession {
+        String exerciseId;
+        String exerciseName;
+        String logId;
+        String date;
+        String datetime;
+        long duration;
+        String workoutId;
     }
 
 }

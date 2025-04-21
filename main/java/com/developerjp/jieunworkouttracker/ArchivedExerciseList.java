@@ -138,8 +138,6 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
                     break;
                 case "Archived Exercises":
                     Log.d("menu item clicked", "Archived Exercises");
-                    //We're already in the archived exercises view
-                    drawer.closeDrawers();
                     break;
                 case "Progress":
                     Log.d("menu item clicked", "Progress");
@@ -152,8 +150,8 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
                     intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
                     startActivity(intent);
                     break;
-                case "Color Scheme":
-                    Log.d("menu item clicked", "Color Scheme");
+                case "Settings":
+                    Log.d("menu item clicked", "Settings");
                     intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
                     startActivity(intent);
                     break;
