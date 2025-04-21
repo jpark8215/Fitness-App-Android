@@ -76,7 +76,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:orientation="horizontal">
 
                 <ImageButton
                     android:id="@+id/imageButtonHome"
@@ -85,7 +85,6 @@
                     android:background="@android:color/transparent"
                     android:contentDescription="Home"
                     android:onClick="bottomNavigationHomeClick"
-                    android:scaleType="fitCenter"
                     app:srcCompat="@drawable/ic_home"
                     app:tint="@color/grey_40" />
 
@@ -96,7 +95,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:orientation="horizontal">
 
                 <ImageButton
                     android:id="@+id/imageButtonCalendar"
@@ -105,7 +104,6 @@
                     android:background="@android:color/transparent"
                     android:contentDescription="Calendar"
                     android:onClick="bottomNavigationCalendarClick"
-                    android:scaleType="fitCenter"
                     app:srcCompat="@drawable/ic_calendar_round"
                     app:tint="@color/grey_40" />
 
