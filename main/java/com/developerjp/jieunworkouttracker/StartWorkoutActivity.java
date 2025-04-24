@@ -953,95 +953,93 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                     }
 
                     // Now check for set values and improvements in the log
-                    if (cursor != null) {
-                        int set1Index = cursor.getColumnIndex(DatabaseHelper.SET1);
-                        int set2Index = cursor.getColumnIndex(DatabaseHelper.SET2);
-                        int set3Index = cursor.getColumnIndex(DatabaseHelper.SET3);
-                        int set4Index = cursor.getColumnIndex(DatabaseHelper.SET4);
-                        int set5Index = cursor.getColumnIndex(DatabaseHelper.SET5);
-                        
-                        int imp1Index = cursor.getColumnIndex(DatabaseHelper.SET1_IMPROVEMENT);
-                        int imp2Index = cursor.getColumnIndex(DatabaseHelper.SET2_IMPROVEMENT);
-                        int imp3Index = cursor.getColumnIndex(DatabaseHelper.SET3_IMPROVEMENT);
-                        int imp4Index = cursor.getColumnIndex(DatabaseHelper.SET4_IMPROVEMENT);
-                        int imp5Index = cursor.getColumnIndex(DatabaseHelper.SET5_IMPROVEMENT);
-                        
-                        // Set reps if available in the cursor
-                        if (set1Index != -1) {
-                            item.setButton1(cursor.getString(set1Index));
-                        } else {
-                            item.setButton1("5");
-                        }
-                        
-                        if (set2Index != -1) {
-                            item.setButton2(cursor.getString(set2Index));
-                        } else {
-                            item.setButton2("5");
-                        }
-                        
-                        if (set3Index != -1) {
-                            item.setButton3(cursor.getString(set3Index));
-                        } else {
-                            item.setButton3("5");
-                        }
-                        
-                        if (set4Index != -1) {
-                            item.setButton4(cursor.getString(set4Index));
-                        } else {
-                            item.setButton4("5");
-                        }
-                        
-                        if (set5Index != -1) {
-                            item.setButton5(cursor.getString(set5Index));
-                        } else {
-                            item.setButton5("5");
-                        }
-                        
-                        // Set colors based on improvement values
-                        if (imp1Index != -1) {
-                            int imp = cursor.getInt(imp1Index);
-                            if (imp == 2) item.setButton1Colour(R.drawable.button_shape_green);
-                            else if (imp == 1) item.setButton1Colour(R.drawable.button_shape_red);
-                            else item.setButton1Colour(R.drawable.button_shape_default);
-                        } else {
-                            item.setButton1Colour(R.drawable.button_shape_default);
-                        }
-                        
-                        if (imp2Index != -1) {
-                            int imp = cursor.getInt(imp2Index);
-                            if (imp == 2) item.setButton2Colour(R.drawable.button_shape_green);
-                            else if (imp == 1) item.setButton2Colour(R.drawable.button_shape_red);
-                            else item.setButton2Colour(R.drawable.button_shape_default);
-                        } else {
-                            item.setButton2Colour(R.drawable.button_shape_default);
-                        }
-                        
-                        if (imp3Index != -1) {
-                            int imp = cursor.getInt(imp3Index);
-                            if (imp == 2) item.setButton3Colour(R.drawable.button_shape_green);
-                            else if (imp == 1) item.setButton3Colour(R.drawable.button_shape_red);
-                            else item.setButton3Colour(R.drawable.button_shape_default);
-                        } else {
-                            item.setButton3Colour(R.drawable.button_shape_default);
-                        }
-                        
-                        if (imp4Index != -1) {
-                            int imp = cursor.getInt(imp4Index);
-                            if (imp == 2) item.setButton4Colour(R.drawable.button_shape_green);
-                            else if (imp == 1) item.setButton4Colour(R.drawable.button_shape_red);
-                            else item.setButton4Colour(R.drawable.button_shape_default);
-                        } else {
-                            item.setButton4Colour(R.drawable.button_shape_default);
-                        }
-                        
-                        if (imp5Index != -1) {
-                            int imp = cursor.getInt(imp5Index);
-                            if (imp == 2) item.setButton5Colour(R.drawable.button_shape_green);
-                            else if (imp == 1) item.setButton5Colour(R.drawable.button_shape_red);
-                            else item.setButton5Colour(R.drawable.button_shape_default);
-                        } else {
-                            item.setButton5Colour(R.drawable.button_shape_default);
-                        }
+                    int set1Index = cursor.getColumnIndex(DatabaseHelper.SET1);
+                    int set2Index = cursor.getColumnIndex(DatabaseHelper.SET2);
+                    int set3Index = cursor.getColumnIndex(DatabaseHelper.SET3);
+                    int set4Index = cursor.getColumnIndex(DatabaseHelper.SET4);
+                    int set5Index = cursor.getColumnIndex(DatabaseHelper.SET5);
+
+                    int imp1Index = cursor.getColumnIndex(DatabaseHelper.SET1_IMPROVEMENT);
+                    int imp2Index = cursor.getColumnIndex(DatabaseHelper.SET2_IMPROVEMENT);
+                    int imp3Index = cursor.getColumnIndex(DatabaseHelper.SET3_IMPROVEMENT);
+                    int imp4Index = cursor.getColumnIndex(DatabaseHelper.SET4_IMPROVEMENT);
+                    int imp5Index = cursor.getColumnIndex(DatabaseHelper.SET5_IMPROVEMENT);
+
+                    // Set reps if available in the cursor
+                    if (set1Index != -1) {
+                        item.setButton1(cursor.getString(set1Index));
+                    } else {
+                        item.setButton1("5");
+                    }
+
+                    if (set2Index != -1) {
+                        item.setButton2(cursor.getString(set2Index));
+                    } else {
+                        item.setButton2("5");
+                    }
+
+                    if (set3Index != -1) {
+                        item.setButton3(cursor.getString(set3Index));
+                    } else {
+                        item.setButton3("5");
+                    }
+
+                    if (set4Index != -1) {
+                        item.setButton4(cursor.getString(set4Index));
+                    } else {
+                        item.setButton4("5");
+                    }
+
+                    if (set5Index != -1) {
+                        item.setButton5(cursor.getString(set5Index));
+                    } else {
+                        item.setButton5("5");
+                    }
+
+                    // Set colors based on improvement values
+                    if (imp1Index != -1) {
+                        int imp = cursor.getInt(imp1Index);
+                        if (imp == 2) item.setButton1Colour(R.drawable.button_shape_green);
+                        else if (imp == 1) item.setButton1Colour(R.drawable.button_shape_red);
+                        else item.setButton1Colour(R.drawable.button_shape_default);
+                    } else {
+                        item.setButton1Colour(R.drawable.button_shape_default);
+                    }
+
+                    if (imp2Index != -1) {
+                        int imp = cursor.getInt(imp2Index);
+                        if (imp == 2) item.setButton2Colour(R.drawable.button_shape_green);
+                        else if (imp == 1) item.setButton2Colour(R.drawable.button_shape_red);
+                        else item.setButton2Colour(R.drawable.button_shape_default);
+                    } else {
+                        item.setButton2Colour(R.drawable.button_shape_default);
+                    }
+
+                    if (imp3Index != -1) {
+                        int imp = cursor.getInt(imp3Index);
+                        if (imp == 2) item.setButton3Colour(R.drawable.button_shape_green);
+                        else if (imp == 1) item.setButton3Colour(R.drawable.button_shape_red);
+                        else item.setButton3Colour(R.drawable.button_shape_default);
+                    } else {
+                        item.setButton3Colour(R.drawable.button_shape_default);
+                    }
+
+                    if (imp4Index != -1) {
+                        int imp = cursor.getInt(imp4Index);
+                        if (imp == 2) item.setButton4Colour(R.drawable.button_shape_green);
+                        else if (imp == 1) item.setButton4Colour(R.drawable.button_shape_red);
+                        else item.setButton4Colour(R.drawable.button_shape_default);
+                    } else {
+                        item.setButton4Colour(R.drawable.button_shape_default);
+                    }
+
+                    if (imp5Index != -1) {
+                        int imp = cursor.getInt(imp5Index);
+                        if (imp == 2) item.setButton5Colour(R.drawable.button_shape_green);
+                        else if (imp == 1) item.setButton5Colour(R.drawable.button_shape_red);
+                        else item.setButton5Colour(R.drawable.button_shape_default);
+                    } else {
+                        item.setButton5Colour(R.drawable.button_shape_default);
                     }
 
                     // Add the item to the list
