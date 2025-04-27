@@ -67,7 +67,6 @@ public class DBManager {
         dbHelper.close();
     }
 
-
     //TODO Find a way to de-primary key Exercise ID so duplicated exerciseID can be generated
     public void insertExercise(String id, String exerciseName, Double exerciseWeight) {
         ContentValues contentValue = new ContentValues();
@@ -149,7 +148,6 @@ public class DBManager {
                         contentValues.put(DatabaseHelper.WEIGHT, cursor.getDouble(weightColumnIndex));
                     }
 
-
                     //Is used to put the current datetime into the LOGS table datetime field
                     Date datetime = Calendar.getInstance().getTime();
                     contentValues.put(DatabaseHelper.DATETIME, datetime.toString());
@@ -172,7 +170,6 @@ public class DBManager {
         }
     }
 
-
     public String countExercises(String id) {
 
         Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_EXERCISES, null, "EXERCISES.WORKOUT_ID = ?", new String[]{id}, null, null, null);
@@ -180,17 +177,6 @@ public class DBManager {
 
         //Our query needs the value as a String so we convert it here
         return Integer.toString(numOfExercises);
-    }
-
-    public String getExerciseId(String name) {
-
-        String exerciseId = "";
-        String[] columns = new String[]{"EXERCISES.EXERCISE_ID"};
-        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_EXERCISES, columns, "EXERCISES.EXERCISE = ?", new String[]{name}, null, null, null);
-
-        cursor.moveToFirst();
-        exerciseId = cursor.getString(0);
-        return exerciseId;
     }
 
     public Cursor getAllExercises() {
@@ -252,9 +238,6 @@ public class DBManager {
         }
     }
 
-
-
-
     public Cursor fetchExerciseLogs(String id, String numOfExercises) {
 
         String[] columns = new String[]{"EXERCISES.WORKOUT_ID", "LOGS.EXERCISE_ID", DatabaseHelper.LOG_ID, DatabaseHelper.EXERCISE, "MAX(datetime)", DatabaseHelper.SET1, DatabaseHelper.SET1_IMPROVEMENT, DatabaseHelper.SET2, DatabaseHelper.SET2_IMPROVEMENT, DatabaseHelper.SET3, DatabaseHelper.SET3_IMPROVEMENT, DatabaseHelper.SET4, DatabaseHelper.SET4_IMPROVEMENT, DatabaseHelper.SET5, DatabaseHelper.SET5_IMPROVEMENT, DatabaseHelper.WEIGHT};
@@ -265,14 +248,12 @@ public class DBManager {
         return cursor;
     }
 
-
     public Cursor fetchAllExerciseLogsForCalendar() {
         String[] columns = new String[]{DatabaseHelper.WORKOUT_ID, DatabaseHelper.DATE};
         Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_LOGS, columns, "LOGS.DURATION IS NOT NULL", null, DatabaseHelper.WORKOUT_ID + "," + DatabaseHelper.DATE, null, null, null);
         cursor.moveToFirst();
         return cursor;
     }
-
 
     public void updateExerciseName(long _id, String exerciseName) {
         // Check if this ID exists directly in the exercises table first
@@ -1050,16 +1031,19 @@ public class DBManager {
      */
     public Cursor fetchUnarchivedExercises() {
         try {
-            // Use the ARCHIVE column in the EXERCISES table directly
+            // This query uses a subquery to get the latest log entry (highest log_id) for each exercise
             String query = "SELECT " +
                     "e." + DatabaseHelper.EXERCISE_ID + " AS " + DatabaseHelper.EXERCISE_ID + ", " +
                     "e." + DatabaseHelper.EXERCISE + " AS " + DatabaseHelper.EXERCISE + ", " +
-                    "l." + DatabaseHelper.WEIGHT + " AS " + DatabaseHelper.WEIGHT + " " +
+                    "latestLog." + DatabaseHelper.WEIGHT + " AS " + DatabaseHelper.WEIGHT + " " +
                     "FROM " + DatabaseHelper.TABLE_NAME_EXERCISES + " e " +
-                    "LEFT JOIN " + DatabaseHelper.TABLE_NAME_LOGS + " l ON " +
-                    "e." + DatabaseHelper.EXERCISE_ID + " = l." + DatabaseHelper.EXERCISE_ID + " " +
+                    "LEFT JOIN (SELECT " + DatabaseHelper.EXERCISE_ID + ", " + DatabaseHelper.WEIGHT + ", " +
+                    "MAX(" + DatabaseHelper.LOG_ID + ") AS max_log_id " +
+                    "FROM " + DatabaseHelper.TABLE_NAME_LOGS + " " +
+                    "GROUP BY " + DatabaseHelper.EXERCISE_ID + ") latestLog " +
+                    "ON e." + DatabaseHelper.EXERCISE_ID + " = latestLog." + DatabaseHelper.EXERCISE_ID + " " +
                     "WHERE e." + DatabaseHelper.ARCHIVE + " = 0 OR e." + DatabaseHelper.ARCHIVE + " IS NULL " +
-                    "GROUP BY e." + DatabaseHelper.EXERCISE_ID;
+                    "ORDER BY e." + DatabaseHelper.EXERCISE;
 
             return database.rawQuery(query, null);
         } catch (Exception e) {
@@ -1141,9 +1125,6 @@ public class DBManager {
                 "AND l." + DatabaseHelper.DATETIME + " = latest.max_datetime " +
                 "ORDER BY l." + DatabaseHelper.DATETIME + " DESC";
 
-        // For debugging, let's also directly check what records exist for this date
-        debugPrintExercisesForDate(formattedDate);
-
         return database.rawQuery(query, new String[]{formattedDate});
     }
 
@@ -1191,58 +1172,6 @@ public class DBManager {
             Log.e("DBManager", "Error converting date format", e);
             // If there's an error, return the original with wildcard
             return inputDate.contains("%") ? inputDate : inputDate + "%";
-        }
-    }
-
-    /**
-     * Debug method to print all records that have the given date
-     * This helps identify if there are any records for the date in any format
-     */
-    private void debugPrintExercisesForDate(String strDate) {
-        // Extract the date part without the wildcard
-        String basicDatePart = strDate.replace("%", "");
-
-        Log.d("DBManager", "DEBUG: Checking for any exercises with date containing: " + basicDatePart);
-
-        String debugQuery = "SELECT " +
-                DatabaseHelper.LOG_ID + ", " +
-                DatabaseHelper.EXERCISE_ID + ", " +
-                DatabaseHelper.DATE + ", " +
-                DatabaseHelper.DATETIME + " " +
-                "FROM " + DatabaseHelper.TABLE_NAME_LOGS + " " +
-                "WHERE " + DatabaseHelper.DATE + " LIKE '%" + basicDatePart + "%' OR " +
-                DatabaseHelper.DATETIME + " LIKE '%" + basicDatePart + "%'";
-
-        Cursor debugCursor = null;
-        try {
-            debugCursor = database.rawQuery(debugQuery, null);
-            Log.d("DBManager", "DEBUG: Found " + debugCursor.getCount() +
-                    " records containing date '" + basicDatePart + "'");
-
-            if (debugCursor.getCount() > 0) {
-                for (debugCursor.moveToFirst(); !debugCursor.isAfterLast(); debugCursor.moveToNext()) {
-                    int logIdIdx = debugCursor.getColumnIndex(DatabaseHelper.LOG_ID);
-                    int exerciseIdIdx = debugCursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
-                    int dateIdx = debugCursor.getColumnIndex(DatabaseHelper.DATE);
-                    int dateTimeIdx = debugCursor.getColumnIndex(DatabaseHelper.DATETIME);
-
-                    String logId = logIdIdx != -1 ? debugCursor.getString(logIdIdx) : "unknown";
-                    String exerciseId = exerciseIdIdx != -1 ? debugCursor.getString(exerciseIdIdx) : "unknown";
-                    String date = dateIdx != -1 ? debugCursor.getString(dateIdx) : "unknown";
-                    String dateTime = dateTimeIdx != -1 ? debugCursor.getString(dateTimeIdx) : "unknown";
-
-                    Log.d("DBManager", "DEBUG: Record found - LogID: " + logId +
-                            ", ExerciseID: " + exerciseId +
-                            ", DATE: " + date +
-                            ", DATETIME: " + dateTime);
-                }
-            }
-        } catch (Exception e) {
-            Log.e("DBManager", "Error in debug query", e);
-        } finally {
-            if (debugCursor != null) {
-                debugCursor.close();
-            }
         }
     }
 

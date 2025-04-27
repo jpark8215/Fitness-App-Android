@@ -58,7 +58,6 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
     private FloatingActionButton fab_add;
     private Parcelable recyclerViewState;
     private Toolbar toolbar;
-    private boolean isKgUnit = true; // Default to kg
 
     @Override
     protected void onPause() {
@@ -78,7 +77,8 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         }
         
         // Get the current weight unit preference
-        isKgUnit = WeightUnitManager.isKgUnit(this);
+        // Default to kg
+        boolean isKgUnit = WeightUnitManager.isKgUnit(this);
         
         // Load exercise data from database
         loadExerciseData();
@@ -206,7 +206,6 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         loadExerciseData();
     }
 
-
     private void initToolbar() {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -277,7 +276,6 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         });
     }
 
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -344,7 +342,6 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         exerciseItems.clear();
 
         // Get all unarchived exercises - this way archived ones won't show in the main list
-
         try (Cursor cursor = dbManager.fetchUnarchivedExercises()) {
             //If the cursor has a value in it then hide the empty textview
             if (cursor != null && cursor.getCount() > 0) {
