@@ -506,12 +506,6 @@ public class DBManager {
     }
 
 
-    /**
-     * Records the duration of an exercise log
-     *
-     * @param log_id          The ID of the log to update
-     * @param workoutDuration The duration in seconds
-     */
     public void recordExerciseLogDuration(String log_id, long workoutDuration) {
         try {
             // Make sure log_id is valid
@@ -520,10 +514,11 @@ public class DBManager {
                 return;
             }
 
-            // First, attempt direct update by log_id
+            // Create a ContentValues object to hold the new duration
             ContentValues contentValues = new ContentValues();
             contentValues.put(DatabaseHelper.DURATION, workoutDuration);
 
+            // Update the specific log entry using the log_id
             int rowsUpdated = database.update(
                     DatabaseHelper.TABLE_NAME_LOGS,
                     contentValues,
@@ -533,72 +528,102 @@ public class DBManager {
 
             if (rowsUpdated > 0) {
                 Log.d("DBManager", "Successfully updated duration for log_id: " + log_id);
-                return; // Exit if update was successful
+            } else {
+                Log.w("DBManager", "No rows updated for log_id: " + log_id + ". Possible invalid ID.");
             }
-
-            // If direct update failed, try to find the most recent log for this exercise
-            // First, get the exercise_id from the log_id
-            String exerciseId = null;
-            Cursor logCursor = database.query(
-                    DatabaseHelper.TABLE_NAME_LOGS,
-                    new String[]{DatabaseHelper.EXERCISE_ID},
-                    DatabaseHelper.LOG_ID + " = ?",
-                    new String[]{log_id},
-                    null, null, null
-            );
-
-            if (logCursor.moveToFirst()) {
-                int exerciseIdColumnIndex = logCursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
-                if (exerciseIdColumnIndex != -1) {
-                    exerciseId = logCursor.getString(exerciseIdColumnIndex);
-                }
-                logCursor.close();
-            }
-
-            // If we found an exercise_id, try to update the most recent log for that exercise
-            if (exerciseId != null) {
-                // Get the most recent log for this exercise
-                Cursor recentLogCursor = database.query(
-                        DatabaseHelper.TABLE_NAME_LOGS,
-                        new String[]{DatabaseHelper.LOG_ID},
-                        DatabaseHelper.EXERCISE_ID + " = ?",
-                        new String[]{exerciseId},
-                        null, null,
-                        DatabaseHelper.DATETIME + " DESC",
-                        "1" // Limit to most recent
-                );
-
-                if (recentLogCursor.moveToFirst()) {
-                    int recentLogIdColumnIndex = recentLogCursor.getColumnIndex(DatabaseHelper.LOG_ID);
-                    if (recentLogIdColumnIndex != -1) {
-                        String recentLogId = recentLogCursor.getString(recentLogIdColumnIndex);
-
-                        // Try to update this log
-                        int recentRowsUpdated = database.update(
-                                DatabaseHelper.TABLE_NAME_LOGS,
-                                contentValues,
-                                DatabaseHelper.LOG_ID + " = ?",
-                                new String[]{recentLogId}
-                        );
-
-                        if (recentRowsUpdated > 0) {
-                            Log.d("DBManager", "Updated most recent log instead. Original log_id: " + log_id + ", Updated log_id: " + recentLogId);
-                            recentLogCursor.close();
-                            return;
-                        }
-                    }
-                    recentLogCursor.close();
-                }
-            }
-
-            // If we still haven't updated anything, log the failure
-            Log.w("DBManager", "No rows updated for log_id: " + log_id + ". Unable to find suitable log to update.");
-
         } catch (Exception e) {
             Log.e("DBManager", "Error updating exercise log duration: " + e.getMessage());
         }
     }
 
+
+//    public void recordExerciseLogDuration(String log_id, long workoutDuration) {
+//        try {
+//            // Make sure log_id is valid
+//            if (log_id == null || log_id.trim().isEmpty()) {
+//                Log.e("DBManager", "Invalid log_id provided: null or empty");
+//                return;
+//            }
+//
+//            // First, attempt direct update by log_id
+//            ContentValues contentValues = new ContentValues();
+//            contentValues.put(DatabaseHelper.DURATION, workoutDuration);
+//
+//            int rowsUpdated = database.update(
+//                    DatabaseHelper.TABLE_NAME_LOGS,
+//                    contentValues,
+//                    DatabaseHelper.LOG_ID + " = ?",
+//                    new String[]{log_id}
+//            );
+//
+//            if (rowsUpdated > 0) {
+//                Log.d("DBManager", "Successfully updated duration for log_id: " + log_id);
+//                return; // Exit if update was successful
+//            }
+//
+//            // If direct update failed, try to find the most recent log for this exercise
+//            // First, get the exercise_id from the log_id
+//            String exerciseId = null;
+//            Cursor logCursor = database.query(
+//                    DatabaseHelper.TABLE_NAME_LOGS,
+//                    new String[]{DatabaseHelper.EXERCISE_ID},
+//                    DatabaseHelper.LOG_ID + " = ?",
+//                    new String[]{log_id},
+//                    null, null, null
+//            );
+//
+//            if (logCursor.moveToFirst()) {
+//                int exerciseIdColumnIndex = logCursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
+//                if (exerciseIdColumnIndex != -1) {
+//                    exerciseId = logCursor.getString(exerciseIdColumnIndex);
+//                }
+//                logCursor.close();
+//            }
+//
+//            // If we found an exercise_id, try to update the most recent log for that exercise
+//            if (exerciseId != null) {
+//                // Get the most recent log for this exercise
+//                Cursor recentLogCursor = database.query(
+//                        DatabaseHelper.TABLE_NAME_LOGS,
+//                        new String[]{DatabaseHelper.LOG_ID},
+//                        DatabaseHelper.EXERCISE_ID + " = ?",
+//                        new String[]{exerciseId},
+//                        null, null,
+//                        DatabaseHelper.DATETIME + " DESC",
+//                        "1" // Limit to most recent
+//                );
+//
+//                if (recentLogCursor.moveToFirst()) {
+//                    int recentLogIdColumnIndex = recentLogCursor.getColumnIndex(DatabaseHelper.LOG_ID);
+//                    if (recentLogIdColumnIndex != -1) {
+//                        String recentLogId = recentLogCursor.getString(recentLogIdColumnIndex);
+//
+//                        // Try to update this log
+//                        int recentRowsUpdated = database.update(
+//                                DatabaseHelper.TABLE_NAME_LOGS,
+//                                contentValues,
+//                                DatabaseHelper.LOG_ID + " = ?",
+//                                new String[]{recentLogId}
+//                        );
+//
+//                        if (recentRowsUpdated > 0) {
+//                            Log.d("DBManager", "Updated most recent log instead. Original log_id: " + log_id + ", Updated log_id: " + recentLogId);
+//                            recentLogCursor.close();
+//                            return;
+//                        }
+//                    }
+//                    recentLogCursor.close();
+//                }
+//            }
+//
+//            // If we still haven't updated anything, log the failure
+//            Log.w("DBManager", "No rows updated for log_id: " + log_id + ". Unable to find suitable log to update.");
+//
+//        } catch (Exception e) {
+//            Log.e("DBManager", "Error updating exercise log duration: " + e.getMessage());
+//        }
+//    }
+//
 
     public void deleteExercise(long _id) {
         // Check if this is an exercise ID directly in the exercises table
@@ -1193,6 +1218,7 @@ public class DBManager {
                 "JOIN " + DatabaseHelper.TABLE_NAME_EXERCISES + " e ON l." + DatabaseHelper.EXERCISE_ID + " = e." + DatabaseHelper.EXERCISE_ID + " " +
                 "WHERE l." + DatabaseHelper.DATE + " = ? " +
                 "AND l." + DatabaseHelper.EXERCISE_ID + " = ? " +
+                "AND l." + DatabaseHelper.DURATION + " IS NOT NULL " +
                 "ORDER BY l." + DatabaseHelper.DATETIME + " ASC";
 
 

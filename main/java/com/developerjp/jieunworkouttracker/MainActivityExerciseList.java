@@ -75,11 +75,11 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             dbManager = new DBManager(this);
             dbManager.open();
         }
-        
+
         // Get the current weight unit preference
         // Default to kg
         boolean isKgUnit = WeightUnitManager.isKgUnit(this);
-        
+
         // Load exercise data from database
         loadExerciseData();
         

@@ -71,8 +71,6 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarRe
     }
 
 
-
-
     @Override
     public int getItemCount() {
         int size = list.size();
