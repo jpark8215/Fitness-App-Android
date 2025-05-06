@@ -544,8 +544,6 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             weightInput.setText(String.valueOf(itemWeight));
         }
 
-        final ToggleButton weightUnitToggle = dialog.findViewById(R.id.toggle_weight_unit);
-
         Button modifyButton = dialog.findViewById(R.id.btn_update);
         modifyButton.setOnClickListener(v -> {
             if (TextUtils.isEmpty(exerciseNameInput.getText())) {
@@ -561,12 +559,6 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             if (weightInput != null && !TextUtils.isEmpty(weightInput.getText())) {
                 try {
                     newWeight = Double.parseDouble(weightInput.getText().toString());
-
-                    // Convert to kg if needed (if toggle is set to lbs)
-                    if (weightUnitToggle != null && !weightUnitToggle.isChecked()) {
-                        // Convert lbs to kg: kg = lbs * 0.453592
-                        newWeight = newWeight * 0.453592;
-                    }
                 } catch (NumberFormatException e) {
                     Toast.makeText(getApplicationContext(), "Invalid weight format", Toast.LENGTH_SHORT).show();
                     return;

@@ -891,6 +891,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                     int logIdColumnIndex = logsCursor.getColumnIndex(DatabaseHelper.LOG_ID);
                     if (logIdColumnIndex != -1) {
                         String logId = logsCursor.getString(logIdColumnIndex);
+                        Log.d("FinishWorkout", "Updating duration for log ID: " + logId);
                         dbManager.recordExerciseLogDuration(logId, workoutDuration);
                     }
                 }
