@@ -412,6 +412,9 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             adapter.notifyDataSetChanged();
         }
 
+        // Update the display based on current weight unit settings
+        updateWeightDisplay();
+
         // Important: Don't close the database here, as it might be needed by other functions
         // We'll close it in onDestroy
     }

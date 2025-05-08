@@ -99,6 +99,9 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         }
     };
 
+    // Add this as a class member variable
+    private List<String> workoutLogIds = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -291,6 +294,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
     private void loadSelectedExercises(ArrayList<String> exerciseIds) {
         ExerciseItem.clear();
+        workoutLogIds.clear(); // Clear previous log IDs
 
         // Get the selected exercise IDs from the intent
         ArrayList<String> selectedExerciseIds = getIntent().getStringArrayListExtra("selected_exercise_ids");
@@ -327,9 +331,10 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
                     // Set the log_id from today's log
                     if (logIdIndex != -1) {
-                        item.setId(cursor.getString(logIdIndex));
-                        log_id = cursor.getString(logIdIndex); // Also store in activity-level variable
-                        Log.d("StartWorkoutActivity", "Loading exercise with log_id: " + log_id);
+                        String logId = cursor.getString(logIdIndex);
+                        item.setId(logId);
+                        workoutLogIds.add(logId); // Store the log ID
+                        Log.d("StartWorkoutActivity", "Loading exercise with log_id: " + logId);
                     }
 
                     // Now check for set values and improvements in the log
@@ -882,22 +887,10 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         long workoutDuration = (SystemClock.elapsedRealtime() - simpleChronometer.getBase()) / 1000;
 
         try {
-            // Fetch today's logs for the selected exercises
-            Cursor logsCursor = dbManager.fetchExerciseLogsForToday(selectedExerciseIds);
-
-            if (logsCursor != null && logsCursor.getCount() > 0) {
-                // Update the duration for each log
-                while (logsCursor.moveToNext()) {
-                    int logIdColumnIndex = logsCursor.getColumnIndex(DatabaseHelper.LOG_ID);
-                    if (logIdColumnIndex != -1) {
-                        String logId = logsCursor.getString(logIdColumnIndex);
-                        Log.d("FinishWorkout", "Updating duration for log ID: " + logId);
-                        dbManager.recordExerciseLogDuration(logId, workoutDuration);
-                    }
-                }
-                logsCursor.close();
-            } else {
-                Log.w("StartWorkoutActivity", "No logs found for today's exercises");
+            // Update duration for each log ID that was created during this workout
+            for (String logId : workoutLogIds) {
+                Log.d("FinishWorkout", "Updating duration for log ID: " + logId);
+                dbManager.recordExerciseLogDuration(logId, workoutDuration);
             }
         } catch (Exception e) {
             Log.e("StartWorkoutActivity", "Error recording workout duration: " + e.getMessage());

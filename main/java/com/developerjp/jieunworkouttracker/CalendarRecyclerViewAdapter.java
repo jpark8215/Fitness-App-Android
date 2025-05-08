@@ -88,12 +88,10 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarRe
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView textViewHead;
-        public TextView textViewId;
 
         public ViewHolder(View itemView) {
             super(itemView);
             textViewHead = itemView.findViewById(R.id.textViewHead);
-//            textViewId = itemView.findViewById(R.id.textViewId);
         }
     }
 }

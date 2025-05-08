@@ -95,49 +95,36 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         dbManager = new DBManager(this);
         dbManager.open();
         Cursor cursor = dbManager.fetchAllExerciseLogsForCalendar();
-        dbManager.close();
 
         //Adds all of the events to the calendar
-        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-            CalendarItem calendarItem = new CalendarItem();
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                // Get the date from the cursor
+                int dateColumnIndex = cursor.getColumnIndex(DatabaseHelper.DATE);
+                if (dateColumnIndex != -1) {
+                    String date = cursor.getString(dateColumnIndex);
+                    Log.d(LOG_TAG, "Processing date: " + date);
 
-            //uses the cursor to populate the calendar WORKOUT_ID value
-            int workoutIdColumnIndex = cursor.getColumnIndex("workout_id");
-            if (workoutIdColumnIndex != -1) {
-                calendarItem.setWorkoutId(cursor.getString(workoutIdColumnIndex));
-            }
-
-            //uses the cursor to populate the calendar DATE value
-            int dateColumnIndex = cursor.getColumnIndex("date");
-            if (dateColumnIndex != -1) {
-                calendarItem.setDate(cursor.getString(dateColumnIndex));
-            }
-            listItem.add(calendarItem);
-
-            //String log_id = calendarItem.getLogId();
-            String workout_id = calendarItem.getWorkoutId();
-            String date = calendarItem.getDate();
-
-            Log.d(LOG_TAG, "Original date value: " + date);
-
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-
-            try {
-                //Gets the date/time into the milliseconds value
-                Date d = dateFormat.parse(date);
-                assert d != null;
-                long milliseconds = d.getTime();
-
-                //Add the workout log events to the calendar
-                Event newEvent = new Event(Color.argb(255, 0, 191, 255), milliseconds, "workout_id: " + workout_id);
-                compactCalendarView.addEvent(newEvent);
-
-            } catch (ParseException pe) {
-                Log.d(LOG_TAG, "ERROR Parsing date time");
-                pe.printStackTrace();
-
-            }
+                    try {
+                        // Parse the date string to a Date object
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+                        Date d = dateFormat.parse(date);
+                        if (d != null) {
+                            long milliseconds = d.getTime();
+                            // Add the event to the calendar with a blue color
+                            Event newEvent = new Event(Color.argb(255, 0, 191, 255), milliseconds, "Workout completed");
+                            compactCalendarView.addEvent(newEvent);
+                            Log.d(LOG_TAG, "Added event for date: " + date);
+                        }
+                    } catch (ParseException pe) {
+                        Log.e(LOG_TAG, "Error parsing date: " + date, pe);
+                    }
+                }
+            } while (cursor.moveToNext());
+            cursor.close();
         }
+
+        dbManager.close();
 
         Log.d(LOG_TAG, "TODAY'S DATE: " + Calendar.getInstance().getTime());
 
@@ -261,10 +248,10 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         List<Event> events = compactCalendarView.getEvents(dateClicked);
         Log.d(LOG_TAG, "Day was clicked: " + dateClicked + " with events " + events);
 
-        String strDate = dateClicked.toString();
-        strDate = strDate.substring(0, 10) + "%" + strDate.substring(24, 28);
-
-        Log.d("*********strDate", strDate);
+        // Format the date in the correct format for the database (yyyy-MM-dd)
+        SimpleDateFormat dbDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        String strDate = dbDateFormat.format(dateClicked);
+        Log.d(LOG_TAG, "Formatted date for database query: " + strDate);
 
         dbManager.open();
 
