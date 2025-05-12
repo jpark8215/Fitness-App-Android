@@ -72,7 +72,6 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
         stub.setLayoutResource(R.layout.activity_exercise_list);
         stub.inflate();
 
-
         //Gets the values of the intent sent in the previous activity
         //Passes the values through to the public variables defined earlier
         Intent intent = getIntent();
@@ -205,8 +204,7 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
 
         Log.d("CalendarShowSelectedWorkout", "Fetching details for specific log ID: " + id);
         try {
-            // Use the new dedicated method, passing only the log id
-            cursor = dbManager.fetchExerciseLogsForDateAndExercise(date, id);
+            cursor = dbManager.fetchExerciseLogsForDateAndLog(date, id);
             Log.d("CalendarShowSelectedWorkout", "Query returned " +
                     (cursor != null ? cursor.getCount() : 0) + " rows");
         } catch (Exception e) {

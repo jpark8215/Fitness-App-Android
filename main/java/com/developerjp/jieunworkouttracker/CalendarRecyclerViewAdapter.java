@@ -46,7 +46,7 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarRe
         Log.d("CalendarAdapter", "Item at position " + position + ": " + "title=" + myList.getTitle() + ", id=" + myList.getWorkoutId() + ", date=" + myList.getDate());
 
         holder.textViewHead.setText(myList.getTitle());
-        final String currentId = myList.getWorkoutId();
+        final String currentId = myList.getLogId();
         final String currentTitle = myList.getTitle();
         final String date = myList.getDate();
 

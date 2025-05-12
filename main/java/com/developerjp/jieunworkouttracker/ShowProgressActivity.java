@@ -3,6 +3,7 @@ package com.developerjp.jieunworkouttracker;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -127,6 +128,13 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         
         // Hide right axis
         chart.getAxisRight().setEnabled(false);
+
+        // Set axis label colors based on dark mode
+        SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
+        boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
+        int labelColor = darkModeEnabled ? Color.GRAY : Color.BLACK;
+        xAxis.setTextColor(labelColor);
+        leftAxis.setTextColor(labelColor);
 
         chart.animateY(500);
         chart.getLegend().setEnabled(false);

@@ -1,7 +1,5 @@
 package com.developerjp.jieunworkouttracker;
 
-import java.text.DecimalFormat;
-
 public class ExerciseItem {
     private String id;
     private String title;

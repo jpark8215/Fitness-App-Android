@@ -239,7 +239,7 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
         //Starts the exercise list class
         Intent modify_intent = new Intent(getApplicationContext(), CalendarShowSelectedWorkout.class);
         modify_intent.putExtra("title", itemTitle);
-        modify_intent.putExtra("id", itemId);
+        modify_intent.putExtra("id", itemId);  // This is now the logId
         modify_intent.putExtra("date", itemDate);
         startActivity(modify_intent);
     }
