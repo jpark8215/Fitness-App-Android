@@ -54,21 +54,8 @@ public class ShowCalendarActivity extends AppCompatActivity implements CalendarR
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Get a reference to the Shared Preferences object
-        SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
-
-        // Get the value of the "dark_mode" key, or "false" if it doesn't exist
-        boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
-
-        // If dark mode is enabled then do the following
-        if (darkModeEnabled) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            setTheme(R.style.DarkAppTheme_NoActionBar);
-            // Otherwise do this
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-            setTheme(R.style.AppTheme_NoActionBar);
-        }
+        // Apply theme using ThemeManager
+        ThemeManager.applyTheme(this);
 
         setContentView(R.layout.activity_menu_drawer_simple_light);
 

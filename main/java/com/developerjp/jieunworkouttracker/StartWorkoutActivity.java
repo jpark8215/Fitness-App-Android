@@ -6,7 +6,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -30,7 +29,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -110,21 +108,8 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         MobileAds.initialize(this, initializationStatus -> {
         });
 
-        // Get a reference to the Shared Preferences object
-        SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
-
-        // Get the value of the "dark_mode" key, or "false" if it doesn't exist
-        boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
-
-        // If dark mode is enabled then do the following
-        if (darkModeEnabled) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            setTheme(R.style.DarkAppTheme_NoActionBar);
-            // Otherwise do this
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-            setTheme(R.style.AppTheme_NoActionBar);
-        }
+        // Apply theme using ThemeManager
+        ThemeManager.applyTheme(this);
 
         setContentView(R.layout.activity_menu_drawer_simple_light);
 
@@ -142,7 +127,8 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         // Get the selected exercise IDs from the intent
         ArrayList<String> selectedExerciseIds = getIntent().getStringArrayListExtra("selected_exercise_ids");
         if (selectedExerciseIds == null || selectedExerciseIds.isEmpty()) {
-            Toast.makeText(this, "No exercises selected", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "No exercises selected", Toast.LENGTH_SHORT).show();
+            Log.d("StartWorkoutActivity", "No exercises selected");
             finish();
             return;
         }
@@ -157,9 +143,6 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
         // Load the selected exercises
         loadSelectedExercises(selectedExerciseIds);
-
-        // Start the timer service
-        // startChronometer();  <- Remove this line
 
         View parent_view = findViewById(android.R.id.content);
         back_drop = findViewById(R.id.back_drop);
@@ -180,7 +163,6 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         //Chronometer is used for the counter timer
         simpleChronometer = findViewById(R.id.simpleChronometer);
 
-
         //Starts the WorkoutService which keeps track of the workout time
         serviceIntent = new Intent(this, WorkoutService.class);
         serviceIntent.putExtra("id", id);
@@ -197,7 +179,6 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         back_drop.setOnClickListener(v -> toggleFabMode(fab_add));
 
         fab_pause_workout.setOnClickListener(v -> pauseWorkout());
-
 
         cv_pause_workout.setOnClickListener(v -> pauseWorkout());
 
@@ -289,7 +270,6 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
             simpleChronometer.start();
         }
     }
-
 
 
     private void loadSelectedExercises(ArrayList<String> exerciseIds) {
@@ -702,9 +682,9 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                 intReps = 0;
             }
 
-            Log.d("StartWorkoutActivity", "Updating log: " + logId + ", set: " + setSelected + 
-                ", reps: " + intReps + ", improvement: " + intImprovement);
-            
+            Log.d("StartWorkoutActivity", "Updating log: " + logId + ", set: " + setSelected +
+                    ", reps: " + intReps + ", improvement: " + intImprovement);
+
             //We pass through the log_id, set selected, number of reps & integer value of if there was an improvement made
             dbManager.updateExerciseLogsWithImprovement(logId, setSelected, intReps, intImprovement);
 
@@ -750,9 +730,9 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                             item.setButton5Colour(R.drawable.button_shape_red);
                         }
                     }
-                    
-                    Log.d("StartWorkoutActivity", "Updated ExerciseItem at position " + i + 
-                        ", set: " + setSelected + ", reps: " + intReps);
+
+                    Log.d("StartWorkoutActivity", "Updated ExerciseItem at position " + i +
+                            ", set: " + setSelected + ", reps: " + intReps);
                     break;
                 }
             }

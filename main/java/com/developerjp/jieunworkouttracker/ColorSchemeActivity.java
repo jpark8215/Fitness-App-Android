@@ -50,20 +50,8 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
             Log.d("Ads", "Initialization status: " + initializationStatus);
         });
 
-        // Get a reference to the Shared Preferences object
-        SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
-
-        // Get the value of the "dark_mode" key, or "false" if it doesn't exist
-        boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
-
-        // If dark mode is enabled then do the following
-        if (darkModeEnabled) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            setTheme(R.style.DarkAppTheme_NoActionBar);
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-            setTheme(R.style.AppTheme_NoActionBar);
-        }
+        // Apply theme using ThemeManager
+        ThemeManager.applyTheme(this);
 
         setContentView(R.layout.activity_menu_drawer_simple_light);
 
@@ -103,8 +91,8 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
         //Sets up the toolbar, navigation menu and switch
         initToolbar();
         initNavigationMenu();
-        initSwitch(darkModeEnabled);
         initWeightUnitControls();
+        initSwitch(ThemeManager.isDarkModeEnabled(this));
     }
 
     private void initWeightUnitControls() {
@@ -237,35 +225,18 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
     }
 
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-        // Get a reference to the Shared Preferences object
-        SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
-
-        // Edit the shared preferences object
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
         if (isChecked) {
             //do stuff when Switch is ON
             switchTheme.setText("Dark");
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-
-            // Put the boolean value "true" in the "dark_mode" key
-            editor.putBoolean("dark_mode", true);
-
-            // Commit the changes
-            editor.apply();
-
-
+            ThemeManager.setDarkMode(this, true);
+            ThemeManager.applyTheme(this);
+            recreate();
         } else {
             //do stuff when Switch if OFF
             switchTheme.setText("Light");
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-
-            // Put the boolean value "true" in the "dark_mode" key
-            editor.putBoolean("dark_mode", false);
-
-            // Commit the changes
-            editor.apply();
+            ThemeManager.setDarkMode(this, false);
+            ThemeManager.applyTheme(this);
+            recreate();
         }
     }
 

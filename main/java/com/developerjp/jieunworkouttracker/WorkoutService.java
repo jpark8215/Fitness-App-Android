@@ -103,7 +103,7 @@ public class WorkoutService extends Service {
         // Creates and shows the notification
         Notification notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setContentTitle("Workout In Progress")
-                .setContentText("Click here to update your workout log")
+                .setContentText("Click here to go back to the workout")
                 .setSmallIcon(R.drawable.shield_heart_icon)
                 .setContentIntent(pendingIntent)
                 .setTicker("Workout in Progress")
