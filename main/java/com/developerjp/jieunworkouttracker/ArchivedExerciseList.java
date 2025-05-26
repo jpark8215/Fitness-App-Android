@@ -382,9 +382,13 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         // Create the AlertDialog
         AlertDialog dialog = builder.create();
 
-        // Set the custom background
+        // Set the custom background based on current theme
         dialog.setOnShowListener(dialogInterface -> {
-            Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(R.drawable.modern_dialog_background);
+            if (ThemeManager.isDarkModeEnabled(this)) {
+                Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(R.drawable.modern_dialog_background_dark);
+            } else {
+                Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(R.drawable.modern_dialog_background);
+            }
         });
 
         // Show the dialog
@@ -455,7 +459,12 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
             Toast.makeText(getApplicationContext(), "Exercise added", Toast.LENGTH_SHORT).show();
         });
 
-        dialog.getWindow().setBackgroundDrawableResource(R.drawable.modern_dialog_background);
+        // Set the custom background based on current theme
+        if (ThemeManager.isDarkModeEnabled(this)) {
+            dialog.getWindow().setBackgroundDrawableResource(R.drawable.modern_dialog_background_dark);
+        } else {
+            dialog.getWindow().setBackgroundDrawableResource(R.drawable.modern_dialog_background);
+        }
         dialog.show();
         dialog.getWindow().setAttributes(lp);
     }
@@ -550,13 +559,20 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
                                 // Dismiss the inner dialog
                                 dialogInterface.dismiss();
                             })
-
-                            .setNegativeButton("Cancel", (dialog1, id) -> {
+                            .setNegativeButton("Cancel", (dialog1, which) -> {
                                 // User does not want to use the same name, do nothing
                                 dialog1.dismiss();
                             });
 
                     AlertDialog dialog1 = builder.create();
+                    // Set the custom background based on current theme
+                    dialog1.setOnShowListener(dialogInterface -> {
+                        if (ThemeManager.isDarkModeEnabled(this)) {
+                            Objects.requireNonNull(dialog1.getWindow()).setBackgroundDrawableResource(R.drawable.modern_dialog_background_dark);
+                        } else {
+                            Objects.requireNonNull(dialog1.getWindow()).setBackgroundDrawableResource(R.drawable.modern_dialog_background);
+                        }
+                    });
                     dialog1.show();
                 } else {
                     // No duplicate, proceed with the update
@@ -610,12 +626,16 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
 
             //Closes the dialog
             dialog.dismiss();
-
         });
 
         (dialog.findViewById(R.id.bt_close)).setOnClickListener(v -> dialog.dismiss());
 
-        dialog.getWindow().setBackgroundDrawableResource(R.drawable.modern_dialog_background);
+        // Set the custom background based on current theme
+        if (ThemeManager.isDarkModeEnabled(this)) {
+            dialog.getWindow().setBackgroundDrawableResource(R.drawable.modern_dialog_background_dark);
+        } else {
+            dialog.getWindow().setBackgroundDrawableResource(R.drawable.modern_dialog_background);
+        }
         dialog.show();
         dialog.getWindow().setAttributes(lp);
     }
