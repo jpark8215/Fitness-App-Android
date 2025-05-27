@@ -528,8 +528,16 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         exerciseNameInput.setText(itemTitle);
 
         final EditText weightInput = dialog.findViewById(R.id.weight_edittext);
+        final ToggleButton toggleWeightUnit = dialog.findViewById(R.id.toggle_weight_unit);
+
+        // Set toggle state based on system preference
+        boolean isKgUnit = WeightUnitManager.isKgUnit(this);
+        toggleWeightUnit.setChecked(isKgUnit);
+
+        // Convert and display weight in the selected unit
         if (itemWeight != null) {
-            weightInput.setText(String.valueOf(itemWeight));
+            double displayWeight = isKgUnit ? itemWeight : WeightUtils.kgToLbs(itemWeight);
+            weightInput.setText(new DecimalFormat("#.#").format(displayWeight));
         }
 
         Button modifyButton = dialog.findViewById(R.id.btn_update);
@@ -546,7 +554,9 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             Double newWeight = null;
             if (weightInput != null && !TextUtils.isEmpty(weightInput.getText())) {
                 try {
-                    newWeight = Double.parseDouble(weightInput.getText().toString());
+                    double inputWeight = Double.parseDouble(weightInput.getText().toString());
+                    // Convert to kg for storage if currently showing lbs
+                    newWeight = toggleWeightUnit.isChecked() ? inputWeight : WeightUtils.lbsToKg(inputWeight);
                 } catch (NumberFormatException e) {
                     Toast.makeText(getApplicationContext(), "Invalid weight format", Toast.LENGTH_SHORT).show();
                     return;
@@ -561,6 +571,21 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
 
             dialog.dismiss();
             Toast.makeText(getApplicationContext(), "Exercise updated", Toast.LENGTH_SHORT).show();
+        });
+
+        // Add toggle button listener
+        toggleWeightUnit.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (weightInput != null && !TextUtils.isEmpty(weightInput.getText())) {
+                try {
+                    double currentWeight = Double.parseDouble(weightInput.getText().toString());
+                    double convertedWeight = isChecked ? 
+                        WeightUtils.lbsToKg(currentWeight) : 
+                        WeightUtils.kgToLbs(currentWeight);
+                    weightInput.setText(new DecimalFormat("#.#").format(convertedWeight));
+                } catch (NumberFormatException e) {
+                    Log.e("MainActivityExerciseList", "Invalid weight format: " + e.getMessage());
+                }
+            }
         });
 
         Button deleteButton = dialog.findViewById(R.id.btn_delete);

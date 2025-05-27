@@ -497,23 +497,30 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         txtTitle.setText("Modify Exercise");
         exerciseEditText.setText(itemTitle);
 
-        // Use WeightUnitManager to check current preference
+        // Set toggle state based on system preference
         boolean isKgUnit = WeightUnitManager.isKgUnit(this);
         toggleWeightUnit.setChecked(isKgUnit);
 
-        // Convert the stored weight (in kg) to the selected unit for display
-        double displayWeight;
-        if (isKgUnit) {
-            displayWeight = itemWeight;
-        } else {
-            // Convert kg to lbs for display
-            displayWeight = WeightUtils.kgToLbs(itemWeight);
-        }
+        // Convert and display weight in the selected unit
+        if (itemWeight != null) {
+            double displayWeight = isKgUnit ? itemWeight : WeightUtils.kgToLbs(itemWeight);
         weightEditText.setText(new DecimalFormat("#.#").format(displayWeight));
+        }
 
-        //Sets the cursor position to the end of text, rather than at the start
-        exerciseEditText.setSelection(exerciseEditText.getText().length());
-        weightEditText.setSelection(weightEditText.getText().length());
+        // Add toggle button listener
+        toggleWeightUnit.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (weightEditText != null && !TextUtils.isEmpty(weightEditText.getText())) {
+                try {
+                    double currentWeight = Double.parseDouble(weightEditText.getText().toString());
+                    double convertedWeight = isChecked ? 
+                        WeightUtils.lbsToKg(currentWeight) : 
+                        WeightUtils.kgToLbs(currentWeight);
+                    weightEditText.setText(new DecimalFormat("#.#").format(convertedWeight));
+                } catch (NumberFormatException e) {
+                    Log.e("ArchivedExerciseList", "Invalid weight format: " + e.getMessage());
+                }
+            }
+        });
 
         btnUpdate.setOnClickListener(v -> {
             if (TextUtils.isEmpty(exerciseEditText.getText())) {
@@ -535,13 +542,10 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
 
                                 // If there is a weight given, update the database
                                 if (!weightEditText.getText().toString().trim().isEmpty()) {
-                                    double newExerciseWeight = Double.parseDouble(weightEditText.getText().toString());
-
+                                    double inputWeight = Double.parseDouble(weightEditText.getText().toString());
                                     // Convert to kg for storage if currently showing lbs
-                                    if (!toggleWeightUnit.isChecked()) {
-                                        newExerciseWeight = WeightUtils.lbsToKg(newExerciseWeight);
-                                    }
-
+                                    double newExerciseWeight = toggleWeightUnit.isChecked() ? 
+                                        inputWeight : WeightUtils.lbsToKg(inputWeight);
                                     dbManager.updateExerciseWeight(String.valueOf(_id), newExerciseWeight);
                                 } else {
                                     // If no weight value was given, update with a default value of 0
@@ -581,13 +585,10 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
 
                     // If there is a weight given, update the database
                     if (!weightEditText.getText().toString().trim().isEmpty()) {
-                        double newExerciseWeight = Double.parseDouble(weightEditText.getText().toString());
-
+                        double inputWeight = Double.parseDouble(weightEditText.getText().toString());
                         // Convert to kg for storage if currently showing lbs
-                        if (!toggleWeightUnit.isChecked()) {
-                            newExerciseWeight = WeightUtils.lbsToKg(newExerciseWeight);
-                        }
-
+                        double newExerciseWeight = toggleWeightUnit.isChecked() ? 
+                            inputWeight : WeightUtils.lbsToKg(inputWeight);
                         dbManager.updateExerciseWeight(String.valueOf(_id), newExerciseWeight);
                     } else {
                         // If no weight value was given, update with a default value of 0
