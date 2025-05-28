@@ -442,7 +442,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
     private void showCustomAddDialog() {
         final Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dialog_add_light);
+        dialog.setContentView(ThemeManager.isDarkModeEnabled(this) ? R.layout.dialog_add_dark : R.layout.dialog_add_light);
         dialog.setCancelable(true);
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
@@ -483,8 +483,8 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
 
                     // Convert to kg if needed (if toggle is set to lbs)
                     if (weightUnitToggle != null && !weightUnitToggle.isChecked()) {
-                        // Convert lbs to kg: kg = lbs * 0.453592
-                        weight = weight * 0.453592;
+                        // Convert lbs to kg: kg = lbs * 0.45359
+                        weight = weight * 0.45359;
                     }
                 } catch (NumberFormatException e) {
                     Toast.makeText(getApplicationContext(), "Invalid weight format", Toast.LENGTH_SHORT).show();
@@ -504,7 +504,6 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             Toast.makeText(getApplicationContext(), "Exercise added", Toast.LENGTH_SHORT).show();
         });
 
-        dialog.getWindow().setBackgroundDrawableResource(R.drawable.modern_dialog_background);
         dialog.show();
         dialog.getWindow().setAttributes(lp);
     }
@@ -513,7 +512,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
     private void showCustomModifyDialog(final String itemId, String itemTitle, Double itemWeight) {
         final Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dialog_modify_light);
+        dialog.setContentView(ThemeManager.isDarkModeEnabled(this) ? R.layout.dialog_modify_dark : R.layout.dialog_modify_light);
         dialog.setCancelable(true);
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
@@ -591,7 +590,8 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         Button deleteButton = dialog.findViewById(R.id.btn_delete);
         deleteButton.setOnClickListener(v -> {
             // Confirm deletion
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this,
+                ThemeManager.isDarkModeEnabled(this) ? R.style.ModernAlertDialogDark : R.style.ModernAlertDialog);
             builder.setTitle("Delete Exercise");
             builder.setMessage("Are you sure you want to delete this exercise?");
             builder.setPositiveButton("Yes", (dialog1, which) -> {
@@ -605,14 +605,8 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
                 // Do nothing
             });
 
-            // Create the AlertDialog
-            AlertDialog confirmationDialog = builder.create();
-            // Set the custom background
-            confirmationDialog.setOnShowListener(dialogInterface -> {
-                Objects.requireNonNull(confirmationDialog.getWindow()).setBackgroundDrawableResource(R.drawable.modern_dialog_background);
-            });
-            // Show the dialog
-            confirmationDialog.show();
+            // Create and show the AlertDialog
+            builder.create().show();
         });
 
         // Add archive button functionality
@@ -627,7 +621,6 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             });
         }
 
-        dialog.getWindow().setBackgroundDrawableResource(R.drawable.modern_dialog_background);
         dialog.show();
         dialog.getWindow().setAttributes(lp);
     }

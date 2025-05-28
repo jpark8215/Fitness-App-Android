@@ -52,6 +52,9 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ThemeManager.applyTheme(this);
+
         setContentView(R.layout.activity_menu_drawer_simple_light);
 
         //Use view stubs to programmatically change the include view at runtime
@@ -163,28 +166,15 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
     }
 
     public void loadExerciseData() {
-        // Initialize the database connection if needed
-        if (dbManager == null || !dbManager.isOpen()) {
-            dbManager = new DBManager(this);
-            dbManager.open();
-        }
-
-        // Clear existing data
+        // Clear the existing list
         ExerciseItem.clear();
 
-        // Fetch archived exercises
+        // Get the current weight unit preference
+        boolean isKgUnit = WeightUnitManager.isKgUnit(this);
+
+        // Fetch archived exercises from the database
         Cursor cursor = dbManager.fetchArchivedExercises();
 
-        // Initialize the recycler view if it's not already initialized
-        if (recyclerView == null) {
-            recyclerView = findViewById(R.id.recycler_view);
-            if (recyclerView != null) {
-                recyclerView.setHasFixedSize(true);
-                recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            }
-        }
-
-        // If the cursor has data, hide the empty text view
         if (cursor != null && cursor.getCount() > 0) {
             TextView empty = findViewById(R.id.empty);
             if (empty != null) {
@@ -209,8 +199,24 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
                     exerciseItem.setTitle(cursor.getString(exerciseColumnIndex));
                 }
 
-                if (weightColumnIndex != -1) {
-                    exerciseItem.setWeight(cursor.getDouble(weightColumnIndex));
+                if (weightColumnIndex != -1 && !cursor.isNull(weightColumnIndex)) {
+                    double exerciseWeight = cursor.getDouble(weightColumnIndex);
+                    
+                    // Store original weight in kg
+                    exerciseItem.setWeight(exerciseWeight);
+                    
+                    // Format weight with appropriate unit
+                    String formattedWeight;
+                    if (isKgUnit) {
+                        formattedWeight = WeightUtils.formatWeight(exerciseWeight, true);
+                    } else {
+                        double weightInLbs = WeightUtils.kgToLbs(exerciseWeight);
+                        formattedWeight = WeightUtils.formatWeight(weightInLbs, false);
+                    }
+                    exerciseItem.setDisplayWeight(formattedWeight);
+                } else {
+                    exerciseItem.setWeight(0.0);
+                    exerciseItem.setDisplayWeight(isKgUnit ? "0.0 kg" : "0.0 lbs");
                 }
 
                 // Set default values for buttons
@@ -266,7 +272,14 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
             dbManager = new DBManager(this);
             dbManager.open();
         }
+        
+        // Refresh the exercise list with current weight unit settings
         loadExerciseData();
+        
+        // Restore RecyclerView state if available
+        if (recyclerViewState != null && recyclerView != null && recyclerView.getLayoutManager() != null) {
+            recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
+        }
     }
 
     @Override
@@ -353,7 +366,8 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
             ids[i] = ExerciseItem.get(i).getId();
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, 
+            ThemeManager.isDarkModeEnabled(this) ? R.style.ModernAlertDialogDark : R.style.ModernAlertDialog);
         builder.setTitle("Select Exercise to Restore");
         builder.setItems(items, (dialog, which) -> {
             try {
@@ -379,20 +393,8 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
             }
         });
 
-        // Create the AlertDialog
-        AlertDialog dialog = builder.create();
-
-        // Set the custom background based on current theme
-        dialog.setOnShowListener(dialogInterface -> {
-            if (ThemeManager.isDarkModeEnabled(this)) {
-                Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(R.drawable.modern_dialog_background_dark);
-            } else {
-                Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(R.drawable.modern_dialog_background);
-            }
-        });
-
-        // Show the dialog
-        dialog.show();
+        // Create and show the AlertDialog
+        builder.create().show();
     }
 
 
@@ -440,8 +442,8 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
 
                     // Convert to kg if toggle is not checked (meaning it's in lbs)
                     if (toggleWeightUnit != null && !toggleWeightUnit.isChecked()) {
-                        // Convert lbs to kg: kg = lbs * 0.453592
-                        exerciseWeight = exerciseWeight * 0.453592;
+                        // Convert lbs to kg: kg = lbs * 0.45359
+                        exerciseWeight = exerciseWeight * 0.45359;
                     }
                 } catch (NumberFormatException e) {
                     Toast.makeText(getApplicationContext(), "Invalid weight format", Toast.LENGTH_SHORT).show();
@@ -532,7 +534,8 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
                 // Check for duplicate exercise name
                 if (dbManager.doesExerciseExist(newExerciseName)) {
                     // Exercise with the same name already exists, ask the user what to do
-                    AlertDialog.Builder builder = new AlertDialog.Builder(ArchivedExerciseList.this);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ArchivedExerciseList.this,
+                        ThemeManager.isDarkModeEnabled(this) ? R.style.ModernAlertDialogDark : R.style.ModernAlertDialog);
                     double mostRecentWeight = dbManager.getMostRecentWeightForExercise(newExerciseName);
                     String message = "The most recent weight was " + mostRecentWeight + ". \nStill update as you entered?";
                     builder.setMessage(message)
@@ -568,16 +571,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
                                 dialog1.dismiss();
                             });
 
-                    AlertDialog dialog1 = builder.create();
-                    // Set the custom background based on current theme
-                    dialog1.setOnShowListener(dialogInterface -> {
-                        if (ThemeManager.isDarkModeEnabled(this)) {
-                            Objects.requireNonNull(dialog1.getWindow()).setBackgroundDrawableResource(R.drawable.modern_dialog_background_dark);
-                        } else {
-                            Objects.requireNonNull(dialog1.getWindow()).setBackgroundDrawableResource(R.drawable.modern_dialog_background);
-                        }
-                    });
-                    dialog1.show();
+                    builder.create().show();
                 } else {
                     // No duplicate, proceed with the update
                     // Update exercise name

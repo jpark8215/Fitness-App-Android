@@ -738,12 +738,15 @@ public class DBManager {
             String query = "SELECT " +
                     "e." + DatabaseHelper.EXERCISE_ID + " AS " + DatabaseHelper.EXERCISE_ID + ", " +
                     "e." + DatabaseHelper.EXERCISE + " AS " + DatabaseHelper.EXERCISE + ", " +
-                    "l." + DatabaseHelper.WEIGHT + " AS " + DatabaseHelper.WEIGHT + " " +
+                    "latestLog." + DatabaseHelper.WEIGHT + " AS " + DatabaseHelper.WEIGHT + " " +
                     "FROM " + DatabaseHelper.TABLE_NAME_EXERCISES + " e " +
-                    "LEFT JOIN " + DatabaseHelper.TABLE_NAME_LOGS + " l ON " +
-                    "e." + DatabaseHelper.EXERCISE_ID + " = l." + DatabaseHelper.EXERCISE_ID + " " +
+                    "LEFT JOIN (SELECT " + DatabaseHelper.EXERCISE_ID + ", " + DatabaseHelper.WEIGHT + ", " +
+                    "MAX(" + DatabaseHelper.LOG_ID + ") AS max_log_id " +
+                    "FROM " + DatabaseHelper.TABLE_NAME_LOGS + " " +
+                    "GROUP BY " + DatabaseHelper.EXERCISE_ID + ") latestLog " +
+                    "ON e." + DatabaseHelper.EXERCISE_ID + " = latestLog." + DatabaseHelper.EXERCISE_ID + " " +
                     "WHERE e." + DatabaseHelper.ARCHIVE + " = 1 " +
-                    "GROUP BY e." + DatabaseHelper.EXERCISE_ID;
+                    "ORDER BY e." + DatabaseHelper.EXERCISE;
 
             return database.rawQuery(query, null);
         } catch (Exception e) {
@@ -907,7 +910,7 @@ public class DBManager {
      * Fetches detailed exercise information for a specific log entry.
      *
      * @param strDate The date to filter logs by (in a format compatible with your database storage).
-     * @param logId The ID of the log entry to fetch.
+     * @param logId   The ID of the log entry to fetch.
      * @return Cursor with exercise details for the specified log entry.
      */
     public Cursor fetchExerciseLogsForDateAndLog(String strDate, String logId) {

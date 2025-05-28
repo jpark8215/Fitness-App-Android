@@ -7,7 +7,7 @@ import java.text.DecimalFormat;
  */
 public class WeightUtils {
     private static final double KG_TO_LBS = 2.20462;
-    private static final double LBS_TO_KG = 0.453592;
+    private static final double LBS_TO_KG = 0.45359;
     private static final DecimalFormat ONE_DECIMAL_FORMAT = new DecimalFormat("0.0");
 
     /**
