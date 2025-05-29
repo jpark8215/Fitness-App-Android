@@ -475,6 +475,20 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
 
             String exerciseName = exerciseNameInput.getText().toString();
 
+            // Check if exercise already exists
+            if (dbManager.doesExerciseExist(exerciseName)) {
+                // Show themed alert dialog
+                AlertDialog.Builder builder = new AlertDialog.Builder(this,
+                    ThemeManager.isDarkModeEnabled(this) ? R.style.ModernAlertDialogDark : R.style.ModernAlertDialog);
+                builder.setTitle("Duplicate Exercise");
+                builder.setMessage("An exercise with this name already exists. \nPlease choose a different name.");
+                builder.setPositiveButton("OK", (dialog1, which) -> {
+                    // Do nothing, just dismiss the dialog
+                });
+                builder.create().show();
+                return;
+            }
+
             // Get the weight if provided
             Double weight = null;
             if (!TextUtils.isEmpty(weightInput.getText())) {
@@ -548,6 +562,23 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
 
             // Get the updated exercise name
             String newTitle = exerciseNameInput.getText().toString();
+
+            // Check if the new name is different from the current name
+            if (!newTitle.equals(itemTitle)) {
+                // Check if the new name already exists
+                if (dbManager.doesExerciseExist(newTitle)) {
+                    // Show themed alert dialog
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this,
+                        ThemeManager.isDarkModeEnabled(this) ? R.style.ModernAlertDialogDark : R.style.ModernAlertDialog);
+                    builder.setTitle("Duplicate Exercise");
+                    builder.setMessage("An exercise with this name already exists. \nPlease choose a different name.");
+                    builder.setPositiveButton("OK", (dialog1, which) -> {
+                        // Do nothing, just dismiss the dialog
+                    });
+                    builder.create().show();
+                    return;
+                }
+            }
 
             // Get the updated weight
             Double newWeight = null;
