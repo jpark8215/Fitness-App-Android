@@ -31,8 +31,9 @@
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Close"
+            android:visibility="invisible"
             android:src="@drawable/ic_close"
-            android:tint="@color/textPrimaryDarkColor" />
+            app:tint="@color/textPrimaryDarkColor" />
     </LinearLayout>
 
     <View
