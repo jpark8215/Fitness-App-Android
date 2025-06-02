@@ -69,7 +69,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
     protected void onResume() {
         super.onResume();
         // Refresh data when returning to this activity
-        if (dbManager == null || !dbManager.isOpen()) {
+        if (dbManager == null || dbManager.isOpen()) {
             dbManager = new DBManager(this);
             dbManager.open();
         }
@@ -318,7 +318,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
 
     private void loadExerciseData() {
         // Make sure we have a valid database connection
-        if (dbManager == null || !dbManager.isOpen()) {
+        if (dbManager == null || dbManager.isOpen()) {
             dbManager = new DBManager(this);
             dbManager.open();
         }

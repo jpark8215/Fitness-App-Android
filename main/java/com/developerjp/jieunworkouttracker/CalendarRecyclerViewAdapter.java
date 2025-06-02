@@ -87,7 +87,7 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarRe
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView textViewHead;
+        public final TextView textViewHead;
 
         public ViewHolder(View itemView) {
             super(itemView);

@@ -18,7 +18,7 @@ import java.util.Collections;
  * for their row ids, as returned by getItemId().
  */
 public class MergeAdapter extends BaseAdapter implements SectionIndexer {
-    protected ArrayList<ListAdapter> pieces = new ArrayList<>();
+    protected final ArrayList<ListAdapter> pieces = new ArrayList<>();
     protected String noItemsText;
 
     /**

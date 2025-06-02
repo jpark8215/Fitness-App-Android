@@ -98,7 +98,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
     };
 
     // Add this as a class member variable
-    private List<String> workoutLogIds = new ArrayList<>();
+    private final List<String> workoutLogIds = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -539,11 +539,11 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
                 //If there is a weight given then update the database
                 if (!weightEditText.getText().toString().trim().isEmpty()) {
-                    Double newExerciseWeight = Double.parseDouble(weightEditText.getText().toString());
+                    double newExerciseWeight = Double.parseDouble(weightEditText.getText().toString());
                     dbManager.updateExerciseWeight(String.valueOf(_id), newExerciseWeight);
                 } else {
                     //If no weight value was given then update with a default value of 0
-                    Double newExerciseWeight = 0.0;
+                    double newExerciseWeight = 0.0;
                     dbManager.updateExerciseWeight(String.valueOf(_id), newExerciseWeight);
                 }
 
@@ -648,7 +648,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         if (dbManager == null) {
             dbManager = new DBManager(this);
         }
-        if (!dbManager.isOpen()) {
+        if (dbManager.isOpen()) {
             dbManager.open();
         }
 
@@ -693,42 +693,48 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                 ExerciseItem item = ExerciseItem.get(i);
                 if (item.getId().equals(itemId)) {
                     // Update the button text based on which set was clicked
-                    if (setSelected.equals("set1")) {
-                        item.setButton1(String.valueOf(intReps));
-                        // Also update the button color based on improvement
-                        if (intImprovement == 2) {
-                            item.setButton1Colour(R.drawable.button_shape_green);
-                        } else if (intImprovement == 1) {
-                            item.setButton1Colour(R.drawable.button_shape_red);
-                        }
-                    } else if (setSelected.equals("set2")) {
-                        item.setButton2(String.valueOf(intReps));
-                        if (intImprovement == 2) {
-                            item.setButton2Colour(R.drawable.button_shape_green);
-                        } else if (intImprovement == 1) {
-                            item.setButton2Colour(R.drawable.button_shape_red);
-                        }
-                    } else if (setSelected.equals("set3")) {
-                        item.setButton3(String.valueOf(intReps));
-                        if (intImprovement == 2) {
-                            item.setButton3Colour(R.drawable.button_shape_green);
-                        } else if (intImprovement == 1) {
-                            item.setButton3Colour(R.drawable.button_shape_red);
-                        }
-                    } else if (setSelected.equals("set4")) {
-                        item.setButton4(String.valueOf(intReps));
-                        if (intImprovement == 2) {
-                            item.setButton4Colour(R.drawable.button_shape_green);
-                        } else if (intImprovement == 1) {
-                            item.setButton4Colour(R.drawable.button_shape_red);
-                        }
-                    } else if (setSelected.equals("set5")) {
-                        item.setButton5(String.valueOf(intReps));
-                        if (intImprovement == 2) {
-                            item.setButton5Colour(R.drawable.button_shape_green);
-                        } else if (intImprovement == 1) {
-                            item.setButton5Colour(R.drawable.button_shape_red);
-                        }
+                    switch (setSelected) {
+                        case "set1":
+                            item.setButton1(String.valueOf(intReps));
+                            // Also update the button color based on improvement
+                            if (intImprovement == 2) {
+                                item.setButton1Colour(R.drawable.button_shape_green);
+                            } else if (intImprovement == 1) {
+                                item.setButton1Colour(R.drawable.button_shape_red);
+                            }
+                            break;
+                        case "set2":
+                            item.setButton2(String.valueOf(intReps));
+                            if (intImprovement == 2) {
+                                item.setButton2Colour(R.drawable.button_shape_green);
+                            } else if (intImprovement == 1) {
+                                item.setButton2Colour(R.drawable.button_shape_red);
+                            }
+                            break;
+                        case "set3":
+                            item.setButton3(String.valueOf(intReps));
+                            if (intImprovement == 2) {
+                                item.setButton3Colour(R.drawable.button_shape_green);
+                            } else if (intImprovement == 1) {
+                                item.setButton3Colour(R.drawable.button_shape_red);
+                            }
+                            break;
+                        case "set4":
+                            item.setButton4(String.valueOf(intReps));
+                            if (intImprovement == 2) {
+                                item.setButton4Colour(R.drawable.button_shape_green);
+                            } else if (intImprovement == 1) {
+                                item.setButton4Colour(R.drawable.button_shape_red);
+                            }
+                            break;
+                        case "set5":
+                            item.setButton5(String.valueOf(intReps));
+                            if (intImprovement == 2) {
+                                item.setButton5Colour(R.drawable.button_shape_green);
+                            } else if (intImprovement == 1) {
+                                item.setButton5Colour(R.drawable.button_shape_red);
+                            }
+                            break;
                     }
 
                     Log.d("StartWorkoutActivity", "Updated ExerciseItem at position " + i +
@@ -812,7 +818,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         }
 
         //If workout is already paused then do the following
-        else if (isPaused) {
+        else {
 
             //minimises the floating action button
             toggleFabMode(fab_add);

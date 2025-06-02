@@ -129,7 +129,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
 
         //Handles side navigation menu clicks
         nav_view.setNavigationItemSelectedListener(item -> {
-            String itemCLicked = item.getTitle().toString();
+            String itemCLicked = Objects.requireNonNull(item.getTitle()).toString();
             Intent intent;
 
             switch (itemCLicked) {
@@ -268,7 +268,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
     protected void onResume() {
         super.onResume();
         // Make sure database is open when returning to activity
-        if (dbManager == null || !dbManager.isOpen()) {
+        if (dbManager == null || dbManager.isOpen()) {
             dbManager = new DBManager(this);
             dbManager.open();
         }
@@ -552,7 +552,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
                                     dbManager.updateExerciseWeight(String.valueOf(_id), newExerciseWeight);
                                 } else {
                                     // If no weight value was given, update with a default value of 0
-                                    Double newExerciseWeight = 0.0;
+                                    double newExerciseWeight = 0.0;
                                     dbManager.updateExerciseWeight(String.valueOf(_id), newExerciseWeight);
                                 }
 
@@ -586,7 +586,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
                         dbManager.updateExerciseWeight(String.valueOf(_id), newExerciseWeight);
                     } else {
                         // If no weight value was given, update with a default value of 0
-                        Double newExerciseWeight = 0.0;
+                        double newExerciseWeight = 0.0;
                         dbManager.updateExerciseWeight(String.valueOf(_id), newExerciseWeight);
                     }
 

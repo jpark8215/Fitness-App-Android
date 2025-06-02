@@ -344,12 +344,17 @@ public class DBManager {
                 );
 
                 Log.d("DBManager", "Sample LOGS table rows:");
-                String[] columnNames = debugCursor.getColumnNames();
-                while (debugCursor.moveToNext()) {
-                    String row = "LOG_ID: " + debugCursor.getLong(debugCursor.getColumnIndex(DatabaseHelper.LOG_ID)) +
-                            ", EXERCISE_ID: " + debugCursor.getLong(debugCursor.getColumnIndex(DatabaseHelper.EXERCISE_ID));
-                    Log.d("DBManager", row);
+                String row = "";
+                int logIdIndex = debugCursor.getColumnIndex(DatabaseHelper.LOG_ID);
+                int exerciseIdIndex = debugCursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
+                
+                if (logIdIndex != -1 && exerciseIdIndex != -1) {
+                    row = "LOG_ID: " + debugCursor.getLong(logIdIndex) +
+                          ", EXERCISE_ID: " + debugCursor.getLong(exerciseIdIndex);
+                } else {
+                    row = "Error: Required columns not found in cursor";
                 }
+                Log.d("DBManager", row);
                 debugCursor.close();
             }
         } catch (Exception e) {
@@ -447,9 +452,7 @@ public class DBManager {
             // Create the AlertDialog
             AlertDialog confirmationDialog = builder.create();
             // Set the custom background
-            confirmationDialog.setOnShowListener(dialogInterface -> {
-                Objects.requireNonNull(confirmationDialog.getWindow()).setBackgroundDrawableResource(R.drawable.modern_dialog_background);
-            });
+            confirmationDialog.setOnShowListener(dialogInterface -> Objects.requireNonNull(confirmationDialog.getWindow()).setBackgroundDrawableResource(R.drawable.modern_dialog_background));
             // Show the dialog
             confirmationDialog.show();
         } else {
@@ -762,7 +765,7 @@ public class DBManager {
      * @return true if the database is open, false otherwise
      */
     public boolean isOpen() {
-        return database != null && database.isOpen();
+        return database == null || !database.isOpen();
     }
 
     /**

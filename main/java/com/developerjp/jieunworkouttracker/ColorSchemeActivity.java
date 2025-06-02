@@ -1,7 +1,6 @@
 package com.developerjp.jieunworkouttracker;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -18,7 +17,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -36,19 +34,15 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
 
     private Toolbar toolbar;
     private Switch switchTheme;
-    private RadioGroup weightUnitRadioGroup;
-    private RadioButton radioKg;
-    private RadioButton radioLbs;
-
+    private boolean isAdLoaded = false;
+    private AdView adView2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Initialize MobileAds
-        MobileAds.initialize(this, initializationStatus -> {
-            Log.d("Ads", "Initialization status: " + initializationStatus);
-        });
+        MobileAds.initialize(this, initializationStatus -> Log.d("Ads", "Initialization status: " + initializationStatus));
 
         // Apply theme using ThemeManager
         ThemeManager.applyTheme(this);
@@ -62,7 +56,7 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
 
         // Initialize and load the ad AFTER layout inflation
         try {
-            AdView adView2 = findViewById(R.id.adView2);
+            adView2 = findViewById(R.id.adView2);
             if (adView2 != null) {
                 try {
                     AdRequest adRequest = new AdRequest.Builder().build();
@@ -70,22 +64,27 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
                         @Override
                         public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                             Log.e("Ads", "Ad failed to load: " + loadAdError.getMessage());
+                            isAdLoaded = false;
                         }
 
                         @Override
                         public void onAdLoaded() {
                             Log.d("Ads", "Ad loaded successfully");
+                            isAdLoaded = true;
                         }
                     });
                     adView2.loadAd(adRequest);
                 } catch (Exception ex) {
                     Log.e("Ads", "Error setting up ad: " + ex.getMessage());
+                    isAdLoaded = false;
                 }
             } else {
                 Log.e("Ads", "AdView not found in layout");
+                isAdLoaded = false;
             }
         } catch (Exception e) {
             Log.e("Ads", "Error finding AdView: " + e.getMessage());
+            isAdLoaded = false;
         }
 
         //Sets up the toolbar, navigation menu and switch
@@ -97,9 +96,9 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
 
     private void initWeightUnitControls() {
         // Initialize the weight unit setting controls
-        weightUnitRadioGroup = findViewById(R.id.weightUnitRadioGroup);
-        radioKg = findViewById(R.id.radioKg);
-        radioLbs = findViewById(R.id.radioLbs);
+        RadioGroup weightUnitRadioGroup = findViewById(R.id.weightUnitRadioGroup);
+        RadioButton radioKg = findViewById(R.id.radioKg);
+        RadioButton radioLbs = findViewById(R.id.radioLbs);
 
         // Load current setting from WeightUnitManager
         boolean isKgUnit = WeightUnitManager.isKgUnit(this);
@@ -225,31 +224,35 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
     }
 
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if (!isAdLoaded) {
+            // If ad is not loaded, show a message and don't change theme
+            Toast.makeText(this, "Please wait while the app is initializing...", Toast.LENGTH_SHORT).show();
+            // Reset the switch to its previous state
+            switchTheme.setOnCheckedChangeListener(null);
+            switchTheme.setChecked(!isChecked);
+            switchTheme.setText(!isChecked ? "Dark" : "Light");
+            switchTheme.setOnCheckedChangeListener(this);
+            return;
+        }
+
         if (isChecked) {
             //do stuff when Switch is ON
             switchTheme.setText("Dark");
             ThemeManager.setDarkMode(this, true);
-            ThemeManager.applyTheme(this);
-            recreate();
         } else {
             //do stuff when Switch if OFF
             switchTheme.setText("Light");
             ThemeManager.setDarkMode(this, false);
-            ThemeManager.applyTheme(this);
-            recreate();
         }
+        ThemeManager.applyTheme(this);
+        recreate();
     }
 
     @Override
     protected void onPause() {
         // Pause the AdView to prevent memory leaks
-        try {
-            AdView adView = findViewById(R.id.adView2);
-            if (adView != null) {
-                adView.pause();
-            }
-        } catch (Exception e) {
-            Log.e("Ads", "Error pausing AdView: " + e.getMessage());
+        if (adView2 != null) {
+            adView2.pause();
         }
         super.onPause();
     }
@@ -258,26 +261,16 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
     protected void onResume() {
         super.onResume();
         // Resume the AdView
-        try {
-            AdView adView = findViewById(R.id.adView2);
-            if (adView != null) {
-                adView.resume();
-            }
-        } catch (Exception e) {
-            Log.e("Ads", "Error resuming AdView: " + e.getMessage());
+        if (adView2 != null) {
+            adView2.resume();
         }
     }
 
     @Override
     protected void onDestroy() {
         // Destroy the AdView to prevent memory leaks
-        try {
-            AdView adView = findViewById(R.id.adView2);
-            if (adView != null) {
-                adView.destroy();
-            }
-        } catch (Exception e) {
-            Log.e("Ads", "Error destroying AdView: " + e.getMessage());
+        if (adView2 != null) {
+            adView2.destroy();
         }
         super.onDestroy();
     }

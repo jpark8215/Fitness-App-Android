@@ -67,25 +67,19 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
         final String currentTitle = myList.getTitle();
         final Double currentWeight = myList.getWeight();
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        holder.itemView.setOnClickListener(v -> {
 
-            }
         });
 
 
-        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                TextView text = v.findViewById(R.id.textViewHead);
-                Context context = v.getContext();
-                Intent intent = new Intent();
-                if (itemLongSelectedListener != null) {
-                    itemLongSelectedListener.onItemLongSelected(currentId, currentTitle, currentWeight);
-                }
-                return true;
+        holder.itemView.setOnLongClickListener(v -> {
+            TextView text = v.findViewById(R.id.textViewHead);
+            Context context = v.getContext();
+            Intent intent = new Intent();
+            if (itemLongSelectedListener != null) {
+                itemLongSelectedListener.onItemLongSelected(currentId, currentTitle, currentWeight);
             }
+            return true;
         });
 
         //Handle normal button clicks
@@ -411,20 +405,20 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView textViewExercise;
+        public final TextView textViewExercise;
         //not sure what this id is used for, can probably be removed with some testing
         public TextView textViewId;
-        public Button button1;
-        public Button button2;
-        public Button button3;
-        public Button button4;
-        public Button button5;
+        public final Button button1;
+        public final Button button2;
+        public final Button button3;
+        public final Button button4;
+        public final Button button5;
         public Boolean button1FirstClick = true;
         public Boolean button2FirstClick = true;
         public Boolean button3FirstClick = true;
         public Boolean button4FirstClick = true;
         public Boolean button5FirstClick = true;
-        public TextView textViewWeight;
+        public final TextView textViewWeight;
 
         public ViewHolder(View itemView) {
             super(itemView);

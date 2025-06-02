@@ -31,6 +31,9 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -54,6 +57,9 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Initialize MobileAds
+        MobileAds.initialize(this, initializationStatus -> Log.d("Ads", "Initialization status: " + initializationStatus));
+
         SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
         boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
 
@@ -70,6 +76,13 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         ViewStub stub = findViewById(R.id.main_view_stub);
         stub.setLayoutResource(R.layout.activity_progress);
         stub.inflate();
+
+        // Initialize AdView
+        AdView adView = findViewById(R.id.adView);
+        if (adView != null) {
+            AdRequest adRequest = new AdRequest.Builder().build();
+            adView.loadAd(adRequest);
+        }
 
         initToolbar();
         initNavigationMenu();
@@ -231,12 +244,6 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
             selectedExerciseIds.add(selectedExerciseId);
 
             // Check if we have valid exercise IDs
-            if (selectedExerciseIds.isEmpty()) {
-                Log.w("ShowProgressActivity", "No exercise IDs found");
-                chart.setNoDataText("No exercise data available");
-                chart.invalidate();
-                return;
-            }
 
             Cursor cursor = dbManager.getExerciseLogProgress(selectedExerciseIds);
             ArrayList<BarEntry> values = new ArrayList<>();
@@ -369,11 +376,9 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
             }
 
             //Splits the date to convert out into Year, Month and Date
-            Log.d("Date to convert", dateToConvert);
             String strYear = dateToConvert.substring(0, 4);
             String strMonth = dateToConvert.substring(5, 7);
             String strDay = dateToConvert.substring(8, 10);
-            Log.d("Converted", strYear + "," + strMonth + "," + strDay);
 
             int year = Integer.parseInt(strYear);
             int monthNumber = Integer.parseInt(strMonth);
@@ -404,11 +409,21 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
     @Override
     protected void onPause() {
         super.onPause();
+        // Pause the AdView
+        AdView adView = findViewById(R.id.adView);
+        if (adView != null) {
+            adView.pause();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        // Resume the AdView
+        AdView adView = findViewById(R.id.adView);
+        if (adView != null) {
+            adView.resume();
+        }
         
         // Check if weight unit preference has changed and refresh chart if needed
         if (chart != null && chart.getData() != null) {
@@ -427,6 +442,11 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // Destroy the AdView
+        AdView adView = findViewById(R.id.adView);
+        if (adView != null) {
+            adView.destroy();
+        }
     }
 
     /**

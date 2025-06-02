@@ -86,7 +86,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView textViewHead;
+        public final TextView textViewHead;
         public TextView textViewId;
 
         public ViewHolder(View itemView) {
