@@ -12,10 +12,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
         android:layout_marginBottom="50dp"
         android:clickable="true"
         android:dividerHeight="1dp"
+        android:focusable="true"
         android:longClickable="true"
         android:padding="10dp" />
 
@@ -26,6 +26,7 @@
         android:background="@color/overlay_dark_30"
         android:clickable="true"
         android:fitsSystemWindows="true"
+        android:focusable="true"
         android:importantForAccessibility="no" />
 
     <TextView
@@ -33,7 +34,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:layout_weight="1"
         android:text="@string/empty_exercise_list_text" />
 
 
@@ -62,7 +62,6 @@
                 android:padding="@dimen/spacing_medium">
 
                 <ImageButton
-                    android:id="@+id/fab_home"
                     android:layout_width="?attr/actionBarSize"
                     android:layout_height="?attr/actionBarSize"
                     android:background="?attr/selectableItemBackgroundBorderless"
@@ -85,7 +84,6 @@
                 android:padding="@dimen/spacing_medium">
 
                 <ImageButton
-                    android:id="@+id/fab_calendar"
                     android:layout_width="?attr/actionBarSize"
                     android:layout_height="?attr/actionBarSize"
                     android:background="?attr/selectableItemBackgroundBorderless"
@@ -112,7 +110,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="false"
         android:layout_alignParentBottom="true"
         android:gravity="center_horizontal"
         android:orientation="vertical">
@@ -128,7 +125,7 @@
                 android:id="@+id/cv_add_exercise"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|end|right"
+                android:layout_gravity="center_vertical|end"
                 android:layout_margin="@dimen/spacing_middle"
                 app:contentPadding="@dimen/spacing_medium">
 
@@ -172,7 +169,7 @@
                 android:id="@+id/cv_start_selected"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|end|right"
+                android:layout_gravity="center_vertical|end"
                 android:layout_margin="@dimen/spacing_middle"
                 app:contentPadding="@dimen/spacing_medium">
 

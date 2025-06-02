@@ -26,18 +26,6 @@
         <item name="android:statusBarColor">@color/black</item>
     </style>
 
-    <style name="DarkAppThemeRed" parent="Theme.AppCompat.DayNight.DarkActionBar">
-        <item name="colorPrimary">@color/pastelPeach</item>
-        <item name="colorPrimaryDark">@color/pastelPeach</item>
-        <item name="colorAccent">@color/pastelYellow</item>
-        <item name="android:windowBackground">@color/colorBackgroundDark</item>
-        <item name="android:textColorPrimary">@color/textPrimaryDarkColor</item>
-        <item name="android:textColorSecondary">@color/textSecondaryDarkColor</item>
-        <item name="android:buttonStyle">@style/ModernButtonDark</item>
-        <item name="alertDialogTheme">@style/ModernAlertDialogDark</item>
-        <item name="android:statusBarColor">@color/black</item>
-    </style>
-
     <style name="DarkAppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
@@ -47,10 +35,6 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
-
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
     <!-- Modern button styles -->
     <style name="ModernButton" parent="Widget.AppCompat.Button">
@@ -117,36 +101,8 @@
     </style>
 
     <!-- Menu labels style -->
-    <style name="menu_labels_style">
-        <item name="android:background">@drawable/modern_fab_label_background</item>
-        <item name="android:textColor">@color/white</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:elevation">4dp</item>
-        <item name="android:paddingStart">12dp</item>
-        <item name="android:paddingEnd">12dp</item>
-        <item name="android:paddingTop">6dp</item>
-        <item name="android:paddingBottom">6dp</item>
-    </style>
 
     <!-- Modern EditText style -->
-    <style name="ModernEditText" parent="Widget.AppCompat.EditText">
-        <item name="android:background">@drawable/modern_edit_text_background</item>
-        <item name="android:textColorHint">@color/textSecondaryColor</item>
-        <item name="android:paddingStart">16dp</item>
-        <item name="android:paddingEnd">16dp</item>
-        <item name="android:paddingTop">12dp</item>
-        <item name="android:paddingBottom">12dp</item>
-    </style>
-
-    <style name="ModernEditTextDark" parent="Widget.AppCompat.EditText">
-        <item name="android:background">@drawable/modern_edit_text_background_dark</item>
-        <item name="android:textColorHint">@color/textSecondaryDarkColor</item>
-        <item name="android:textColor">@color/white</item>
-        <item name="android:paddingStart">16dp</item>
-        <item name="android:paddingEnd">16dp</item>
-        <item name="android:paddingTop">12dp</item>
-        <item name="android:paddingBottom">12dp</item>
-    </style>
 
     <!-- Ripple styles -->
     <style name="RippleStyleWhite">
@@ -154,18 +110,6 @@
         <item name="mrl_rippleColor">@color/white</item>
         <item name="mrl_rippleHover">true</item>
         <item name="mrl_rippleAlpha">0.2</item>
-    </style>
-
-    <style name="RippleStyleDark">
-        <item name="mrl_rippleOverlay">true</item>
-        <item name="mrl_rippleColor">@color/colorAccent</item>
-        <item name="mrl_rippleHover">true</item>
-        <item name="mrl_rippleAlpha">0.2</item>
-    </style>
-
-    <style name="Toolbar.Light" parent="@style/AppTheme">
-        <item name="colorControlNormal">@color/grey_60</item>
-        <item name="android:textColorPrimary">@color/grey_60</item>
     </style>
 
 </resources>

@@ -26,7 +26,6 @@
             android:textStyle="bold" />
 
         <ImageButton
-            android:id="@+id/btn_close"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
@@ -54,7 +53,7 @@
             android:id="@+id/name_edittext"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/modern_edit_text_background_dark"
+            android:autofillHints="" android:background="@drawable/modern_edit_text_background_dark"
             android:elevation="2dp"
             android:ems="10"
             android:hint="Exercise Name"
@@ -84,7 +83,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/modern_edit_text_background_dark"
+                android:autofillHints="" android:background="@drawable/modern_edit_text_background_dark"
                 android:elevation="2dp"
                 android:ems="10"
                 android:hint="Weight"

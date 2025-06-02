@@ -6,21 +6,37 @@
     android:layout_height="match_parent"
     tools:context="com.developerjp.jieunworkouttracker.MainActivityExerciseList">
 
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:gravity="center">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="wrap_content"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:title="Exercise List"
+            app:titleTextColor="@android:color/white" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/appBarLayout"
         android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
         android:layout_marginStart="0dp"
-        android:layout_marginLeft="0dp"
         android:layout_marginTop="0dp"
         android:layout_marginBottom="70dp"
         android:clickable="true"
         android:dividerHeight="1dp"
+        android:focusable="true"
         android:longClickable="true"
-        android:padding="10dp"></androidx.recyclerview.widget.RecyclerView>
+        android:padding="10dp" />
 
     <View
         android:id="@+id/back_drop"
@@ -29,6 +45,7 @@
         android:background="@color/overlay_dark_30"
         android:clickable="true"
         android:fitsSystemWindows="true"
+        android:focusable="true"
         android:importantForAccessibility="no" />
 
     <TextView
@@ -36,7 +53,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:layout_weight="1"
         android:text="@string/empty_exercise_list_text"
         android:visibility="invisible" />
 
@@ -112,7 +128,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="false"
         android:layout_alignParentBottom="true"
         android:gravity="center_horizontal"
         android:orientation="vertical">
@@ -156,6 +171,7 @@
                 android:layout_marginBottom="@dimen/spacing_middle"
                 android:clickable="true"
                 android:contentDescription="Add Exercise"
+                android:focusable="true"
                 android:tint="@android:color/white"
                 app:fabSize="normal"
                 app:rippleColor="@android:color/black"
@@ -227,6 +243,7 @@
             android:layout_marginBottom="@dimen/spacing_mlarge"
             android:clickable="true"
             android:contentDescription="Add"
+            android:focusable="true"
             app:fabSize="normal"
             app:rippleColor="@android:color/white"
             app:srcCompat="@drawable/fab_add_icon" />

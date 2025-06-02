@@ -23,6 +23,7 @@
             android:id="@+id/icon"
             android:layout_width="@dimen/spacing_mlarge"
             android:layout_height="@dimen/spacing_mlarge"
+            android:contentDescription="TODO"
             app:srcCompat="@drawable/ic_close"
             app:tint="@android:color/white" />
 

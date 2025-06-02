@@ -9,7 +9,6 @@
 
     <!--toolbar and header-->
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
@@ -26,7 +25,6 @@
         tools:openDrawer="start">
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
-            android:id="@+id/main_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 

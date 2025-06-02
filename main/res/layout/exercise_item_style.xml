@@ -49,6 +49,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="72dp"
+                android:baselineAligned="false"
                 android:orientation="horizontal"
                 android:padding="5dp">
 
@@ -139,12 +140,11 @@
             </LinearLayout>
 
             <TextView
-                android:id="@+id/reverse_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:gravity="center_horizontal"
-                android:textSize="10sp" />
+                android:textSize="12sp" />
 
             <!--                android:text="Long click to reverse"-->
 
