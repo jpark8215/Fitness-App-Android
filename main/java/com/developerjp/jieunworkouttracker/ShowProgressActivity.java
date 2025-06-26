@@ -464,4 +464,14 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
             return String.format("%.1f %s", value, isKgUnit ? "kg" : "lbs");
         }
     }
+
+    public void bottomNavigationHomeClick(View view) {
+        Intent intent = new Intent(this, MainActivityExerciseList.class);
+        startActivity(intent);
+    }
+
+    public void bottomNavigationCalendarClick(View view) {
+        Intent intent = new Intent(this, ShowCalendarActivity.class);
+        startActivity(intent);
+    }
 }
