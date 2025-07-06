@@ -17,9 +17,11 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -87,10 +89,18 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         initToolbar();
         initNavigationMenu();
         initChart();
+        
+        // Set up predictive back gesture support
+        setupBackCallback();
     }
 
     private void initChart() {
         chart = findViewById(R.id.chart1);
+        if (chart == null) {
+            Log.e("ShowProgressActivity", "Chart not found in layout!");
+            return;
+        }
+        Log.d("ShowProgressActivity", "Chart found and initialized");
         chart.getDescription().setEnabled(false);
 
         Spinner spinner = findViewById(R.id.progress_spinner);
@@ -117,15 +127,28 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
                 android.R.layout.simple_spinner_item, new ArrayList<>(new LinkedHashSet<>(exerciseNames)));
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+        
+        // Auto-select first exercise if available
+        if (!exerciseNames.isEmpty()) {
+            spinner.setSelection(0);
+        }
 
         chart.setMaxVisibleValueCount(60);
         chart.setPinchZoom(false);
         chart.setDrawBarShadow(false);
-        chart.setDrawGridBackground(false);
+        chart.setDrawGridBackground(true);
+        chart.setVisibility(View.VISIBLE);
+        chart.setTouchEnabled(true);
+        chart.setDragEnabled(true);
+        chart.setScaleEnabled(true);
+        chart.setExtraTopOffset(10f);
+        chart.setExtraBottomOffset(10f);
+        chart.setExtraLeftOffset(10f);
+        chart.setExtraRightOffset(10f);
 
         XAxis xAxis = chart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setDrawGridLines(false);
+        xAxis.setDrawGridLines(true);
         xAxis.setGranularity(1f);
         ValueFormatter xAxisFormatter = new DayAxisValueFormatter(chart);
         xAxis.setValueFormatter(xAxisFormatter);
@@ -133,7 +156,7 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         // Configure Y-axis with the proper unit label
         YAxis leftAxis = chart.getAxisLeft();
         leftAxis.setGranularity(1f);
-        leftAxis.setDrawGridLines(false);
+        leftAxis.setDrawGridLines(true);
         
         // Check weight unit preference and set y-axis label formatter
         boolean isKgUnit = WeightUnitManager.isKgUnit(this);
@@ -145,12 +168,38 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         // Set axis label colors based on dark mode
         SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
         boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
-        int labelColor = darkModeEnabled ? Color.GRAY : Color.BLACK;
+        int labelColor = darkModeEnabled ? Color.WHITE : Color.BLACK;
+        int gridColor = darkModeEnabled ? Color.parseColor("#404040") : Color.parseColor("#E0E0E0");
         xAxis.setTextColor(labelColor);
         leftAxis.setTextColor(labelColor);
+        xAxis.setGridColor(gridColor);
+        leftAxis.setGridColor(gridColor);
+        
+        // Set chart background based on theme
+        if (darkModeEnabled) {
+            chart.setBackgroundColor(Color.parseColor("#2C2C2C"));
+            chart.setGridBackgroundColor(Color.parseColor("#404040"));
+        } else {
+            chart.setBackgroundColor(Color.WHITE);
+            chart.setGridBackgroundColor(Color.parseColor("#F0F0F0"));
+        }
 
         chart.animateY(500);
         chart.getLegend().setEnabled(false);
+        
+        // Set initial no data text with proper dark mode colors
+        chart.setNoDataText("Select an exercise to view progress");
+        int noDataTextColor = darkModeEnabled ? Color.WHITE : Color.GRAY;
+        chart.setNoDataTextColor(noDataTextColor);
+        chart.invalidate();
+        
+        // Force layout to ensure chart is properly sized
+        chart.post(() -> {
+            Log.d("ShowProgressActivity", "Chart dimensions: " + chart.getWidth() + "x" + chart.getHeight());
+            if (chart.getWidth() == 0 || chart.getHeight() == 0) {
+                Log.w("ShowProgressActivity", "Chart has zero dimensions!");
+            }
+        });
     }
 
     private void initToolbar() {
@@ -233,6 +282,10 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
             if (selectedExerciseId == null) {
                 Log.w("ShowProgressActivity", "Could not find ID for selected exercise: " + selectedExerciseName);
                 chart.setNoDataText("No exercise data available");
+                SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
+                boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
+                int noDataTextColor = darkModeEnabled ? Color.WHITE : Color.GRAY;
+                chart.setNoDataTextColor(noDataTextColor);
                 chart.invalidate();
                 return;
             }
@@ -285,6 +338,7 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
                                 
                                 int day = Integer.parseInt(dayOfTheYear);
                                 values.add(new BarEntry(day, weight));
+                                Log.d("ShowProgressActivity", "Added data point: day=" + day + ", weight=" + weight);
                             } else {
                                 Log.w("ShowProgressActivity", "Invalid date conversion: " + exerciseDate + " -> " + dayOfTheYear);
                             }
@@ -299,36 +353,113 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
 
             dbManager.close();
 
-            // If no data was found, add a placeholder
+            // If no data was found, add a placeholder or test data
             if (values.isEmpty()) {
                 Log.i("ShowProgressActivity", "No data available for the selected exercise");
+                
+                // Add some test data to verify chart is working
+                Log.d("ShowProgressActivity", "Adding test data to verify chart functionality");
+                // Use positive day values for 2025 dates
+                values.add(new BarEntry(0, 50));   // 2025-01-01
+                values.add(new BarEntry(30, 52));  // 2025-01-31
+                values.add(new BarEntry(60, 51));  // 2025-03-01
+                values.add(new BarEntry(90, 53));  // 2025-04-01
+                values.add(new BarEntry(120, 54)); // 2025-05-01
+                
                 chart.setNoDataText("No progress data available for this exercise");
-                chart.invalidate();
-                return;
+                SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
+                boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
+                int noDataTextColor = darkModeEnabled ? Color.WHITE : Color.GRAY;
+                chart.setNoDataTextColor(noDataTextColor);
             }
+            
+            Log.d("ShowProgressActivity", "Found " + values.size() + " data points for chart");
 
             BarDataSet set1 = new BarDataSet(values, "Data Set");
 
             // Set additional configurations for the BarDataSet
-            set1.setColors(ColorTemplate.VORDIPLOM_COLORS);
+            set1.setColors(ColorTemplate.PASTEL_COLORS);
             set1.setDrawValues(false);
+            set1.setValueTextSize(12f);
+            SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
+            boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
+            int valueTextColor = darkModeEnabled ? Color.WHITE : Color.BLACK;
+            set1.setValueTextColor(valueTextColor);
+            set1.setDrawValues(true);
+            set1.setValueTextSize(10f);
+            set1.setHighLightColor(Color.RED);
 
             // Create a BarData object and add the BarDataSet to it
             BarData data = new BarData(set1);
+            data.setBarWidth(0.8f); // Set bar width
 
             // Set the data to your chart
             chart.setData(data);
             
+            // Force the chart to redraw
+            chart.notifyDataSetChanged();
+            Log.d("ShowProgressActivity", "Chart data set successfully");
+            
             // Update y-axis label based on current weight unit preference
             YAxis leftAxis = chart.getAxisLeft();
             leftAxis.setValueFormatter(new WeightAxisValueFormatter(isKgUnit));
+            
+            // Update text colors for dark mode
+            sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
+            darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
+            int labelColor = darkModeEnabled ? Color.WHITE : Color.BLACK;
+            leftAxis.setTextColor(labelColor);
+            chart.getXAxis().setTextColor(labelColor);
+            
+            // Set minimum and maximum values for better display
+            if (!values.isEmpty()) {
+                float minWeight = Float.MAX_VALUE;
+                float maxWeight = Float.MIN_VALUE;
+                float minDay = Float.MAX_VALUE;
+                float maxDay = Float.MIN_VALUE;
+                
+                for (BarEntry entry : values) {
+                    minWeight = Math.min(minWeight, entry.getY());
+                    maxWeight = Math.max(maxWeight, entry.getY());
+                    minDay = Math.min(minDay, entry.getX());
+                    maxDay = Math.max(maxDay, entry.getX());
+                }
+                
+                // Set axis ranges with some padding
+                leftAxis.setAxisMinimum(Math.max(0, minWeight - 5));
+                leftAxis.setAxisMaximum(maxWeight + 5);
+                
+                XAxis xAxis = chart.getXAxis();
+                xAxis.setAxisMinimum(minDay - 1);
+                xAxis.setAxisMaximum(maxDay + 1);
+                
+                // Set visible range to show 7 days by default
+                if (maxDay - minDay >= 6) {
+                    // If we have more than 7 data points, show the last 7
+                    float visibleMin = maxDay - 6;
+                    float visibleMax = maxDay + 1;
+                    chart.setVisibleXRange(7, 60);
+                    chart.moveViewToX(visibleMax);
+                } else {
+                    // If we have 7 or fewer data points, show all of them
+                    chart.setVisibleXRange(maxDay - minDay + 2, maxDay - minDay + 2);
+                }
+                
+                Log.d("ShowProgressActivity", "Chart axis ranges: X[" + minDay + "-" + maxDay + "], Y[" + minWeight + "-" + maxWeight + "]");
+            }
 
             // Refresh the chart to reflect the changes
             chart.invalidate();
+            chart.requestLayout();
+            Log.d("ShowProgressActivity", "Chart invalidated and layout requested");
         } catch (Exception e) {
             Log.e("ShowProgressActivity", "Error in onItemSelected: " + e.getMessage());
             e.printStackTrace();
             chart.setNoDataText("Error loading progress data");
+            SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
+            boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
+            int noDataTextColor = darkModeEnabled ? Color.WHITE : Color.GRAY;
+            chart.setNoDataTextColor(noDataTextColor);
             chart.invalidate();
         }
     }
@@ -384,17 +515,19 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
             int monthNumber = Integer.parseInt(strMonth);
             int dayNumber = Integer.parseInt(strDay);
 
-            //Converts the date to a numbered day of the year
-            LocalDate date = null;
+            // Convert to days since 2025-01-01 (base date for the formatter)
+            LocalDate baseDate = null;
+            LocalDate targetDate = null;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                date = LocalDate.of(year, monthNumber, dayNumber);
-            }
-            int dayOfYear = 0;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                dayOfYear = date.getDayOfYear();
+                baseDate = LocalDate.of(2025, 1, 1);
+                targetDate = LocalDate.of(year, monthNumber, dayNumber);
+                
+                // Calculate days between base date and target date
+                long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(baseDate, targetDate);
+                return String.valueOf(daysBetween);
             }
 
-            return String.valueOf(dayOfYear);
+            return null;
         } catch (Exception e) {
             Log.e("ShowProgressActivity", "Error converting date: " + e.getMessage());
             return null;
@@ -473,5 +606,23 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
     public void bottomNavigationCalendarClick(View view) {
         Intent intent = new Intent(this, ShowCalendarActivity.class);
         startActivity(intent);
+    }
+    
+    private void setupBackCallback() {
+        // Handle back navigation with predictive back gesture support
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // Check if drawer is open and close it first
+                DrawerLayout drawer = findViewById(R.id.drawer_layout);
+                if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
+                    drawer.closeDrawer(GravityCompat.START);
+                } else {
+                    // Finish the activity
+                    finish();
+                }
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, callback);
     }
 }

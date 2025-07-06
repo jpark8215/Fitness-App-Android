@@ -424,6 +424,25 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         btnAdd.setText("Add Exercise");
         txtTitle.setText("Add an Exercise");
         exerciseEditText.setHint("Exercise");
+        
+        // Set toggle state based on system preference
+        boolean isKgUnit = WeightUnitManager.isKgUnit(this);
+        toggleWeightUnit.setChecked(isKgUnit);
+        
+        // Add toggle button listener
+        toggleWeightUnit.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (weightEditText != null && !TextUtils.isEmpty(weightEditText.getText())) {
+                try {
+                    double currentWeight = Double.parseDouble(weightEditText.getText().toString());
+                    double convertedWeight = isChecked ? 
+                        WeightUtils.lbsToKg(currentWeight) : 
+                        WeightUtils.kgToLbs(currentWeight);
+                    weightEditText.setText(new DecimalFormat("#.#").format(convertedWeight));
+                } catch (NumberFormatException e) {
+                    Log.e("ArchivedExerciseList", "Invalid weight format: " + e.getMessage());
+                }
+            }
+        });
 
         btnAdd.setOnClickListener(v -> {
             final String exerciseName = exerciseEditText.getText().toString();
@@ -442,8 +461,8 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
 
                     // Convert to kg if toggle is not checked (meaning it's in lbs)
                     if (toggleWeightUnit != null && !toggleWeightUnit.isChecked()) {
-                        // Convert lbs to kg: kg = lbs * 0.45359
-                        exerciseWeight = exerciseWeight * 0.45359;
+                        // Convert lbs to kg using the utility method
+                        exerciseWeight = WeightUtils.lbsToKg(exerciseWeight);
                     }
                 } catch (NumberFormatException e) {
                     Toast.makeText(getApplicationContext(), "Invalid weight format", Toast.LENGTH_SHORT).show();

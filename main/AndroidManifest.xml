@@ -15,6 +15,7 @@
         android:roundIcon="@drawable/logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.JieunWorkoutTracker"
+        android:enableOnBackInvokedCallback="true"
         tools:targetApi="31">
 
 
@@ -37,10 +38,6 @@
 
         <activity
             android:name=".ArchivedExerciseList"
-            android:theme="@style/AppTheme.NoActionBar" />
-
-        <activity
-            android:name=".ExerciseList"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity

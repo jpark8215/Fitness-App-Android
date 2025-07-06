@@ -25,12 +25,15 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -42,6 +45,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -186,6 +190,8 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
         cv_finish_workout.setOnClickListener(v -> finishWorkout());
 
+        // Set up predictive back gesture support
+        setupBackCallback();
     }
 
     private void initToolbar() {
@@ -276,6 +282,9 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         ExerciseItem.clear();
         workoutLogIds.clear(); // Clear previous log IDs
 
+        // Get the current weight unit preference
+        boolean isKgUnit = WeightUnitManager.isKgUnit(this);
+
         // Get the selected exercise IDs from the intent
         ArrayList<String> selectedExerciseIds = getIntent().getStringArrayListExtra("selected_exercise_ids");
 
@@ -306,7 +315,21 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                     }
 
                     if (weightIndex != -1) {
-                        item.setWeight(cursor.getDouble(weightIndex));
+                        double weight = cursor.getDouble(weightIndex);
+                        item.setWeight(weight);
+                        
+                        // Format weight with appropriate unit based on user preference
+                        String formattedWeight;
+                        if (isKgUnit) {
+                            formattedWeight = WeightUtils.formatWeight(weight, true);
+                        } else {
+                            double weightInLbs = WeightUtils.kgToLbs(weight);
+                            formattedWeight = WeightUtils.formatWeight(weightInLbs, false);
+                        }
+                        item.setDisplayWeight(formattedWeight);
+                    } else {
+                        item.setWeight(0.0);
+                        item.setDisplayWeight(isKgUnit ? "0.0 kg" : "0.0 lbs");
                     }
 
                     // Set the log_id from today's log
@@ -454,28 +477,28 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
     }
 
 
-    @Override
-    public void onBackPressed() {
-        // When backing out of the activity, make sure to clean up resources
-        try {
-            // Stop and unbind from the service if bound
-            if (mServiceBound) {
-                unbindService(mServiceConnection);
-                mServiceBound = false;
-            }
-
-            // Stop the chronometer
-            if (simpleChronometer != null) {
-                simpleChronometer.stop();
-            }
-        } catch (Exception e) {
-            Log.e("StartWorkoutActivity", "Error during onBackPressed: " + e.getMessage());
-        }
-
-        // Return to the workout list page
-        super.onBackPressed();
-        this.finish();
-    }
+//    @Override
+//    public void onBackPressed() {
+//        // When backing out of the activity, make sure to clean up resources
+//        try {
+//            // Stop and unbind from the service if bound
+//            if (mServiceBound) {
+//                unbindService(mServiceConnection);
+//                mServiceBound = false;
+//            }
+//
+//            // Stop the chronometer
+//            if (simpleChronometer != null) {
+//                simpleChronometer.stop();
+//            }
+//        } catch (Exception e) {
+//            Log.e("StartWorkoutActivity", "Error during onBackPressed: " + e.getMessage());
+//        }
+//
+//        // Return to the workout list page
+//        super.onBackPressed();
+//        this.finish();
+//    }
 
 
     @Override
@@ -491,7 +514,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
     private void showCustomModifyDialog(final String itemId, String itemTitle, Double itemWeight) {
         final Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dialog_modify_light);
+        dialog.setContentView(ThemeManager.isDarkModeEnabled(this) ? R.layout.dialog_modify_dark : R.layout.dialog_modify_light);
         dialog.setCancelable(true);
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
@@ -501,6 +524,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
         final EditText exerciseEditText = dialog.findViewById(R.id.name_edittext);
         final EditText weightEditText = dialog.findViewById(R.id.weight_edittext);
+        final ToggleButton toggleWeightUnit = dialog.findViewById(R.id.toggle_weight_unit);
         TextView txtTitle = dialog.findViewById(R.id.txt_title);
         Button btnUpdate = dialog.findViewById(R.id.btn_update);
         Button btnDelete = dialog.findViewById(R.id.btn_delete);
@@ -509,7 +533,16 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
         txtTitle.setText("Modify Exercise");
         exerciseEditText.setText(itemTitle);
-        weightEditText.setText(itemWeight.toString());
+        
+        // Set toggle state based on system preference
+        boolean isKgUnit = WeightUnitManager.isKgUnit(this);
+        toggleWeightUnit.setChecked(isKgUnit);
+
+        // Convert and display weight in the selected unit
+        if (itemWeight != null) {
+            double displayWeight = isKgUnit ? itemWeight : WeightUtils.kgToLbs(itemWeight);
+            weightEditText.setText(new DecimalFormat("#.#").format(displayWeight));
+        }
 
         //Hides the archive and placeholder buttons
         btnArchive.setVisibility(View.GONE);
@@ -518,6 +551,21 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         //Sets the cursor position to the end of text, rather than at the start
         exerciseEditText.setSelection(exerciseEditText.getText().length());
         weightEditText.setSelection(weightEditText.getText().length());
+
+        // Add toggle button listener
+        toggleWeightUnit.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (weightEditText != null && !TextUtils.isEmpty(weightEditText.getText())) {
+                try {
+                    double currentWeight = Double.parseDouble(weightEditText.getText().toString());
+                    double convertedWeight = isChecked ? 
+                        WeightUtils.lbsToKg(currentWeight) : 
+                        WeightUtils.kgToLbs(currentWeight);
+                    weightEditText.setText(new DecimalFormat("#.#").format(convertedWeight));
+                } catch (NumberFormatException e) {
+                    Log.e("StartWorkoutActivity", "Invalid weight format: " + e.getMessage());
+                }
+            }
+        });
 
 
         btnUpdate.setOnClickListener(v -> {
@@ -540,6 +588,13 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                 //If there is a weight given then update the database
                 if (!weightEditText.getText().toString().trim().isEmpty()) {
                     double newExerciseWeight = Double.parseDouble(weightEditText.getText().toString());
+                    
+                    // Convert to kg if needed (if toggle is set to lbs)
+                    if (toggleWeightUnit != null && !toggleWeightUnit.isChecked()) {
+                        // Convert lbs to kg
+                        newExerciseWeight = WeightUtils.lbsToKg(newExerciseWeight);
+                    }
+                    
                     dbManager.updateExerciseWeight(String.valueOf(_id), newExerciseWeight);
                 } else {
                     //If no weight value was given then update with a default value of 0
@@ -664,6 +719,9 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                 recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
             }
         }
+        
+        // Update weight display in case user changed weight unit preference
+        updateWeightDisplay();
     }
 
     @Override
@@ -772,6 +830,59 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
     public void bottomNavigationCalendarClick(View view) {
         Intent intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
         startActivity(intent);
+    }
+    
+    private void setupBackCallback() {
+        // Handle back navigation with predictive back gesture support
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // Check if drawer is open and close it first
+                DrawerLayout drawer = findViewById(R.id.drawer_layout);
+                if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
+                    drawer.closeDrawer(GravityCompat.START);
+                } else {
+                    // Show confirmation dialog before exiting workout
+                    showExitWorkoutConfirmation();
+                }
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, callback);
+    }
+    
+    private void showExitWorkoutConfirmation() {
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+        builder.setTitle("Exit Workout");
+        builder.setMessage("Are you sure you want to exit the workout? Your progress will be saved.");
+        builder.setPositiveButton("Exit", (dialog, which) -> {
+            finishWorkout();
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            dialog.dismiss();
+        });
+        builder.show();
+    }
+    
+    private void updateWeightDisplay() {
+        if (ExerciseItem != null && adapter != null) {
+            boolean isKgUnit = WeightUnitManager.isKgUnit(this);
+            for (ExerciseItem exercise : ExerciseItem) {
+                double weight = exercise.getWeight();
+                String formattedWeight;
+                
+                if (isKgUnit) {
+                    // Already in kg, just format it
+                    formattedWeight = WeightUtils.formatWeight(weight, true);
+                } else {
+                    // Convert to lbs and format
+                    double weightInLbs = WeightUtils.kgToLbs(weight);
+                    formattedWeight = WeightUtils.formatWeight(weightInLbs, false);
+                }
+                
+                exercise.setDisplayWeight(formattedWeight);
+            }
+            adapter.notifyDataSetChanged();
+        }
     }
 
     private void toggleFabMode(View v) {

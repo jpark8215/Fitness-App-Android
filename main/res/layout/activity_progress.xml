@@ -34,16 +34,19 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center|center_vertical"
+        android:layout_height="0dp"
         android:layout_weight="1"
-        android:minHeight="150dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@android:color/transparent">
 
         <com.github.mikephil.charting.charts.BarChart
             android:id="@+id/chart1"
             android:layout_width="match_parent"
-            android:layout_height="0dp">
+            android:layout_height="match_parent"
+            android:layout_margin="8dp"
+            android:background="@android:color/transparent"
+            android:minHeight="200dp">
 
         </com.github.mikephil.charting.charts.BarChart>
 

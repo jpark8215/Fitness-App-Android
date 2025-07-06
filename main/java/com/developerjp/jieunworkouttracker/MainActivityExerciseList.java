@@ -23,9 +23,11 @@ import android.widget.ToggleButton;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -87,6 +89,9 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         if (recyclerViewState != null && recyclerView.getLayoutManager() != null) {
             recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
         }
+        
+        // Set up predictive back gesture support
+        setupBackCallback();
     }
 
     @Override
@@ -270,16 +275,16 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        if (rotate) {
-            // If the FAB menu is open, close it
-            toggleFabMenu();
-        } else {
-            // Otherwise, finish the activity
-            super.onBackPressed();
-        }
-    }
+//    @Override
+//    public void onBackPressed() {
+//        if (rotate) {
+//            // If the FAB menu is open, close it
+//            toggleFabMenu();
+//        } else {
+//            // Otherwise, finish the activity
+//            super.onBackPressed();
+//        }
+//    }
 
     public void onItemSelected(String itemId, String itemTitle) {
         // Handle when an item is selected (not long-selected)
@@ -465,6 +470,25 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
 
         // Get reference to weight unit toggle
         final ToggleButton weightUnitToggle = dialog.findViewById(R.id.toggle_weight_unit);
+        
+        // Set toggle state based on system preference
+        boolean isKgUnit = WeightUnitManager.isKgUnit(this);
+        weightUnitToggle.setChecked(isKgUnit);
+
+        // Add toggle button listener
+        weightUnitToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (weightInput != null && !TextUtils.isEmpty(weightInput.getText())) {
+                try {
+                    double currentWeight = Double.parseDouble(weightInput.getText().toString());
+                    double convertedWeight = isChecked ? 
+                        WeightUtils.lbsToKg(currentWeight) : 
+                        WeightUtils.kgToLbs(currentWeight);
+                    weightInput.setText(new DecimalFormat("#.#").format(convertedWeight));
+                } catch (NumberFormatException e) {
+                    Log.e("MainActivityExerciseList", "Invalid weight format: " + e.getMessage());
+                }
+            }
+        });
 
         Button addButton = dialog.findViewById(R.id.btn_add);
         addButton.setOnClickListener(v -> {
@@ -497,8 +521,8 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
 
                     // Convert to kg if needed (if toggle is set to lbs)
                     if (weightUnitToggle != null && !weightUnitToggle.isChecked()) {
-                        // Convert lbs to kg: kg = lbs * 0.45359
-                        weight = weight * 0.45359;
+                        // Convert lbs to kg using the utility method
+                        weight = WeightUtils.lbsToKg(weight);
                     }
                 } catch (NumberFormatException e) {
                     Toast.makeText(getApplicationContext(), "Invalid weight format", Toast.LENGTH_SHORT).show();
@@ -721,5 +745,23 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             }
             adapter.notifyDataSetChanged();
         }
+    }
+    
+    private void setupBackCallback() {
+        // Handle back navigation with predictive back gesture support
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // Check if drawer is open and close it first
+                DrawerLayout drawer = findViewById(R.id.drawer_layout);
+                if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
+                    drawer.closeDrawer(GravityCompat.START);
+                } else {
+                    // If no drawer or drawer is closed, finish the activity
+                    finish();
+                }
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, callback);
     }
 }

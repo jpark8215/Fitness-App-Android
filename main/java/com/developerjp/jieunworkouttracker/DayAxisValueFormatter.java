@@ -12,48 +12,33 @@ public class DayAxisValueFormatter extends ValueFormatter {
 
     private final BarLineChartBase<?> chart;
 
+    private static final int BASE_YEAR = 2025;
+    private static final int NUM_YEARS = 10;
+    private static final int DAYS_PER_YEAR = 366; // Leap year safe
+
     public DayAxisValueFormatter(BarLineChartBase<?> chart) {
         this.chart = chart;
     }
 
     @Override
     public String getFormattedValue(float value) {
-
         int days = (int) value;
+        
+        // Handle negative days (dates before 2025)
+        if (days < 0) {
+            return "";
+        }
 
         int year = determineYear(days);
-
         int month = determineMonth(days);
-        String monthName = mMonths[month % mMonths.length];
-        String yearName = String.valueOf(year);
-
-        if (chart.getVisibleXRange() > 30 * 6) {
-
-            return monthName + " " + yearName;
-        } else {
-
-            int dayOfMonth = determineDayOfMonth(days, month + 12 * (year - 2016));
-
-            String appendix = "th";
-
-            switch (dayOfMonth) {
-                case 1:
-                case 21:
-                case 31:
-                    appendix = "st";
-                    break;
-                case 2:
-                case 22:
-                    appendix = "nd";
-                    break;
-                case 3:
-                case 23:
-                    appendix = "rd";
-                    break;
-            }
-
-            return dayOfMonth == 0 ? "" : dayOfMonth + appendix + " " + monthName;
-        }
+        int dayOfMonth = determineDayOfMonth(days, month);
+        
+        // Format as M/d/yy
+        String monthStr = String.valueOf(month + 1); // month is 0-based
+        String dayStr = String.valueOf(dayOfMonth);
+        String yearStr = String.valueOf(year).substring(2); // Get last 2 digits
+        
+        return monthStr + "/" + dayStr + "/" + yearStr;
     }
 
     private int getDaysForMonth(int month, int year) {
@@ -78,50 +63,39 @@ public class DayAxisValueFormatter extends ValueFormatter {
     }
 
     private int determineMonth(int dayOfYear) {
-
-        int month = -1;
+        // Calculate the month for the given day offset from BASE_YEAR-01-01
+        int year = determineYear(dayOfYear);
+        int daysIntoYear = dayOfYear - ((year - BASE_YEAR) * DAYS_PER_YEAR);
+        int month = 0;
         int days = 0;
-
-        while (days < dayOfYear) {
-            month = month + 1;
-
-            if (month >= 12)
-                month = 0;
-
-            int year = determineYear(days);
-            days += getDaysForMonth(month, year);
+        while (month < 12) {
+            int daysForMonth = getDaysForMonth(month, year);
+            if (days + daysForMonth > daysIntoYear) {
+                break;
+            }
+            days += daysForMonth;
+            month++;
         }
-
-        return Math.max(month, 0);
+        return month;
     }
 
     private int determineDayOfMonth(int days, int month) {
-
-        int count = 0;
+        // Calculate the day of the month for the given day offset from BASE_YEAR-01-01
+        int year = determineYear(days);
+        int daysIntoYear = days - ((year - BASE_YEAR) * DAYS_PER_YEAR);
         int daysForMonths = 0;
-
-        while (count < month) {
-
-            int year = determineYear(daysForMonths);
-            daysForMonths += getDaysForMonth(count % 12, year);
-            count++;
+        for (int i = 0; i < month; i++) {
+            daysForMonths += getDaysForMonth(i, year);
         }
-
-        return days - daysForMonths;
+        return daysIntoYear - daysForMonths + 1;
     }
 
     private int determineYear(int days) {
-
-        if (days <= 366)
-            return 2016;
-        else if (days <= 730)
-            return 2017;
-        else if (days <= 1094)
-            return 2018;
-        else if (days <= 1458)
-            return 2019;
-        else
-            return 2020;
-
+        // Calculate the year based on the number of days since BASE_YEAR-01-01
+        int year = BASE_YEAR + (days / DAYS_PER_YEAR);
+        if (year > BASE_YEAR + NUM_YEARS - 1) {
+            year = BASE_YEAR + NUM_YEARS - 1;
+        }
+        return year;
     }
 }
