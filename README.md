@@ -30,7 +30,6 @@
 ### Core Activities
 
 #### 1. MainActivityExerciseList.java
-**Status**: ✅ **ACTIVE** - Main entry point
 - **Purpose**: Primary activity for managing exercises
 - **Key Features**:
   - Exercise list display with RecyclerView
@@ -44,7 +43,6 @@
 - **Dependencies**: ExerciseRecyclerViewAdapter, DBManager, ThemeManager, WeightUnitManager
 
 #### 2. StartWorkoutActivity.java
-**Status**: ✅ **ACTIVE** - Workout execution
 - **Purpose**: Manages active workout sessions
 - **Key Features**:
   - Real-time workout timing with chronometer
@@ -58,7 +56,6 @@
 - **Dependencies**: WorkoutService, WorkoutRecyclerViewAdapter, WeightUnitManager
 
 #### 3. ShowProgressActivity.java
-**Status**: ✅ **ACTIVE** - Progress visualization
 - **Purpose**: Displays workout progress charts
 - **Key Features**:
   - Weight progress tracking with 7-day default view
@@ -71,7 +68,6 @@
 - **Dependencies**: MPAndroidChart library, WeightUnitManager
 
 #### 4. ShowCalendarActivity.java
-**Status**: ✅ **ACTIVE** - Calendar view
 - **Purpose**: Calendar interface for workout history
 - **Key Features**:
   - Monthly calendar view
@@ -81,7 +77,6 @@
 - **Dependencies**: CalendarRecyclerViewAdapter
 
 #### 5. CalendarShowSelectedWorkout.java
-**Status**: ✅ **ACTIVE** - Calendar detail view
 - **Purpose**: Shows detailed workout information for selected dates
 - **Key Features**:
   - Exercise details for specific dates
@@ -89,7 +84,6 @@
 - **Layout**: Uses shared layout system
 
 #### 6. ArchivedExerciseList.java
-**Status**: ✅ **ACTIVE** - Archive management
 - **Purpose**: Manages archived exercises
 - **Key Features**:
   - View archived exercises
@@ -101,7 +95,6 @@
 - **Dependencies**: WeightUnitManager
 
 #### 7. ColorSchemeActivity.java
-**Status**: ✅ **ACTIVE** - Theme settings
 - **Purpose**: Theme and color scheme management
 - **Key Features**:
   - Light/dark theme switching
@@ -112,10 +105,17 @@
 - **Layout**: `activity_color_scheme_screen.xml`
 - **Dependencies**: ThemeManager, WeightUnitManager
 
+- #### 8. DayAxisValueFormatter.java
+- **Purpose**: Chart axis formatting for progress charts
+- **Key Features**:
+  - M/d/yy date format display
+  - Support for 2025-2034 date range
+  - Proper date conversion for chart X-axis
+- **Dependencies**: MPAndroidChart library
+
 ### Data Layer
 
 #### DatabaseHelper.java
-**Status**: ✅ **ACTIVE** - Database schema
 - **Purpose**: SQLite database schema definition
 - **Tables**:
   - `WORKOUTS`: Workout definitions
@@ -127,7 +127,6 @@
   - Archive column support
 
 #### DBManager.java
-**Status**: ✅ **ACTIVE** - Database operations
 - **Purpose**: Database CRUD operations
 - **Key Methods**:
   - `getAllExercises()`: Fetch all exercises with latest weights
@@ -139,7 +138,6 @@
 ### Services
 
 #### WorkoutService.java
-**Status**: ✅ **ACTIVE** - Foreground service
 - **Purpose**: Manages workout timing in background
 - **Key Features**:
   - Foreground service with notification
@@ -150,7 +148,6 @@
 ### Adapters
 
 #### ExerciseRecyclerViewAdapter.java
-**Status**: ✅ **ACTIVE** - Exercise list adapter
 - **Purpose**: Manages exercise list display
 - **Key Features**:
   - Exercise selection functionality
@@ -159,7 +156,6 @@
   - Weight display formatting
 
 #### WorkoutRecyclerViewAdapter.java
-**Status**: ✅ **ACTIVE** - Workout session adapter
 - **Purpose**: Manages active workout display
 - **Key Features**:
   - Real-time set tracking
@@ -167,7 +163,6 @@
   - Progress visualization
 
 #### CalendarRecyclerViewAdapter.java
-**Status**: ✅ **ACTIVE** - Calendar adapter
 - **Purpose**: Manages calendar view display
 - **Key Features**:
   - Date-based workout display
@@ -176,7 +171,6 @@
 ### Data Models
 
 #### ExerciseItem.java
-**Status**: ✅ **ACTIVE** - Exercise data model
 - **Purpose**: Represents exercise data
 - **Properties**:
   - Exercise ID, title, weight
@@ -185,14 +179,12 @@
 - **Dependencies**: WeightUtils
 
 #### ExerciseSession.java
-**Status**: ❓ **POTENTIALLY UNUSED**
 - **Purpose**: Exercise session data model
 - **Note**: No direct imports found in codebase
 
 ### Utility Classes
 
 #### ThemeManager.java
-**Status**: ✅ **ACTIVE** - Theme management
 - **Purpose**: Manages app theme switching
 - **Key Features**:
   - Light/dark mode switching
@@ -200,7 +192,6 @@
   - SharedPreferences integration
 
 #### WeightUnitManager.java
-**Status**: ✅ **ACTIVE** - Weight unit management
 - **Purpose**: Manages weight unit conversion
 - **Key Features**:
   - kg/lbs conversion
@@ -208,12 +199,10 @@
   - Weight formatting
 
 #### WeightUtils.java
-**Status**: ✅ **ACTIVE** - Weight utility functions
 - **Purpose**: Weight formatting utilities
 - **Dependencies**: Used by ExerciseItem
 
 #### ViewAnimation.java
-**Status**: ✅ **ACTIVE** - Animation utilities
 - **Purpose**: Provides animation functions
 - **Usage**: FAB menu animations
 
@@ -222,36 +211,22 @@
 The following files appear to be unused in the current codebase:
 
 #### 1. Item.java
-**Status**: ❌ **UNUSED**
 - **Purpose**: Generic item data model
 - **Issue**: No imports found, superseded by ExerciseItem
 
 #### 2. ProgressItem.java
-**Status**: ❌ **UNUSED**
 - **Purpose**: Progress data model
 - **Issue**: No imports found, likely replaced by direct database queries
 
 #### 3. CalendarItem.java
-**Status**: ❌ **UNUSED**
 - **Purpose**: Calendar item data model
 - **Issue**: No imports found, calendar functionality uses direct database queries
 
-#### 4. DayAxisValueFormatter.java
-**Status**: ✅ **ACTIVE** - Chart axis formatting
-- **Purpose**: Chart axis formatting for progress charts
-- **Key Features**:
-  - M/d/yy date format display
-  - Support for 2025-2034 date range
-  - Proper date conversion for chart X-axis
-- **Dependencies**: MPAndroidChart library
-
-#### 5. MergeAdapter.java
-**Status**: ❌ **UNUSED**
+#### 4. MergeAdapter.java
 - **Purpose**: Adapter merging utility
 - **Issue**: No imports found, not implemented in current UI
 
-#### 6. RecyclerViewAdapter.java
-**Status**: ❌ **UNUSED**
+#### 5. RecyclerViewAdapter.java
 - **Purpose**: Generic RecyclerView adapter
 - **Issue**: No imports found, specific adapters used instead
 
