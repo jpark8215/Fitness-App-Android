@@ -105,7 +105,7 @@
 - **Layout**: `activity_color_scheme_screen.xml`
 - **Dependencies**: ThemeManager, WeightUnitManager
 
-- #### 8. DayAxisValueFormatter.java
+#### 8. DayAxisValueFormatter.java
 - **Purpose**: Chart axis formatting for progress charts
 - **Key Features**:
   - M/d/yy date format display
