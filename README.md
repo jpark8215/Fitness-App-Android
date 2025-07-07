@@ -1,20 +1,22 @@
-# Jieun Workout Tracker - Developer Documentation
+# Workout! - Developer Documentation
 
 ## Project Overview
 
-**Jieun Workout Tracker** is an Android application designed to help users track their workout exercises, monitor progress, and manage fitness routines. The app features a modern Material Design interface with support for both light and dark themes.
+**Workout!** is an Android application designed to help users track their workout exercises, monitor progress, and manage fitness routines. The app features a modern Material Design interface with support for both light and dark themes.
 
 ### Key Features
 - Exercise management and tracking
-- Workout session timing with foreground service
+- Workout session timing with foreground service and notification integration
 - Progress visualization with charts (7-day default view)
-- Calendar view for workout history
+- Calendar view for workout history (no session grouping)
 - Weight unit conversion (kg/lbs) with consistent display
 - Theme customization (light/dark mode)
 - Exercise archiving system
 - Google AdMob integration
 - Predictive back gesture support (Android 15+)
 - Enhanced chart visibility in dark mode
+- Smart notification system for ongoing workouts
+- Disabled long-click modify during active workouts
 
 ## Technical Specifications
 
@@ -46,14 +48,21 @@
 - **Purpose**: Manages active workout sessions
 - **Key Features**:
   - Real-time workout timing with chronometer
-  - Set tracking for exercises
-  - Foreground service integration
+  - Set tracking for exercises (1-5 sets with color coding)
+  - Foreground service integration with smart notification
   - Workout pause/resume functionality
   - Weight unit preference integration
   - Predictive back gesture with exit confirmation
   - Enhanced weight display consistency
+  - Disabled long-click modify during workouts
+  - Notification integration for workout resumption
+  - Welcome back message for resumed workouts
 - **Layout**: Uses shared layout with ViewStub
 - **Dependencies**: WorkoutService, WorkoutRecyclerViewAdapter, WeightUnitManager
+- **Recent Updates**:
+  - Long-click modify dialog disabled during active workouts
+  - Enhanced notification system for workout resumption
+  - Improved workout data persistence
 
 #### 3. ShowProgressActivity.java
 - **Purpose**: Displays workout progress charts
@@ -71,10 +80,15 @@
 - **Purpose**: Calendar interface for workout history
 - **Key Features**:
   - Monthly calendar view
-  - Workout history display
+  - Workout history display with time and duration
   - Date-based navigation
+  - Simplified exercise list (no session grouping)
 - **Layout**: `activity_calendar.xml`
 - **Dependencies**: CalendarRecyclerViewAdapter
+- **Recent Updates**:
+  - Removed session grouping (morning/afternoon/evening)
+  - Simplified exercise display with time and duration
+  - Cleaner calendar interface
 
 #### 5. CalendarShowSelectedWorkout.java
 - **Purpose**: Shows detailed workout information for selected dates
@@ -132,18 +146,24 @@
   - `getAllExercises()`: Fetch all exercises with latest weights
   - `getExerciseLogProgress()`: Get progress data for charts
   - `startSelectedExercises()`: Create workout session
-  - `updateExerciseLogs()`: Update exercise sets and reps
+  - `updateExerciseLogsWithImprovement()`: Update exercise sets and reps with improvement tracking
   - `archiveExercise()`: Archive/unarchive exercises
+  - `recordExerciseLogDuration()`: Record workout duration
 
 ### Services
 
 #### WorkoutService.java
 - **Purpose**: Manages workout timing in background
 - **Key Features**:
-  - Foreground service with notification
+  - Foreground service with smart notification
   - Chronometer for workout timing
   - Service binding for activity communication
+  - Workout data persistence for notification resumption
 - **Permissions**: FOREGROUND_SERVICE
+- **Recent Updates**:
+  - Enhanced notification with workout data
+  - Improved service lifecycle management
+  - Better workout state persistence
 
 ### Adapters
 
@@ -160,13 +180,15 @@
 - **Key Features**:
   - Real-time set tracking
   - Button interaction for reps
-  - Progress visualization
+  - Progress visualization with color coding
+  - Configurable long-click listener (disabled during workouts)
 
 #### CalendarRecyclerViewAdapter.java
 - **Purpose**: Manages calendar view display
 - **Key Features**:
   - Date-based workout display
   - Calendar item formatting
+  - Simplified exercise list display
 
 ### Data Models
 
@@ -174,13 +196,17 @@
 - **Purpose**: Represents exercise data
 - **Properties**:
   - Exercise ID, title, weight
-  - Set buttons (1-5) with colors
+  - Set buttons (1-5) with colors (green/red/default)
   - Weight display formatting
+  - Improvement tracking
 - **Dependencies**: WeightUtils
 
-#### ExerciseSession.java
-- **Purpose**: Exercise session data model
-- **Note**: No direct imports found in codebase
+#### CalendarItem.java
+- **Purpose**: Calendar display data model
+- **Properties**:
+  - Exercise title with time and duration
+  - Workout ID and log ID
+  - Date information
 
 ### Utility Classes
 
@@ -199,202 +225,96 @@
   - Weight formatting
 
 #### WeightUtils.java
-- **Purpose**: Weight formatting utilities
-- **Dependencies**: Used by ExerciseItem
+- **Purpose**: Weight conversion utilities
+- **Key Features**:
+  - kg to lbs conversion
+  - lbs to kg conversion
+  - Weight formatting with units
 
 #### ViewAnimation.java
-- **Purpose**: Provides animation functions
-- **Usage**: FAB menu animations
+- **Purpose**: Animation utilities for UI elements
+- **Key Features**:
+  - FAB rotation animations
+  - View show/hide animations
 
-### Unused/Deprecated Files
+## Recent Updates and Improvements
 
-The following files appear to be unused in the current codebase:
+### Notification System Enhancement
+- **Smart Workout Resumption**: Notification now properly resumes ongoing workouts with all exercise data
+- **Workout Data Persistence**: Service stores workout information for seamless resumption
+- **Enhanced User Experience**: Welcome back message when resuming from notification
 
-#### 1. Item.java
-- **Purpose**: Generic item data model
-- **Issue**: No imports found, superseded by ExerciseItem
+### Calendar Interface Simplification
+- **Removed Session Grouping**: Calendar no longer groups exercises by time of day
+- **Cleaner Display**: Simple list of exercises with time and duration
+- **Better Performance**: Reduced complexity in calendar data processing
 
-#### 2. ProgressItem.java
-- **Purpose**: Progress data model
-- **Issue**: No imports found, likely replaced by direct database queries
-
-#### 3. CalendarItem.java
-- **Purpose**: Calendar item data model
-- **Issue**: No imports found, calendar functionality uses direct database queries
-
-#### 4. MergeAdapter.java
-- **Purpose**: Adapter merging utility
-- **Issue**: No imports found, not implemented in current UI
-
-#### 5. RecyclerViewAdapter.java
-- **Purpose**: Generic RecyclerView adapter
-- **Issue**: No imports found, specific adapters used instead
-
-## Database Schema
-
-### Tables
-
-#### WORKOUTS
-```sql
-CREATE TABLE WORKOUTS (
-    workout_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    workout TEXT NOT NULL,
-    archive INTEGER
-);
-```
-
-#### EXERCISES
-```sql
-CREATE TABLE EXERCISES (
-    exercise_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    workout_id INTEGER NOT NULL,
-    exercise TEXT,
-    archive INTEGER DEFAULT 0
-);
-```
-
-#### LOGS
-```sql
-CREATE TABLE LOGS (
-    log_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    exercise_id INTEGER NOT NULL,
-    workout_id INTEGER NOT NULL,
-    set1 INTEGER, set1_improvement INTEGER,
-    set2 INTEGER, set2_improvement INTEGER,
-    set3 INTEGER, set3_improvement INTEGER,
-    set4 INTEGER, set4_improvement INTEGER,
-    set5 INTEGER, set5_improvement INTEGER,
-    weight DOUBLE,
-    date DATE,
-    datetime DEFAULT CURRENT_TIMESTAMP,
-    duration TIME,
-    notes TEXT
-);
-```
-
-## Key Dependencies
-
-### External Libraries
-- **Google AdMob**: Advertisement integration
-- **MPAndroidChart**: Progress chart visualization
-- **AndroidX**: Modern Android support libraries
-- **Material Design Components**: UI components
-
-### Internal Dependencies
-- **ThemeManager**: Theme switching across activities
-- **WeightUnitManager**: Weight conversion and formatting
-- **DBManager**: Database operations
-- **ViewAnimation**: UI animations
-
-## Configuration
-
-### Permissions
-- `INTERNET`: AdMob integration
-- `FOREGROUND_SERVICE`: Workout timing service
-
-### Build Configuration
-- **Application ID**: `com.developerjp.jieunworkouttracker`
-- **Version**: 4.1
-- **Version Code**: 11
-
-## Recent Updates (v4.1)
-
-### Major Improvements
-
-#### 1. **Predictive Back Gesture Support**
-- Enabled `android:enableOnBackInvokedCallback="true"` in AndroidManifest.xml
-- Implemented `OnBackPressedCallback` in all main activities
-- Added proper drawer handling and exit confirmations
-- Enhanced navigation experience for Android 15+ devices
-
-#### 2. **Enhanced Progress Charts**
-- **7-Day Default View**: Charts now show 7 days by default for better focus
-- **Improved X-Axis Formatting**: Changed to M/d/yy format (e.g., "1/15/25")
-- **Dark Mode Visibility**: Fixed chart text colors for dark mode
-- **Date Range Support**: Updated to support 2025-2034 date range
-- **Better Chart Styling**: Enhanced grid lines, colors, and visibility
-
-#### 3. **Weight Unit Consistency**
-- **Settings Integration**: Weight unit preference now consistently applied across all activities
-- **Dialog Improvements**: Add/modify exercise dialogs respect user's weight unit preference
-- **Real-time Conversion**: Weight values convert in real-time when toggling units
-- **Workout Display**: Exercise weights in workout screen now match user's preference
-- **Progress Charts**: Chart Y-axis labels show correct weight units
-
-#### 4. **Enhanced User Experience**
-- **Exit Confirmation**: Added confirmation dialog when exiting active workouts
-- **Improved Navigation**: Better back gesture handling with drawer support
-- **Theme Consistency**: Enhanced dark mode support across all components
-- **Error Handling**: Improved error handling and user feedback
+### Workout Session Improvements
+- **Disabled Long-Click Modify**: Users cannot modify exercises during active workouts
+- **Focus on Completion**: Interface optimized for workout completion rather than modification
+- **Enhanced Exit Confirmation**: Improved dialog for workout exit with progress saving
 
 ### Technical Improvements
+- **Service Lifecycle**: Better service management for seamless resumption
+- **Data Consistency**: Improved weight unit handling across all dialogs
+- **Error Handling**: Enhanced error handling and logging throughout the app
 
-#### 1. **Updated Dependencies**
-- Target SDK updated to 35 (Android 15)
-- Minimum SDK updated to 23 (Android 6.0)
-- Enhanced compatibility with latest Android features
+## Development Guidelines
 
-#### 2. **Code Quality**
-- Removed unused files and improved code organization
-- Enhanced error handling and logging
-- Improved weight unit conversion utilities
-- Better separation of concerns
+### Code Style
+- Follow Android development best practices
+- Use meaningful variable and method names
+- Implement proper error handling
+- Add logging for debugging purposes
 
-#### 3. **Performance Optimizations**
-- Optimized chart rendering and data loading
-- Improved database query efficiency
-- Enhanced memory management for large datasets
+### Database Operations
+- Always close cursors after use
+- Use parameterized queries to prevent SQL injection
+- Implement proper transaction handling for complex operations
 
-## Development Notes
+### UI/UX Considerations
+- Support both light and dark themes
+- Implement proper weight unit display
+- Use consistent color coding for exercise progress
+- Provide clear user feedback for actions
 
-### Code Quality Issues
-1. **Hardcoded Values**: Some UI elements use hardcoded values
-2. **Error Handling**: Limited error handling in database operations
-3. **Code Duplication**: Some adapter code could be consolidated
+### Performance Optimization
+- Use RecyclerView for large lists
+- Implement proper view recycling
+- Minimize database queries
+- Use background services appropriately
 
-### Recommended Improvements
-1. **Implement MVVM**: Consider migrating to MVVM architecture
-2. **Add Unit Tests**: Implement comprehensive testing
-3. **Error Handling**: Improve error handling and user feedback
-4. **Code Documentation**: Add more comprehensive code comments
-5. **Cloud Sync**: Add cloud backup and sync functionality
+## Future Enhancements
 
-### Performance Considerations
-1. **Database Queries**: Some queries could be optimized
-2. **Memory Management**: Large lists should implement pagination
-3. **Service Lifecycle**: Ensure proper service cleanup
+### Planned Features
+- Workout templates and routines
+- Advanced progress analytics
+- Social features and sharing
+- Integration with fitness devices
+- Cloud backup and sync
 
-## Build and Deployment
-
-### Building the App
-```bash
-./gradlew assembleDebug
-./gradlew assembleRelease
-```
-
-### Release Configuration
-- **Signing**: Configured for release builds
-- **ProGuard**: Enabled for code obfuscation
-- **AdMob**: Integrated for monetization
+### Technical Improvements
+- Migration to modern Android architecture components
+- Enhanced offline capabilities
+- Improved accessibility features
+- Performance optimizations
 
 ## Support and Maintenance
 
-### Current Version
-- **Version**: 4.1
-- **Version Code**: 11
-- **Last Updated**: December 2024
-- **Status**: Active Development
+### Debugging
+- Use Android Studio's built-in debugging tools
+- Check logcat for error messages
+- Verify database integrity
+- Test on multiple Android versions
 
-### Known Issues
-1. Limited error handling in some database operations
-2. No comprehensive testing suite
-3. Some hardcoded values in UI components
+### Testing
+- Test on various screen sizes
+- Verify theme switching functionality
+- Test weight unit conversion accuracy
+- Validate workout timing accuracy
 
-### Future Enhancements
-1. **Cloud Sync**: Google Drive or Firebase integration for backup
-2. **Social Features**: Share workouts and achievements
-3. **Advanced Analytics**: Detailed progress insights and trends
-4. **Workout Templates**: Pre-defined workout routines
-5. **Fitness Device Integration**: Connect with wearables and smart devices
-6. **Export Features**: CSV/PDF workout reports
-7. **Reminder System**: Workout scheduling and notifications 
+### Deployment
+- Ensure proper signing configuration
+- Test release builds thoroughly
+- Verify all permissions are correctly declared
+- Check for memory leaks and performance issues
