@@ -201,10 +201,10 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
 
                 if (weightColumnIndex != -1 && !cursor.isNull(weightColumnIndex)) {
                     double exerciseWeight = cursor.getDouble(weightColumnIndex);
-                    
+
                     // Store original weight in kg
                     exerciseItem.setWeight(exerciseWeight);
-                    
+
                     // Format weight with appropriate unit
                     String formattedWeight;
                     if (isKgUnit) {
@@ -272,10 +272,10 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
             dbManager = new DBManager(this);
             dbManager.open();
         }
-        
+
         // Refresh the exercise list with current weight unit settings
         loadExerciseData();
-        
+
         // Restore RecyclerView state if available
         if (recyclerViewState != null && recyclerView != null && recyclerView.getLayoutManager() != null) {
             recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
@@ -366,8 +366,8 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
             ids[i] = ExerciseItem.get(i).getId();
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, 
-            ThemeManager.isDarkModeEnabled(this) ? R.style.ModernAlertDialogDark : R.style.ModernAlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this,
+                ThemeManager.isDarkModeEnabled(this) ? R.style.ModernAlertDialogDark : R.style.ModernAlertDialog);
         builder.setTitle("Select Exercise to Restore");
         builder.setItems(items, (dialog, which) -> {
             try {
@@ -424,19 +424,19 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         btnAdd.setText("Add Exercise");
         txtTitle.setText("Add an Exercise");
         exerciseEditText.setHint("Exercise");
-        
+
         // Set toggle state based on system preference
         boolean isKgUnit = WeightUnitManager.isKgUnit(this);
         toggleWeightUnit.setChecked(isKgUnit);
-        
+
         // Add toggle button listener
         toggleWeightUnit.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (weightEditText != null && !TextUtils.isEmpty(weightEditText.getText())) {
                 try {
                     double currentWeight = Double.parseDouble(weightEditText.getText().toString());
-                    double convertedWeight = isChecked ? 
-                        WeightUtils.lbsToKg(currentWeight) : 
-                        WeightUtils.kgToLbs(currentWeight);
+                    double convertedWeight = isChecked ?
+                            WeightUtils.lbsToKg(currentWeight) :
+                            WeightUtils.kgToLbs(currentWeight);
                     weightEditText.setText(new DecimalFormat("#.#").format(convertedWeight));
                 } catch (NumberFormatException e) {
                     Log.e("ArchivedExerciseList", "Invalid weight format: " + e.getMessage());
@@ -525,7 +525,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         // Convert and display weight in the selected unit
         if (itemWeight != null) {
             double displayWeight = isKgUnit ? itemWeight : WeightUtils.kgToLbs(itemWeight);
-        weightEditText.setText(new DecimalFormat("#.#").format(displayWeight));
+            weightEditText.setText(new DecimalFormat("#.#").format(displayWeight));
         }
 
         // Add toggle button listener
@@ -533,9 +533,9 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
             if (weightEditText != null && !TextUtils.isEmpty(weightEditText.getText())) {
                 try {
                     double currentWeight = Double.parseDouble(weightEditText.getText().toString());
-                    double convertedWeight = isChecked ? 
-                        WeightUtils.lbsToKg(currentWeight) : 
-                        WeightUtils.kgToLbs(currentWeight);
+                    double convertedWeight = isChecked ?
+                            WeightUtils.lbsToKg(currentWeight) :
+                            WeightUtils.kgToLbs(currentWeight);
                     weightEditText.setText(new DecimalFormat("#.#").format(convertedWeight));
                 } catch (NumberFormatException e) {
                     Log.e("ArchivedExerciseList", "Invalid weight format: " + e.getMessage());
@@ -554,7 +554,7 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
                 if (dbManager.doesExerciseExist(newExerciseName)) {
                     // Exercise with the same name already exists, ask the user what to do
                     AlertDialog.Builder builder = new AlertDialog.Builder(ArchivedExerciseList.this,
-                        ThemeManager.isDarkModeEnabled(this) ? R.style.ModernAlertDialogDark : R.style.ModernAlertDialog);
+                            ThemeManager.isDarkModeEnabled(this) ? R.style.ModernAlertDialogDark : R.style.ModernAlertDialog);
                     double mostRecentWeight = dbManager.getMostRecentWeightForExercise(newExerciseName);
                     String message = "The most recent weight was " + mostRecentWeight + ". \nStill update as you entered?";
                     builder.setMessage(message)
@@ -566,8 +566,8 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
                                 if (!weightEditText.getText().toString().trim().isEmpty()) {
                                     double inputWeight = Double.parseDouble(weightEditText.getText().toString());
                                     // Convert to kg for storage if currently showing lbs
-                                    double newExerciseWeight = toggleWeightUnit.isChecked() ? 
-                                        inputWeight : WeightUtils.lbsToKg(inputWeight);
+                                    double newExerciseWeight = toggleWeightUnit.isChecked() ?
+                                            inputWeight : WeightUtils.lbsToKg(inputWeight);
                                     dbManager.updateExerciseWeight(String.valueOf(_id), newExerciseWeight);
                                 } else {
                                     // If no weight value was given, update with a default value of 0
@@ -600,8 +600,8 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
                     if (!weightEditText.getText().toString().trim().isEmpty()) {
                         double inputWeight = Double.parseDouble(weightEditText.getText().toString());
                         // Convert to kg for storage if currently showing lbs
-                        double newExerciseWeight = toggleWeightUnit.isChecked() ? 
-                            inputWeight : WeightUtils.lbsToKg(inputWeight);
+                        double newExerciseWeight = toggleWeightUnit.isChecked() ?
+                                inputWeight : WeightUtils.lbsToKg(inputWeight);
                         dbManager.updateExerciseWeight(String.valueOf(_id), newExerciseWeight);
                     } else {
                         // If no weight value was given, update with a default value of 0

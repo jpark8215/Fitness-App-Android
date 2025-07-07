@@ -52,10 +52,6 @@ public class ViewAnimation {
                 v.requestLayout();
             }
 
-            @Override
-            public boolean willChangeBounds() {
-                return true;
-            }
         };
 
         a.setDuration((int) (targetHeight / v.getContext().getResources().getDisplayMetrics().density));
@@ -77,10 +73,6 @@ public class ViewAnimation {
                 }
             }
 
-            @Override
-            public boolean willChangeBounds() {
-                return true;
-            }
         };
 
         a.setDuration((int) (initialHeight / v.getContext().getResources().getDisplayMetrics().density));

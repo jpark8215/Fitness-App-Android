@@ -406,19 +406,19 @@ WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapt
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         public final TextView textViewExercise;
-        //not sure what this id is used for, can probably be removed with some testing
-        public TextView textViewId;
         public final Button button1;
         public final Button button2;
         public final Button button3;
         public final Button button4;
         public final Button button5;
+        public final TextView textViewWeight;
+        //not sure what this id is used for, can probably be removed with some testing
+        public TextView textViewId;
         public Boolean button1FirstClick = true;
         public Boolean button2FirstClick = true;
         public Boolean button3FirstClick = true;
         public Boolean button4FirstClick = true;
         public Boolean button5FirstClick = true;
-        public final TextView textViewWeight;
 
         public ViewHolder(View itemView) {
             super(itemView);

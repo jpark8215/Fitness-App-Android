@@ -97,6 +97,7 @@ public class WorkoutService extends Service {
 
         // Creates the notification intent
         Intent notificationIntent = new Intent(this, StartWorkoutActivity.class);
+        notificationIntent.putExtra("ongoing_workout", true);
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 

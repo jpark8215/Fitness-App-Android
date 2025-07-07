@@ -112,6 +112,10 @@ public class ExerciseItem {
         return button5colour;
     }
 
+    public double getWeight() {
+        return weight;
+    }
+
     public void setWeight(double weight) {
         // Store the weight with exactly one decimal place
         this.weight = WeightUtils.formatToOneDecimal(weight);
@@ -119,15 +123,11 @@ public class ExerciseItem {
         this.displayWeight = WeightUtils.formatWeight(this.weight, true);
     }
 
-    public double getWeight() {
-        return weight;
+    public String getDisplayWeight() {
+        return displayWeight;
     }
 
     public void setDisplayWeight(String displayWeight) {
         this.displayWeight = displayWeight;
-    }
-
-    public String getDisplayWeight() {
-        return displayWeight;
     }
 }

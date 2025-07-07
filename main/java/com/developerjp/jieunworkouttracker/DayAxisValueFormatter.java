@@ -6,24 +6,20 @@ import com.github.mikephil.charting.formatter.ValueFormatter;
 
 public class DayAxisValueFormatter extends ValueFormatter {
 
+    private static final int BASE_YEAR = 2025;
+    private static final int NUM_YEARS = 10;
+    private static final int DAYS_PER_YEAR = 366; // Leap year safe
     private final String[] mMonths = new String[]{
             "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     };
 
-    private final BarLineChartBase<?> chart;
-
-    private static final int BASE_YEAR = 2025;
-    private static final int NUM_YEARS = 10;
-    private static final int DAYS_PER_YEAR = 366; // Leap year safe
-
     public DayAxisValueFormatter(BarLineChartBase<?> chart) {
-        this.chart = chart;
     }
 
     @Override
     public String getFormattedValue(float value) {
         int days = (int) value;
-        
+
         // Handle negative days (dates before 2025)
         if (days < 0) {
             return "";
@@ -32,12 +28,12 @@ public class DayAxisValueFormatter extends ValueFormatter {
         int year = determineYear(days);
         int month = determineMonth(days);
         int dayOfMonth = determineDayOfMonth(days, month);
-        
+
         // Format as M/d/yy
         String monthStr = String.valueOf(month + 1); // month is 0-based
         String dayStr = String.valueOf(dayOfMonth);
         String yearStr = String.valueOf(year).substring(2); // Get last 2 digits
-        
+
         return monthStr + "/" + dayStr + "/" + yearStr;
     }
 

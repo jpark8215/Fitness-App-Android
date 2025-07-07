@@ -16,6 +16,7 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.view.Window;
 import android.view.WindowManager;
@@ -27,9 +28,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
@@ -53,8 +54,12 @@ import java.util.Objects;
 
 public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRecyclerViewAdapter.OnItemLongSelectedListener, WorkoutRecyclerViewAdapter.OnButtonClickListener {
 
+    public static boolean isWorkoutOngoing = false;
+
     // Item List
     private final List<com.developerjp.jieunworkouttracker.ExerciseItem> ExerciseItem = new ArrayList<>();
+    // Add this as a class member variable
+    private final List<String> workoutLogIds = new ArrayList<>();
     //Public variables which are used across classes/voids
     public String id;
     public String title;
@@ -101,9 +106,6 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         }
     };
 
-    // Add this as a class member variable
-    private final List<String> workoutLogIds = new ArrayList<>();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -131,11 +133,13 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         // Get the selected exercise IDs from the intent
         ArrayList<String> selectedExerciseIds = getIntent().getStringArrayListExtra("selected_exercise_ids");
         if (selectedExerciseIds == null || selectedExerciseIds.isEmpty()) {
-//            Toast.makeText(this, "No exercises selected", Toast.LENGTH_SHORT).show();
             Log.d("StartWorkoutActivity", "No exercises selected");
             finish();
             return;
         }
+
+        // Mark workout as ongoing
+        isWorkoutOngoing = true;
 
         //Sets up the toolbar and navigation menu
         initToolbar();
@@ -167,12 +171,15 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         //Chronometer is used for the counter timer
         simpleChronometer = findViewById(R.id.simpleChronometer);
 
-        //Starts the WorkoutService which keeps track of the workout time
-        serviceIntent = new Intent(this, WorkoutService.class);
-        serviceIntent.putExtra("id", id);
-        serviceIntent.putExtra("title", title);
-        startService(serviceIntent);
-        bindService(serviceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        // Only start the service if workout is ongoing
+        if (isWorkoutOngoing) {
+            serviceIntent = new Intent(this, WorkoutService.class);
+            serviceIntent.putExtra("id", id);
+            serviceIntent.putExtra("title", title);
+            serviceIntent.putExtra("selected_exercise_ids", selectedExerciseIds);
+            startService(serviceIntent);
+            bindService(serviceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        }
 
         // Database connection is already initialized above, no need to do it again
         //Loads the Exercise logs data using recyclerview and the custom adapter
@@ -192,6 +199,31 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
         // Set up predictive back gesture support
         setupBackCallback();
+
+        // Check if this is a resume from notification
+        if (getIntent().getBooleanExtra("ongoing_workout", false)) {
+            // Get workout data from the intent (passed from service notification)
+            String resumeId = getIntent().getStringExtra("id");
+            String resumeTitle = getIntent().getStringExtra("title");
+            ArrayList<String> resumeExerciseIds = getIntent().getStringArrayListExtra("selected_exercise_ids");
+
+            if (resumeId != null && resumeTitle != null && resumeExerciseIds != null) {
+                // Update the activity's workout data
+                id = resumeId;
+                title = resumeTitle;
+
+                Log.d("StartWorkoutActivity", "Resuming workout from notification - ID: " + id + ", Title: " + title);
+
+                // Load the exercises for the ongoing workout
+                loadSelectedExercises(resumeExerciseIds);
+
+                // Show welcome back message after a short delay to ensure views are ready
+                new android.os.Handler().postDelayed(this::showWelcomeBackMessage, 500);
+            } else {
+                // Fallback to original logic if data is missing
+                showOngoingWorkout();
+            }
+        }
     }
 
     private void initToolbar() {
@@ -317,7 +349,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                     if (weightIndex != -1) {
                         double weight = cursor.getDouble(weightIndex);
                         item.setWeight(weight);
-                        
+
                         // Format weight with appropriate unit based on user preference
                         String formattedWeight;
                         if (isKgUnit) {
@@ -443,8 +475,8 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
             recyclerView.setHasFixedSize(true);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-            // Set up the adapter
-            adapter = new WorkoutRecyclerViewAdapter(ExerciseItem, this, this, this);
+            // Set up the adapter - disable long click during workout
+            adapter = new WorkoutRecyclerViewAdapter(ExerciseItem, this, null, this);
             recyclerView.setAdapter(adapter);
 
             // Log the loaded exercise items for debugging
@@ -469,36 +501,18 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                 unbindService(mServiceConnection);
                 mServiceBound = false;
             }
+
+            // Stop the service if it's still running
+            if (serviceIntent != null) {
+                stopService(serviceIntent);
+                Log.d("StartWorkoutActivity", "Service stopped in onDestroy");
+            }
         } catch (Exception e) {
             Log.e("StartWorkoutActivity", "Error during onDestroy: " + e.getMessage());
         }
 
         super.onDestroy();
     }
-
-
-//    @Override
-//    public void onBackPressed() {
-//        // When backing out of the activity, make sure to clean up resources
-//        try {
-//            // Stop and unbind from the service if bound
-//            if (mServiceBound) {
-//                unbindService(mServiceConnection);
-//                mServiceBound = false;
-//            }
-//
-//            // Stop the chronometer
-//            if (simpleChronometer != null) {
-//                simpleChronometer.stop();
-//            }
-//        } catch (Exception e) {
-//            Log.e("StartWorkoutActivity", "Error during onBackPressed: " + e.getMessage());
-//        }
-//
-//        // Return to the workout list page
-//        super.onBackPressed();
-//        this.finish();
-//    }
 
 
     @Override
@@ -533,7 +547,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
         txtTitle.setText("Modify Exercise");
         exerciseEditText.setText(itemTitle);
-        
+
         // Set toggle state based on system preference
         boolean isKgUnit = WeightUnitManager.isKgUnit(this);
         toggleWeightUnit.setChecked(isKgUnit);
@@ -554,12 +568,10 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
         // Add toggle button listener
         toggleWeightUnit.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (weightEditText != null && !TextUtils.isEmpty(weightEditText.getText())) {
+            if (!TextUtils.isEmpty(weightEditText.getText())) {
                 try {
                     double currentWeight = Double.parseDouble(weightEditText.getText().toString());
-                    double convertedWeight = isChecked ? 
-                        WeightUtils.lbsToKg(currentWeight) : 
-                        WeightUtils.kgToLbs(currentWeight);
+                    double convertedWeight = isChecked ? WeightUtils.lbsToKg(currentWeight) : WeightUtils.kgToLbs(currentWeight);
                     weightEditText.setText(new DecimalFormat("#.#").format(convertedWeight));
                 } catch (NumberFormatException e) {
                     Log.e("StartWorkoutActivity", "Invalid weight format: " + e.getMessage());
@@ -572,8 +584,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
             //Does a validation check to make sure the user has entered in a value for the exercise name
             if (TextUtils.isEmpty(exerciseEditText.getText())) {
-                Toast.makeText(StartWorkoutActivity.this,
-                        "You must give an exercise name", Toast.LENGTH_LONG).show();
+                Toast.makeText(StartWorkoutActivity.this, "You must give an exercise name", Toast.LENGTH_LONG).show();
 
                 //If the user has given an exercise name then we will update the exercise name in the database
             } else {
@@ -588,13 +599,13 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                 //If there is a weight given then update the database
                 if (!weightEditText.getText().toString().trim().isEmpty()) {
                     double newExerciseWeight = Double.parseDouble(weightEditText.getText().toString());
-                    
+
                     // Convert to kg if needed (if toggle is set to lbs)
-                    if (toggleWeightUnit != null && !toggleWeightUnit.isChecked()) {
+                    if (!toggleWeightUnit.isChecked()) {
                         // Convert lbs to kg
                         newExerciseWeight = WeightUtils.lbsToKg(newExerciseWeight);
                     }
-                    
+
                     dbManager.updateExerciseWeight(String.valueOf(_id), newExerciseWeight);
                 } else {
                     //If no weight value was given then update with a default value of 0
@@ -683,28 +694,55 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
     @Override
     protected void onPause() {
-        //When the user navigates away from this screen we will minimise the floating action menu
-        //floatingActionsMenu.collapse();
+        // When the user navigates away from this screen we will:
+        // 1. Minimize the floating action menu (if open)
+        // 2. Pause the chronometer if it's running and not already paused
+        // 3. Save the RecyclerView state
 
-        // Save state - used when user clicks on an item far down the recycler view list
+        Log.d("StartWorkoutActivity", "Activity paused");
+
+        // Collapse FAB menu if it's open
+        if (rotate) {
+            toggleFabMode(fab_add);
+        }
+
+        // Pause the chronometer if it's running and not already manually paused
+        if (simpleChronometer != null && !isPaused) {
+            timeWhenStopped = simpleChronometer.getBase() - SystemClock.elapsedRealtime();
+            simpleChronometer.stop();
+            Log.d("StartWorkoutActivity", "Chronometer paused due to activity pause");
+        }
+
+        // Save RecyclerView state - used when user clicks on an item far down the recycler view list
         // It remembers the state or position
-        recyclerViewState = Objects.requireNonNull(recyclerView.getLayoutManager()).onSaveInstanceState();
+        if (recyclerView != null && recyclerView.getLayoutManager() != null) {
+            recyclerViewState = recyclerView.getLayoutManager().onSaveInstanceState();
+        }
+
         super.onPause();
     }
-
 
     @Override
     public void onResume() {
         super.onResume();
-        //Refreshes the data when the activity is resumed.
-        //Mainly used for when an exercise is updated.
+        Log.d("StartWorkoutActivity", "Activity resumed");
+
+        // Refresh the data when the activity is resumed
+        // Mainly used for when an exercise is updated
 
         // Make sure database is open
         if (dbManager == null) {
             dbManager = new DBManager(this);
         }
-        if (dbManager.isOpen()) {
+        if (!dbManager.isOpen()) {
             dbManager.open();
+        }
+
+        // Resume the chronometer if it was paused due to activity pause (not manual pause)
+        if (simpleChronometer != null && !isPaused && timeWhenStopped != 0) {
+            simpleChronometer.setBase(SystemClock.elapsedRealtime() + timeWhenStopped);
+            simpleChronometer.start();
+            Log.d("StartWorkoutActivity", "Chronometer resumed from activity resume");
         }
 
         // Get the selected exercise IDs from the intent
@@ -719,10 +757,11 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                 recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
             }
         }
-        
+
         // Update weight display in case user changed weight unit preference
         updateWeightDisplay();
     }
+
 
     @Override
     public void OnBackPressedDispatcher() {
@@ -740,8 +779,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                 intReps = 0;
             }
 
-            Log.d("StartWorkoutActivity", "Updating log: " + logId + ", set: " + setSelected +
-                    ", reps: " + intReps + ", improvement: " + intImprovement);
+            Log.d("StartWorkoutActivity", "Updating log: " + logId + ", set: " + setSelected + ", reps: " + intReps + ", improvement: " + intImprovement);
 
             //We pass through the log_id, set selected, number of reps & integer value of if there was an improvement made
             dbManager.updateExerciseLogsWithImprovement(logId, setSelected, intReps, intImprovement);
@@ -795,8 +833,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                             break;
                     }
 
-                    Log.d("StartWorkoutActivity", "Updated ExerciseItem at position " + i +
-                            ", set: " + setSelected + ", reps: " + intReps);
+                    Log.d("StartWorkoutActivity", "Updated ExerciseItem at position " + i + ", set: " + setSelected + ", reps: " + intReps);
                     break;
                 }
             }
@@ -831,7 +868,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         Intent intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
         startActivity(intent);
     }
-    
+
     private void setupBackCallback() {
         // Handle back navigation with predictive back gesture support
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
@@ -849,27 +886,23 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         };
         getOnBackPressedDispatcher().addCallback(this, callback);
     }
-    
+
     private void showExitWorkoutConfirmation() {
         androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
         builder.setTitle("Exit Workout");
-        builder.setMessage("Are you sure you want to exit the workout? Your progress will be saved.");
-        builder.setPositiveButton("Exit", (dialog, which) -> {
-            finishWorkout();
-        });
-        builder.setNegativeButton("Cancel", (dialog, which) -> {
-            dialog.dismiss();
-        });
+        builder.setMessage("Are you sure you want to exit the workout? \nYour progress will be saved.");
+        builder.setPositiveButton("Exit", (dialog, which) -> finishWorkout());
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
         builder.show();
     }
-    
+
     private void updateWeightDisplay() {
         if (ExerciseItem != null && adapter != null) {
             boolean isKgUnit = WeightUnitManager.isKgUnit(this);
             for (ExerciseItem exercise : ExerciseItem) {
                 double weight = exercise.getWeight();
                 String formattedWeight;
-                
+
                 if (isKgUnit) {
                     // Already in kg, just format it
                     formattedWeight = WeightUtils.formatWeight(weight, true);
@@ -878,7 +911,7 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
                     double weightInLbs = WeightUtils.kgToLbs(weight);
                     formattedWeight = WeightUtils.formatWeight(weightInLbs, false);
                 }
-                
+
                 exercise.setDisplayWeight(formattedWeight);
             }
             adapter.notifyDataSetChanged();
@@ -898,15 +931,16 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
         }
     }
 
-    public void pauseWorkout() {
-        //If workout isn't already paused then do the following
-        if (!isPaused) {
 
-            //minimises the floating action button
+    // You can also modify your existing pauseWorkout() method to handle this better:
+    public void pauseWorkout() {
+        // If workout isn't already paused then do the following
+        if (!isPaused) {
+            // minimises the floating action button
             toggleFabMode(fab_add);
-            //Shows a snackbar message to the user letting them know the workout has been paused
+
+            // Shows a snackbar message to the user letting them know the workout has been paused
             final Snackbar snackbar = Snackbar.make(findViewById(R.id.viewSnack), "", Snackbar.LENGTH_SHORT);
-            //inflate view
             View custom_view = getLayoutInflater().inflate(R.layout.snackbar_icon_text, null);
 
             snackbar.getView().setBackgroundColor(Color.TRANSPARENT);
@@ -916,26 +950,24 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
             ((TextView) custom_view.findViewById(R.id.message)).setText("Workout Paused!");
             ((ImageView) custom_view.findViewById(R.id.icon)).setImageResource(R.drawable.ic_done);
             (custom_view.findViewById(R.id.parent_view)).setBackgroundColor(getResources().getColor(R.color.colorSuccess));
-//            snackBarView.addView(custom_view, 0);
             snackbar.show();
 
-            //Calculates the time when stopped
+            // Calculates the time when stopped
             timeWhenStopped = simpleChronometer.getBase() - SystemClock.elapsedRealtime();
-            //Stops the timer
+            // Stops the timer
             simpleChronometer.stop();
             txt_pause_workout.setText("Resume Workout");
             fab_pause_workout.setImageResource(R.drawable.fab_resume_workout);
             isPaused = true;
+            Log.d("StartWorkoutActivity", "Workout manually paused");
         }
-
-        //If workout is already paused then do the following
+        // If workout is already paused then do the following
         else {
-
-            //minimises the floating action button
+            // minimises the floating action button
             toggleFabMode(fab_add);
-            //Shows a snackbar message to the user letting them know the workout has resumed
+
+            // Shows a snackbar message to the user letting them know the workout has resumed
             final Snackbar snackbar = Snackbar.make(findViewById(R.id.viewSnack), "", Snackbar.LENGTH_SHORT);
-            //inflate view
             View custom_view = getLayoutInflater().inflate(R.layout.snackbar_icon_text, null);
 
             snackbar.getView().setBackgroundColor(Color.TRANSPARENT);
@@ -945,17 +977,84 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
             ((TextView) custom_view.findViewById(R.id.message)).setText("Workout Resumed!");
             ((ImageView) custom_view.findViewById(R.id.icon)).setImageResource(R.drawable.ic_done);
             (custom_view.findViewById(R.id.parent_view)).setBackgroundColor(getResources().getColor(R.color.colorSuccess));
-//            snackBarView.addView(custom_view, 0);
             snackbar.show();
 
-
-            //Sets the correct timer time when you resume the chronometer
+            // Sets the correct timer time when you resume the chronometer
             simpleChronometer.setBase(SystemClock.elapsedRealtime() + timeWhenStopped);
             simpleChronometer.start();
             txt_pause_workout.setText("Pause Workout");
             fab_pause_workout.setImageResource(R.drawable.fab_pause_workout);
             isPaused = false;
+            Log.d("StartWorkoutActivity", "Workout manually resumed");
         }
+    }
+
+
+    private void showWelcomeBackMessage() {
+        Log.d("StartWorkoutActivity", "showWelcomeBackMessage() called");
+        try {
+            // Show a welcome back message
+            View snackView = findViewById(R.id.viewSnack);
+            if (snackView != null) {
+                final Snackbar snackbar = Snackbar.make(snackView, "", Snackbar.LENGTH_LONG);
+                View custom_view = getLayoutInflater().inflate(R.layout.snackbar_icon_text, null);
+
+                snackbar.getView().setBackgroundColor(Color.TRANSPARENT);
+                View snackBarView = snackbar.getView();
+                snackBarView.setPadding(0, 0, 0, 0);
+
+                ((TextView) custom_view.findViewById(R.id.message)).setText("Welcome back to your workout!");
+                ((ImageView) custom_view.findViewById(R.id.icon)).setImageResource(R.drawable.ic_done);
+                (custom_view.findViewById(R.id.parent_view)).setBackgroundColor(getResources().getColor(R.color.colorSuccess));
+
+                // Add the custom view to the snackbar
+                if (snackBarView instanceof ViewGroup) {
+                    ((ViewGroup) snackBarView).addView(custom_view, 0);
+                }
+
+                snackbar.show();
+                Log.d("StartWorkoutActivity", "Welcome back message displayed");
+            } else {
+                Log.e("StartWorkoutActivity", "viewSnack not found in layout");
+                // Fallback to Toast if Snackbar view is not available
+                Toast.makeText(this, "Welcome back to your workout!", Toast.LENGTH_LONG).show();
+            }
+        } catch (Exception e) {
+            Log.e("StartWorkoutActivity", "Error showing welcome back message: " + e.getMessage());
+            // Fallback to Toast
+            Toast.makeText(this, "Welcome back to your workout!", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void showOngoingWorkout() {
+        Log.d("StartWorkoutActivity", "Showing ongoing workout");
+
+        // Check if we have stored workout log IDs to resume
+        if (workoutLogIds.isEmpty()) {
+            Log.d("StartWorkoutActivity", "No ongoing workout data found");
+            // If no ongoing workout data, treat as new workout
+            ArrayList<String> selectedExerciseIds = getIntent().getStringArrayListExtra("selected_exercise_ids");
+            if (selectedExerciseIds != null && !selectedExerciseIds.isEmpty()) {
+                loadSelectedExercises(selectedExerciseIds);
+            } else {
+                Toast.makeText(this, "No workout data found", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+            return;
+        }
+
+        // Resume the workout with existing data
+        // The chronometer will be started when the service connects
+        Log.d("StartWorkoutActivity", "Resuming ongoing workout with " + workoutLogIds.size() + " exercises");
+
+        // Load the exercise data that was already in progress
+        ArrayList<String> selectedExerciseIds = getIntent().getStringArrayListExtra("selected_exercise_ids");
+        if (selectedExerciseIds != null && !selectedExerciseIds.isEmpty()) {
+            loadSelectedExercises(selectedExerciseIds);
+        }
+
+        // Show a welcome back message
+        showWelcomeBackMessage();
     }
 
     public void finishWorkout() {
@@ -964,6 +1063,9 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
 
         //General clean up tasks
         simpleChronometer.stop();
+
+        // Mark workout as not ongoing
+        isWorkoutOngoing = false;
 
         //unbinds the service if bound
         if (mServiceBound) {

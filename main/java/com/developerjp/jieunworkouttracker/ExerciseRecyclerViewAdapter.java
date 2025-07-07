@@ -119,7 +119,7 @@ public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRe
             holder.button3.setBackgroundResource(myList.getButton3colour());
             holder.button4.setBackgroundResource(myList.getButton4colour());
             holder.button5.setBackgroundResource(myList.getButton5colour());
-            
+
             // Exit early since we don't need to set up click listeners in read-only mode
             return;
         }
@@ -320,21 +320,19 @@ public class ExerciseRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseRe
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         public final TextView textViewExercise;
-        //not sure what this id is used for, can probably be removed with some testing
-        public TextView textViewId;
         public final Button button1;
         public final Button button2;
         public final Button button3;
         public final Button button4;
         public final Button button5;
-
+        public final TextView textViewWeight;
+        //not sure what this id is used for, can probably be removed with some testing
+        public TextView textViewId;
         public Boolean button1FirstClick = true;
         public Boolean button2FirstClick = true;
         public Boolean button3FirstClick = true;
         public Boolean button4FirstClick = true;
         public Boolean button5FirstClick = true;
-
-        public final TextView textViewWeight;
 
         public ViewHolder(View itemView) {
             super(itemView);

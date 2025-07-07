@@ -83,7 +83,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // Handle upgrades between specific versions
         if (oldVersion < 23) {
             // Apply all migrations necessary to get to the current version
-            
+
             // Add ARCHIVE column if it doesn't exist
             try {
                 db.execSQL("ALTER TABLE " + TABLE_NAME_WORKOUTS + " ADD COLUMN " + ARCHIVE + " TEXT;");
@@ -92,7 +92,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 // Column might already exist, ignore
             }
         }
-        
+
         // For future migrations, add more conditions here
         // if (oldVersion < 24) { ... }
     }

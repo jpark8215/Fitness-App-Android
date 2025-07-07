@@ -14,10 +14,10 @@ import android.widget.Chronometer;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
@@ -32,10 +32,10 @@ import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
-import com.google.android.material.navigation.NavigationView;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.material.navigation.NavigationView;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -89,7 +89,7 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         initToolbar();
         initNavigationMenu();
         initChart();
-        
+
         // Set up predictive back gesture support
         setupBackCallback();
     }
@@ -123,11 +123,10 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
 
         dbManager.close();
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, new ArrayList<>(new LinkedHashSet<>(exerciseNames)));
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new ArrayList<>(new LinkedHashSet<>(exerciseNames)));
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        
+
         // Auto-select first exercise if available
         if (!exerciseNames.isEmpty()) {
             spinner.setSelection(0);
@@ -157,11 +156,11 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         YAxis leftAxis = chart.getAxisLeft();
         leftAxis.setGranularity(1f);
         leftAxis.setDrawGridLines(true);
-        
+
         // Check weight unit preference and set y-axis label formatter
         boolean isKgUnit = WeightUnitManager.isKgUnit(this);
         leftAxis.setValueFormatter(new WeightAxisValueFormatter(isKgUnit));
-        
+
         // Hide right axis
         chart.getAxisRight().setEnabled(false);
 
@@ -174,7 +173,7 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         leftAxis.setTextColor(labelColor);
         xAxis.setGridColor(gridColor);
         leftAxis.setGridColor(gridColor);
-        
+
         // Set chart background based on theme
         if (darkModeEnabled) {
             chart.setBackgroundColor(Color.parseColor("#2C2C2C"));
@@ -186,13 +185,13 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
 
         chart.animateY(500);
         chart.getLegend().setEnabled(false);
-        
+
         // Set initial no data text with proper dark mode colors
         chart.setNoDataText("Select an exercise to view progress");
         int noDataTextColor = darkModeEnabled ? Color.WHITE : Color.GRAY;
         chart.setNoDataTextColor(noDataTextColor);
         chart.invalidate();
-        
+
         // Force layout to ensure chart is properly sized
         chart.post(() -> {
             Log.d("ShowProgressActivity", "Chart dimensions: " + chart.getWidth() + "x" + chart.getHeight());
@@ -291,7 +290,7 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
             }
 
             Log.d("Selected Exercise", "ID: " + selectedExerciseId);
-            
+
             // Create a list with just the selected exercise ID
             List<String> selectedExerciseIds = new ArrayList<>();
             selectedExerciseIds.add(selectedExerciseId);
@@ -330,12 +329,12 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
                             if (dayOfTheYear != null && !dayOfTheYear.isEmpty()) {
                                 // Parse the weight value
                                 float weight = Float.parseFloat(exerciseWeight);
-                                
+
                                 // Convert weight to lbs if needed based on user preference
                                 if (!isKgUnit) {
                                     weight = (float) WeightUtils.kgToLbs(weight);
                                 }
-                                
+
                                 int day = Integer.parseInt(dayOfTheYear);
                                 values.add(new BarEntry(day, weight));
                                 Log.d("ShowProgressActivity", "Added data point: day=" + day + ", weight=" + weight);
@@ -356,7 +355,7 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
             // If no data was found, add a placeholder or test data
             if (values.isEmpty()) {
                 Log.i("ShowProgressActivity", "No data available for the selected exercise");
-                
+
                 // Add some test data to verify chart is working
                 Log.d("ShowProgressActivity", "Adding test data to verify chart functionality");
                 // Use positive day values for 2025 dates
@@ -365,14 +364,14 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
                 values.add(new BarEntry(60, 51));  // 2025-03-01
                 values.add(new BarEntry(90, 53));  // 2025-04-01
                 values.add(new BarEntry(120, 54)); // 2025-05-01
-                
+
                 chart.setNoDataText("No progress data available for this exercise");
                 SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
                 boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
                 int noDataTextColor = darkModeEnabled ? Color.WHITE : Color.GRAY;
                 chart.setNoDataTextColor(noDataTextColor);
             }
-            
+
             Log.d("ShowProgressActivity", "Found " + values.size() + " data points for chart");
 
             BarDataSet set1 = new BarDataSet(values, "Data Set");
@@ -395,44 +394,44 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
 
             // Set the data to your chart
             chart.setData(data);
-            
+
             // Force the chart to redraw
             chart.notifyDataSetChanged();
             Log.d("ShowProgressActivity", "Chart data set successfully");
-            
+
             // Update y-axis label based on current weight unit preference
             YAxis leftAxis = chart.getAxisLeft();
             leftAxis.setValueFormatter(new WeightAxisValueFormatter(isKgUnit));
-            
+
             // Update text colors for dark mode
             sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
             darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
             int labelColor = darkModeEnabled ? Color.WHITE : Color.BLACK;
             leftAxis.setTextColor(labelColor);
             chart.getXAxis().setTextColor(labelColor);
-            
+
             // Set minimum and maximum values for better display
             if (!values.isEmpty()) {
                 float minWeight = Float.MAX_VALUE;
                 float maxWeight = Float.MIN_VALUE;
                 float minDay = Float.MAX_VALUE;
                 float maxDay = Float.MIN_VALUE;
-                
+
                 for (BarEntry entry : values) {
                     minWeight = Math.min(minWeight, entry.getY());
                     maxWeight = Math.max(maxWeight, entry.getY());
                     minDay = Math.min(minDay, entry.getX());
                     maxDay = Math.max(maxDay, entry.getX());
                 }
-                
+
                 // Set axis ranges with some padding
                 leftAxis.setAxisMinimum(Math.max(0, minWeight - 5));
                 leftAxis.setAxisMaximum(maxWeight + 5);
-                
+
                 XAxis xAxis = chart.getXAxis();
                 xAxis.setAxisMinimum(minDay - 1);
                 xAxis.setAxisMaximum(maxDay + 1);
-                
+
                 // Set visible range to show 7 days by default
                 if (maxDay - minDay >= 6) {
                     // If we have more than 7 data points, show the last 7
@@ -444,7 +443,7 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
                     // If we have 7 or fewer data points, show all of them
                     chart.setVisibleXRange(maxDay - minDay + 2, maxDay - minDay + 2);
                 }
-                
+
                 Log.d("ShowProgressActivity", "Chart axis ranges: X[" + minDay + "-" + maxDay + "], Y[" + minWeight + "-" + maxWeight + "]");
             }
 
@@ -516,12 +515,12 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
             int dayNumber = Integer.parseInt(strDay);
 
             // Convert to days since 2025-01-01 (base date for the formatter)
-            LocalDate baseDate = null;
-            LocalDate targetDate = null;
+            LocalDate baseDate;
+            LocalDate targetDate;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 baseDate = LocalDate.of(2025, 1, 1);
                 targetDate = LocalDate.of(year, monthNumber, dayNumber);
-                
+
                 // Calculate days between base date and target date
                 long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(baseDate, targetDate);
                 return String.valueOf(daysBetween);
@@ -557,13 +556,13 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         if (adView != null) {
             adView.resume();
         }
-        
+
         // Check if weight unit preference has changed and refresh chart if needed
         if (chart != null && chart.getData() != null) {
             boolean isKgUnit = WeightUnitManager.isKgUnit(this);
             YAxis leftAxis = chart.getAxisLeft();
             leftAxis.setValueFormatter(new WeightAxisValueFormatter(isKgUnit));
-            
+
             // If we have a spinner with a selected position, trigger onItemSelected again
             Spinner spinner = findViewById(R.id.progress_spinner);
             if (spinner != null && spinner.getSelectedItemPosition() >= 0) {
@@ -582,22 +581,6 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         }
     }
 
-    /**
-     * Custom formatter for the y-axis that shows units (kg or lbs)
-     */
-    private static class WeightAxisValueFormatter extends ValueFormatter {
-        private final boolean isKgUnit;
-        
-        public WeightAxisValueFormatter(boolean isKgUnit) {
-            this.isKgUnit = isKgUnit;
-        }
-        
-        @Override
-        public String getFormattedValue(float value) {
-            return String.format("%.1f %s", value, isKgUnit ? "kg" : "lbs");
-        }
-    }
-
     public void bottomNavigationHomeClick(View view) {
         Intent intent = new Intent(this, MainActivityExerciseList.class);
         startActivity(intent);
@@ -607,7 +590,7 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         Intent intent = new Intent(this, ShowCalendarActivity.class);
         startActivity(intent);
     }
-    
+
     private void setupBackCallback() {
         // Handle back navigation with predictive back gesture support
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
@@ -624,5 +607,21 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
             }
         };
         getOnBackPressedDispatcher().addCallback(this, callback);
+    }
+
+    /**
+     * Custom formatter for the y-axis that shows units (kg or lbs)
+     */
+    private static class WeightAxisValueFormatter extends ValueFormatter {
+        private final boolean isKgUnit;
+
+        public WeightAxisValueFormatter(boolean isKgUnit) {
+            this.isKgUnit = isKgUnit;
+        }
+
+        @Override
+        public String getFormattedValue(float value) {
+            return String.format("%.1f %s", value, isKgUnit ? "kg" : "lbs");
+        }
     }
 }

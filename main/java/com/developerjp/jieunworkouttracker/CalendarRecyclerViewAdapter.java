@@ -34,7 +34,7 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarRe
 
 
     @Override
-    public void onBindViewHolder(final CalendarRecyclerViewAdapter.ViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final CalendarRecyclerViewAdapter.ViewHolder holder, final int position) {
         Log.d("CalendarAdapter", "Binding item at position: " + position);
 
         if (position >= list.size()) {

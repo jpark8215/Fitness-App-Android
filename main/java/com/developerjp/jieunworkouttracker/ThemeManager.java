@@ -3,6 +3,7 @@ package com.developerjp.jieunworkouttracker;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+
 import androidx.appcompat.app.AppCompatDelegate;
 
 public class ThemeManager {

@@ -190,7 +190,7 @@ public class DBManager {
                 "1"
         );
 
-        long workoutId = -1;
+        long workoutId;
         if (cursor.moveToFirst()) {
             workoutId = cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.WORKOUT_ID));
             cursor.close();
@@ -344,13 +344,13 @@ public class DBManager {
                 );
 
                 Log.d("DBManager", "Sample LOGS table rows:");
-                String row = "";
+                String row;
                 int logIdIndex = debugCursor.getColumnIndex(DatabaseHelper.LOG_ID);
                 int exerciseIdIndex = debugCursor.getColumnIndex(DatabaseHelper.EXERCISE_ID);
-                
+
                 if (logIdIndex != -1 && exerciseIdIndex != -1) {
                     row = "LOG_ID: " + debugCursor.getLong(logIdIndex) +
-                          ", EXERCISE_ID: " + debugCursor.getLong(exerciseIdIndex);
+                            ", EXERCISE_ID: " + debugCursor.getLong(exerciseIdIndex);
                 } else {
                     row = "Error: Required columns not found in cursor";
                 }

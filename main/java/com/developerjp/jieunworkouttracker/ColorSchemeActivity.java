@@ -116,11 +116,11 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
             // Save the setting
             WeightUnitManager.setKgUnit(this, newIsKgUnit);
             Log.d("Weight Unit", "Changed to: " + (newIsKgUnit ? "kg" : "lbs"));
-            
+
             // Notify user that the setting has been changed
-            Toast.makeText(this, 
-                "Weight unit changed to " + (newIsKgUnit ? "kilograms" : "pounds"), 
-                Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,
+                    "Weight unit changed to " + (newIsKgUnit ? "kilograms" : "pounds"),
+                    Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -223,7 +223,7 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
         startActivity(intent);
     }
 
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+    public void onCheckedChanged(@NonNull CompoundButton buttonView, boolean isChecked) {
         if (!isAdLoaded) {
             // If ad is not loaded, show a message and don't change theme
             Toast.makeText(this, "Please wait while the app is initializing...", Toast.LENGTH_SHORT).show();
@@ -233,6 +233,12 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
             switchTheme.setText(!isChecked ? "Dark" : "Light");
             switchTheme.setOnCheckedChangeListener(this);
             return;
+        }
+
+        // Check if there's an ongoing workout service and stop it to prevent unwanted notifications
+        if (ServiceUtils.isWorkoutServiceRunning(this)) {
+            Log.d("ColorSchemeActivity", "Stopping ongoing workout service before theme change");
+            ServiceUtils.stopWorkoutService(this);
         }
 
         if (isChecked) {

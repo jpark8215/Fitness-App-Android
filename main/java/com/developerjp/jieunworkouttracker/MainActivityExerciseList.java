@@ -82,14 +82,14 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
 
         // Load exercise data from database
         loadExerciseData();
-        
+
         // Update the display based on current weight unit settings
         updateWeightDisplay();
 
         if (recyclerViewState != null && recyclerView.getLayoutManager() != null) {
             recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
         }
-        
+
         // Set up predictive back gesture support
         setupBackCallback();
     }
@@ -275,17 +275,6 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         }
     }
 
-//    @Override
-//    public void onBackPressed() {
-//        if (rotate) {
-//            // If the FAB menu is open, close it
-//            toggleFabMenu();
-//        } else {
-//            // Otherwise, finish the activity
-//            super.onBackPressed();
-//        }
-//    }
-
     public void onItemSelected(String itemId, String itemTitle) {
         // Handle when an item is selected (not long-selected)
         toggleSelection(itemId);
@@ -470,19 +459,19 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
 
         // Get reference to weight unit toggle
         final ToggleButton weightUnitToggle = dialog.findViewById(R.id.toggle_weight_unit);
-        
+
         // Set toggle state based on system preference
         boolean isKgUnit = WeightUnitManager.isKgUnit(this);
         weightUnitToggle.setChecked(isKgUnit);
 
         // Add toggle button listener
         weightUnitToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (weightInput != null && !TextUtils.isEmpty(weightInput.getText())) {
+            if (!TextUtils.isEmpty(weightInput.getText())) {
                 try {
                     double currentWeight = Double.parseDouble(weightInput.getText().toString());
-                    double convertedWeight = isChecked ? 
-                        WeightUtils.lbsToKg(currentWeight) : 
-                        WeightUtils.kgToLbs(currentWeight);
+                    double convertedWeight = isChecked ?
+                            WeightUtils.lbsToKg(currentWeight) :
+                            WeightUtils.kgToLbs(currentWeight);
                     weightInput.setText(new DecimalFormat("#.#").format(convertedWeight));
                 } catch (NumberFormatException e) {
                     Log.e("MainActivityExerciseList", "Invalid weight format: " + e.getMessage());
@@ -503,7 +492,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             if (dbManager.doesExerciseExist(exerciseName)) {
                 // Show themed alert dialog
                 AlertDialog.Builder builder = new AlertDialog.Builder(this,
-                    ThemeManager.isDarkModeEnabled(this) ? R.style.ModernAlertDialogDark : R.style.ModernAlertDialog);
+                        ThemeManager.isDarkModeEnabled(this) ? R.style.ModernAlertDialogDark : R.style.ModernAlertDialog);
                 builder.setTitle("Duplicate Exercise");
                 builder.setMessage("An exercise with this name already exists. \nPlease choose a different name.");
                 builder.setPositiveButton("OK", (dialog1, which) -> {
@@ -520,7 +509,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
                     weight = Double.parseDouble(weightInput.getText().toString());
 
                     // Convert to kg if needed (if toggle is set to lbs)
-                    if (weightUnitToggle != null && !weightUnitToggle.isChecked()) {
+                    if (!weightUnitToggle.isChecked()) {
                         // Convert lbs to kg using the utility method
                         weight = WeightUtils.lbsToKg(weight);
                     }
@@ -593,7 +582,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
                 if (dbManager.doesExerciseExist(newTitle)) {
                     // Show themed alert dialog
                     AlertDialog.Builder builder = new AlertDialog.Builder(this,
-                        ThemeManager.isDarkModeEnabled(this) ? R.style.ModernAlertDialogDark : R.style.ModernAlertDialog);
+                            ThemeManager.isDarkModeEnabled(this) ? R.style.ModernAlertDialogDark : R.style.ModernAlertDialog);
                     builder.setTitle("Duplicate Exercise");
                     builder.setMessage("An exercise with this name already exists. \nPlease choose a different name.");
                     builder.setPositiveButton("OK", (dialog1, which) -> {
@@ -632,9 +621,9 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             if (weightInput != null && !TextUtils.isEmpty(weightInput.getText())) {
                 try {
                     double currentWeight = Double.parseDouble(weightInput.getText().toString());
-                    double convertedWeight = isChecked ? 
-                        WeightUtils.lbsToKg(currentWeight) : 
-                        WeightUtils.kgToLbs(currentWeight);
+                    double convertedWeight = isChecked ?
+                            WeightUtils.lbsToKg(currentWeight) :
+                            WeightUtils.kgToLbs(currentWeight);
                     weightInput.setText(new DecimalFormat("#.#").format(convertedWeight));
                 } catch (NumberFormatException e) {
                     Log.e("MainActivityExerciseList", "Invalid weight format: " + e.getMessage());
@@ -646,7 +635,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         deleteButton.setOnClickListener(v -> {
             // Confirm deletion
             AlertDialog.Builder builder = new AlertDialog.Builder(this,
-                ThemeManager.isDarkModeEnabled(this) ? R.style.ModernAlertDialogDark : R.style.ModernAlertDialog);
+                    ThemeManager.isDarkModeEnabled(this) ? R.style.ModernAlertDialogDark : R.style.ModernAlertDialog);
             builder.setTitle("Delete Exercise");
             builder.setMessage("Are you sure you want to delete this exercise?");
             builder.setPositiveButton("Yes", (dialog1, which) -> {
@@ -731,7 +720,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
             for (ExerciseItem exercise : exerciseItems) {
                 double weight = exercise.getWeight();
                 String formattedWeight;
-                
+
                 if (isKgUnit) {
                     // Already in kg, just format it
                     formattedWeight = WeightUtils.formatWeight(weight, true);
@@ -740,13 +729,13 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
                     double weightInLbs = WeightUtils.kgToLbs(weight);
                     formattedWeight = WeightUtils.formatWeight(weightInLbs, false);
                 }
-                
+
                 exercise.setDisplayWeight(formattedWeight);
             }
             adapter.notifyDataSetChanged();
         }
     }
-    
+
     private void setupBackCallback() {
         // Handle back navigation with predictive back gesture support
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
