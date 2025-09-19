@@ -1,4 +1,4 @@
-# Workout! - Developer Documentation
+# Workout!
 
 ## Project Overview
 
@@ -318,3 +318,4 @@
 - Test release builds thoroughly
 - Verify all permissions are correctly declared
 - Check for memory leaks and performance issues
+
