@@ -70,6 +70,10 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
     @Override
     protected void onResume() {
         super.onResume();
+        
+        // Clear any lingering notifications when returning to main activity
+        ServiceUtils.clearAllNotifications(this);
+        
         // Refresh data when returning to this activity
         if (dbManager == null || dbManager.isOpen()) {
             dbManager = new DBManager(this);

@@ -1073,6 +1073,9 @@ public class StartWorkoutActivity extends AppCompatActivity implements WorkoutRe
             mServiceBound = false;
         }
         stopService(serviceIntent);
+        
+        // Clear any remaining notifications
+        ServiceUtils.clearAllNotifications(this);
 
         // Get the selected exercise IDs
         ArrayList<String> selectedExerciseIds = getIntent().getStringArrayListExtra("selected_exercise_ids");

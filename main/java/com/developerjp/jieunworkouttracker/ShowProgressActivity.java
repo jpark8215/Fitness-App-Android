@@ -47,8 +47,7 @@ import java.util.Objects;
 
 public class ShowProgressActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
-    // Item List
-    private final List<Item> listItem = new ArrayList<>();
+    // Exercise data
     private final List<String> exerciseNames = new ArrayList<>();
     private final Map<String, String> exerciseIdMap = new HashMap<>();
     private Toolbar toolbar;

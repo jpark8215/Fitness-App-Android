@@ -239,6 +239,9 @@ public class ColorSchemeActivity extends AppCompatActivity implements CompoundBu
         if (ServiceUtils.isWorkoutServiceRunning(this)) {
             Log.d("ColorSchemeActivity", "Stopping ongoing workout service before theme change");
             ServiceUtils.stopWorkoutService(this);
+        } else {
+            // Even if service is not running, clear any lingering notifications
+            ServiceUtils.clearAllNotifications(this);
         }
 
         if (isChecked) {

@@ -41,5 +41,22 @@ public class ServiceUtils {
             Intent serviceIntent = new Intent(context, WorkoutService.class);
             context.stopService(serviceIntent);
         }
+        
+        // Always clear all notifications regardless of service state
+        clearAllNotifications(context);
+    }
+    
+    /**
+     * Clears all notifications from this app
+     *
+     * @param context The application context
+     */
+    public static void clearAllNotifications(Context context) {
+        android.app.NotificationManager notificationManager = 
+            (android.app.NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager != null) {
+            notificationManager.cancelAll();
+            Log.d("ServiceUtils", "Cleared all notifications");
+        }
     }
 } 
