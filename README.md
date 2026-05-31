@@ -5,6 +5,7 @@
 **Workout!** is an Android application designed to help users track their workout exercises, monitor progress, and manage fitness routines. The app features a modern Material Design interface with support for both light and dark themes.
 
 ### Key Features
+- Home dashboard with workout statistics and streak tracking
 - Exercise management and tracking
 - Workout session timing with foreground service and notification integration
 - Progress visualization with charts (7-day default view)
@@ -17,11 +18,16 @@
 - Enhanced chart visibility in dark mode
 - Smart notification system for ongoing workouts
 - Disabled long-click modify during active workouts
+- Bottom navigation system for easy app navigation
+- User name customization for personalized experience
+- Recent activities display on home dashboard
+- Weekly workout streak visualization
 
 ## Technical Specifications
 
-- **Target SDK**: 35 (Android 15)
+- **Target SDK**: 36 (Android 16)
 - **Minimum SDK**: 23 (Android 6.0)
+- **Compile SDK**: 36
 - **Language**: Java
 - **Database**: SQLite
 - **Architecture**: Traditional Android with Activities and Services
@@ -108,23 +114,38 @@
 - **Layout**: Uses shared layout system
 - **Dependencies**: WeightUnitManager
 
-#### 7. ColorSchemeActivity.java
-- **Purpose**: Theme and color scheme management
+#### 7. HomeDashboardActivity.java
+- **Purpose**: Main home dashboard activity
 - **Key Features**:
-  - Light/dark theme switching
-  - Color scheme customization
-  - Theme persistence
-  - Weight unit preference (kg/lbs) selection
-  - Real-time preference updates
-- **Layout**: `activity_color_scheme_screen.xml`
-- **Dependencies**: ThemeManager, WeightUnitManager
+  - Time-aware greeting with user name personalization
+  - Weekly workout streak visualization (M-T-W-T-F-S-S)
+  - Workout statistics display (total workouts, current streak)
+  - Recent activities list with workout details
+  - Quick start workout button with all exercises
+  - Bottom navigation integration
+  - Dark mode support for streak circles
+- **Layout**: `activity_home_dashboard.xml`
+- **Dependencies**: DBManager, ThemeManager
 
-#### 8. DayAxisValueFormatter.java
+#### 8. SettingsActivity.java
+- **Purpose**: Settings and preferences management
+- **Key Features**:
+  - Light/dark theme switching with ad loading protection
+  - Weight unit preference (kg/lbs) selection
+  - User name customization with real-time updates
+  - Google AdMob integration with proper lifecycle management
+  - Service cleanup on theme change
+  - Bottom navigation integration
+- **Layout**: `activity_settings_screen.xml`
+- **Dependencies**: ThemeManager, WeightUnitManager, ServiceUtils
+
+#### 9. DayAxisValueFormatter.java
 - **Purpose**: Chart axis formatting for progress charts
 - **Key Features**:
   - M/d/yy date format display
-  - Support for 2025-2034 date range
+  - Days since epoch to date conversion
   - Proper date conversion for chart X-axis
+  - Handles negative dates (before 1970) gracefully
 - **Dependencies**: MPAndroidChart library
 
 ### Data Layer
@@ -201,6 +222,13 @@
   - Improvement tracking
 - **Dependencies**: WeightUtils
 
+#### ProgressItem.java
+- **Purpose**: Data model for progress tracking
+- **Properties**:
+  - Weight value
+  - Date information
+- **Usage**: Used in progress charts and data visualization
+
 #### CalendarItem.java
 - **Purpose**: Calendar display data model
 - **Properties**:
@@ -231,6 +259,15 @@
   - lbs to kg conversion
   - Weight formatting with units
 
+#### ServiceUtils.java
+- **Purpose**: Service management utilities
+- **Key Features**:
+  - Check if WorkoutService is running
+  - Stop WorkoutService safely
+  - Clear all notifications
+  - Service lifecycle management
+- **Usage**: Used across activities for service state management
+
 #### ViewAnimation.java
 - **Purpose**: Animation utilities for UI elements
 - **Key Features**:
@@ -243,6 +280,18 @@
 - **Smart Workout Resumption**: Notification now properly resumes ongoing workouts with all exercise data
 - **Workout Data Persistence**: Service stores workout information for seamless resumption
 - **Enhanced User Experience**: Welcome back message when resuming from notification
+
+### Home Dashboard Implementation
+- **New Home Screen**: Added comprehensive home dashboard with statistics
+- **Streak Tracking**: Weekly visualization of workout days with active/inactive states
+- **User Personalization**: Time-aware greetings with customizable user name
+- **Recent Activities**: Display of recent workout history with duration and exercise count
+- **Quick Start**: One-tap workout start with all exercises
+
+### Navigation System Redesign
+- **Bottom Navigation**: Implemented bottom navigation bar for easy app navigation
+- **Navigation Items**: Home, Exercises, Workout, Progress, Settings, Archived
+- **Workout Resume**: Smart workout resumption from navigation with ongoing workout detection
 
 ### Calendar Interface Simplification
 - **Removed Session Grouping**: Calendar no longer groups exercises by time of day
@@ -258,6 +307,9 @@
 - **Service Lifecycle**: Better service management for seamless resumption
 - **Data Consistency**: Improved weight unit handling across all dialogs
 - **Error Handling**: Enhanced error handling and logging throughout the app
+- **Service Utilities**: Added ServiceUtils for centralized service management
+- **Ad Lifecycle**: Proper AdView lifecycle management to prevent memory leaks
+- **Theme Change Safety**: Service cleanup and notification clearing on theme changes
 
 ## Development Guidelines
 
