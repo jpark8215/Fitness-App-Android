@@ -109,9 +109,9 @@
                 android:id="@+id/toggle_weight_unit"
                 android:layout_width="70dp"
                 android:layout_height="56dp"
-                android:background="@drawable/modern_button_background"
+                android:background="@drawable/pastel_button_background"
                 android:checked="false"
-                android:textColor="@color/white"
+                android:textColor="@color/textOnPastel"
                 android:textOff="lbs"
                 android:textOn="kg" />
 
@@ -132,12 +132,11 @@
         <Button
             android:id="@+id/btn_update"
             style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:background="@drawable/modern_button_background"
-            android:backgroundTint="@color/colorSuccess"
+            android:background="@drawable/pastel_accent_button_background"
             android:elevation="2dp"
             android:paddingStart="16dp"
             android:paddingTop="8dp"
@@ -145,16 +144,15 @@
             android:paddingBottom="8dp"
             android:text="Update"
             android:textAllCaps="false"
-            android:textColor="@color/white" />
+            android:textColor="@color/textOnPastel" />
 
         <Button
             android:id="@+id/btn_delete"
             style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@drawable/modern_button_background"
-            android:backgroundTint="@color/colorError"
+            android:background="@drawable/pastel_button_background"
             android:elevation="2dp"
             android:paddingStart="16dp"
             android:paddingTop="8dp"
@@ -162,7 +160,7 @@
             android:paddingBottom="8dp"
             android:text="Delete"
             android:textAllCaps="false"
-            android:textColor="@color/white" />
+            android:textColor="@color/textOnPastel" />
 
     </LinearLayout>
 
@@ -183,8 +181,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:background="@drawable/modern_button_background"
-            android:backgroundTint="@color/colorInfo"
+            android:background="@drawable/pastel_button_background"
             android:elevation="2dp"
             android:paddingStart="16dp"
             android:paddingTop="8dp"
@@ -192,7 +189,7 @@
             android:paddingBottom="8dp"
             android:text="Archive"
             android:textAllCaps="false"
-            android:textColor="@color/white" />
+            android:textColor="@color/textOnPastel" />
 
         <Button
             android:id="@+id/btn_placeholder"

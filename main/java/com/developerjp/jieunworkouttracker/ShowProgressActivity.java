@@ -17,42 +17,62 @@ import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
-import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
-import com.github.mikephil.charting.utils.ColorTemplate;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.material.navigation.NavigationView;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class ShowProgressActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class ShowProgressActivity extends AppCompatActivity {
 
     // Exercise data
     private final List<String> exerciseNames = new ArrayList<>();
-    private final Map<String, String> exerciseIdMap = new HashMap<>();
+    private final Map<String, String> exerciseIdToNameMap = new HashMap<>();
+    private final Map<String, String> exerciseNameToIdMap = new HashMap<>();
     private Toolbar toolbar;
-    private BarChart chart;
+    private LineChart chart;
     private DBManager dbManager;
+    private Spinner exerciseSpinner;
+    private android.widget.RadioGroup dateFilterRadioGroup;
+    private TextView txtMaxWeight;
+    private TextView txtTotalSets;
+    private TextView txtMaxLabel;
+
+    private enum DateFilter {
+        DAYS_7,
+        DAYS_30,
+        MONTHS_3,
+        ALL_TIME
+    }
+
+    private enum MetricMode {
+        WEIGHT,
+        SETS,
+        REPS
+    }
+
+    private DateFilter selectedDateFilter = DateFilter.DAYS_7;
+    private MetricMode selectedMetricMode = MetricMode.WEIGHT;
+    private String selectedExerciseId = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -102,38 +122,56 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         Log.d("ShowProgressActivity", "Chart found and initialized");
         chart.getDescription().setEnabled(false);
 
-        Spinner spinner = findViewById(R.id.progress_spinner);
-        spinner.setOnItemSelectedListener(this);
+        exerciseSpinner = findViewById(R.id.exercise_spinner);
+        dateFilterRadioGroup = findViewById(R.id.date_filter_radio_group);
+        android.widget.RadioGroup metricToggleGroup = findViewById(R.id.metric_toggle_group);
+        txtMaxWeight = findViewById(R.id.txt_max_weight);
+        txtTotalSets = findViewById(R.id.txt_total_sets);
+        txtMaxLabel = findViewById(R.id.txt_max_label);
+
+        if (dateFilterRadioGroup != null) {
+            dateFilterRadioGroup.check(R.id.btn_filter_7d);
+        }
+        selectedDateFilter = DateFilter.DAYS_7;
+
+        if (dateFilterRadioGroup != null) {
+            dateFilterRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+                if (checkedId == R.id.btn_filter_7d) selectedDateFilter = DateFilter.DAYS_7;
+                else if (checkedId == R.id.btn_filter_30d) selectedDateFilter = DateFilter.DAYS_30;
+                else if (checkedId == R.id.btn_filter_3m) selectedDateFilter = DateFilter.MONTHS_3;
+                else selectedDateFilter = DateFilter.ALL_TIME;
+
+                // Update button backgrounds based on selection
+                updateDateFilterButtonBackgrounds(checkedId);
+
+                refreshChart();
+            });
+
+            // Set initial background for checked button
+            updateDateFilterButtonBackgrounds(R.id.btn_filter_7d);
+        }
+
+        if (metricToggleGroup != null) {
+            metricToggleGroup.check(R.id.btn_metric_weight);
+            metricToggleGroup.setOnCheckedChangeListener((group, checkedId) -> {
+                if (checkedId == R.id.btn_metric_weight) selectedMetricMode = MetricMode.WEIGHT;
+                else if (checkedId == R.id.btn_metric_sets) selectedMetricMode = MetricMode.SETS;
+                else if (checkedId == R.id.btn_metric_reps) selectedMetricMode = MetricMode.REPS;
+
+                // Update button backgrounds based on selection
+                updateMetricButtonBackgrounds(checkedId);
+
+                refreshChart();
+            });
+
+            // Set initial background for checked button
+            updateMetricButtonBackgrounds(R.id.btn_metric_weight);
+        }
 
         dbManager = new DBManager(this);
-        dbManager.open();
-        Cursor cursor = dbManager.getAllExercises();
+        loadExerciseList();
 
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                String exerciseName = cursor.getString(1);
-                String exerciseId = cursor.getString(0);
-
-                Log.d("Exercise", "Name: " + exerciseName + ", ID: " + exerciseId);
-                exerciseNames.add(exerciseName);
-                exerciseIdMap.put(exerciseId, exerciseName);
-            } while (cursor.moveToNext());
-        }
-
-        dbManager.close();
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new ArrayList<>(new LinkedHashSet<>(exerciseNames)));
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-
-        // Auto-select first exercise if available
-        if (!exerciseNames.isEmpty()) {
-            spinner.setSelection(0);
-        }
-
-        chart.setMaxVisibleValueCount(60);
         chart.setPinchZoom(false);
-        chart.setDrawBarShadow(false);
         chart.setDrawGridBackground(true);
         chart.setVisibility(View.VISIBLE);
         chart.setTouchEnabled(true);
@@ -166,8 +204,8 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         // Set axis label colors based on dark mode
         SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
         boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
-        int labelColor = darkModeEnabled ? Color.WHITE : Color.BLACK;
-        int gridColor = darkModeEnabled ? Color.parseColor("#404040") : Color.parseColor("#E0E0E0");
+        int labelColor = darkModeEnabled ? Color.parseColor("#E2E2E2") : Color.parseColor("#3E4E56");
+        int gridColor = darkModeEnabled ? Color.parseColor("#424242") : Color.parseColor("#E0E0E0");
         xAxis.setTextColor(labelColor);
         leftAxis.setTextColor(labelColor);
         xAxis.setGridColor(gridColor);
@@ -175,11 +213,11 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
 
         // Set chart background based on theme
         if (darkModeEnabled) {
-            chart.setBackgroundColor(Color.parseColor("#2C2C2C"));
-            chart.setGridBackgroundColor(Color.parseColor("#404040"));
+            chart.setBackgroundColor(Color.parseColor("#252836"));
+            chart.setGridBackgroundColor(Color.parseColor("#252836"));
         } else {
             chart.setBackgroundColor(Color.WHITE);
-            chart.setGridBackgroundColor(Color.parseColor("#F0F0F0"));
+            chart.setGridBackgroundColor(Color.WHITE);
         }
 
         chart.animateY(500);
@@ -187,7 +225,7 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
 
         // Set initial no data text with proper dark mode colors
         chart.setNoDataText("Select an exercise to view progress");
-        int noDataTextColor = darkModeEnabled ? Color.WHITE : Color.GRAY;
+        int noDataTextColor = darkModeEnabled ? Color.parseColor("#ADADAD") : Color.parseColor("#5F7380");
         chart.setNoDataTextColor(noDataTextColor);
         chart.invalidate();
 
@@ -200,13 +238,518 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         });
     }
 
+    private void loadExerciseList() {
+        exerciseNames.clear();
+        exerciseIdToNameMap.clear();
+        exerciseNameToIdMap.clear();
+
+        dbManager.open();
+        Cursor cursor = dbManager.getAllExercises();
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                String exerciseName = cursor.getString(1);
+                String exerciseId = cursor.getString(0);
+
+                Log.d("Exercise", "Name: " + exerciseName + ", ID: " + exerciseId);
+                exerciseNames.add(exerciseName);
+                exerciseIdToNameMap.put(exerciseId, exerciseName);
+                exerciseNameToIdMap.put(exerciseName, exerciseId);
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
+
+        dbManager.close();
+
+        setupExerciseSpinner(new ArrayList<>(new LinkedHashSet<>(exerciseNames)));
+    }
+
+    private void updateDateFilterButtonBackgrounds(int checkedId) {
+        SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
+        boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
+
+        int[] buttonIds = {R.id.btn_filter_7d, R.id.btn_filter_30d, R.id.btn_filter_3m, R.id.btn_filter_all};
+
+        for (int buttonId : buttonIds) {
+            android.widget.RadioButton rb = findViewById(buttonId);
+            if (rb != null) {
+                if (buttonId == checkedId) {
+                    if (darkModeEnabled) {
+                        rb.setBackgroundResource(R.drawable.chip_selector_selected_dark);
+                    } else {
+                        rb.setBackgroundResource(R.drawable.chip_selector_selected_light);
+                    }
+                } else {
+                    if (darkModeEnabled) {
+                        rb.setBackgroundResource(R.drawable.chip_selector_dark);
+                    } else {
+                        rb.setBackgroundResource(R.drawable.chip_selector_light);
+                    }
+                }
+            }
+        }
+    }
+
+    private void updateMetricButtonBackgrounds(int checkedId) {
+        SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
+        boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
+
+        int[] buttonIds = {R.id.btn_metric_weight, R.id.btn_metric_sets, R.id.btn_metric_reps};
+
+        for (int buttonId : buttonIds) {
+            android.widget.RadioButton rb = findViewById(buttonId);
+            if (rb != null) {
+                if (buttonId == checkedId) {
+                    if (darkModeEnabled) {
+                        rb.setBackgroundResource(R.drawable.chip_selector_selected_dark);
+                    } else {
+                        rb.setBackgroundResource(R.drawable.chip_selector_selected_light);
+                    }
+                } else {
+                    if (darkModeEnabled) {
+                        rb.setBackgroundResource(R.drawable.chip_selector_dark);
+                    } else {
+                        rb.setBackgroundResource(R.drawable.chip_selector_light);
+                    }
+                }
+            }
+        }
+    }
+
+    private void setupExerciseSpinner(List<String> uniqueExerciseNames) {
+        if (exerciseSpinner == null) return;
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+            this,
+            android.R.layout.simple_spinner_item,
+            uniqueExerciseNames
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        exerciseSpinner.setAdapter(adapter);
+
+        exerciseSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String name = uniqueExerciseNames.get(position);
+                selectedExerciseId = exerciseNameToIdMap.get(name);
+                refreshChart();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
+            }
+        });
+
+        if (!uniqueExerciseNames.isEmpty()) {
+            selectedExerciseId = exerciseNameToIdMap.get(uniqueExerciseNames.get(0));
+        }
+    }
+
+    private void refreshChart() {
+        if (chart == null) return;
+        chart.clear();
+
+        if (selectedExerciseId == null) {
+            chart.setNoDataText("Select an exercise to view progress");
+            chart.invalidate();
+            updateStats(null, 0);
+            return;
+        }
+
+        Cursor cursor = null;
+        ArrayList<Entry> lineEntries = new ArrayList<>();
+        int totalSets = 0;
+        int totalReps = 0;
+        Float maxWeight = null;
+        Integer maxSets = null;
+        Integer maxReps = null;
+        float weightSum = 0;
+        int weightCount = 0;
+        boolean isKgUnit = WeightUnitManager.isKgUnit(this);
+        
+        try {
+            dbManager.open();
+            List<String> selectedExerciseIds = new ArrayList<>();
+            selectedExerciseIds.add(selectedExerciseId);
+
+            cursor = dbManager.getExerciseLogProgress(selectedExerciseIds);
+
+            long cutoffMillis = getCutoffMillis(selectedDateFilter);
+
+            // Aggregate data by date to handle multiple entries per day
+            Map<Integer, Float> weightByDay = new HashMap<>();
+            Map<Integer, Integer> setsByDay = new HashMap<>();
+            Map<Integer, Integer> repsByDay = new HashMap<>();
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    int weightColumnIndex = cursor.getColumnIndex(DatabaseHelper.WEIGHT);
+                    int dateColumnIndex = cursor.getColumnIndex(DatabaseHelper.DATE);
+
+                    if (weightColumnIndex == -1 || dateColumnIndex == -1) continue;
+
+                    String exerciseWeight = cursor.getString(weightColumnIndex);
+                    String exerciseDate = cursor.getString(dateColumnIndex);
+                    if (exerciseWeight == null || exerciseDate == null) continue;
+
+                    long dateMillis = parseDateMillis(exerciseDate);
+                    if (cutoffMillis > 0 && dateMillis > 0 && dateMillis < cutoffMillis) {
+                        continue;
+                    }
+
+                    String dayOfTheYear = convertDate(exerciseDate);
+                    if (dayOfTheYear == null || dayOfTheYear.isEmpty()) continue;
+
+                    int day = Integer.parseInt(dayOfTheYear);
+
+                    // Count sets for this entry
+                    int setsForEntry = countCompletedSets(cursor);
+                    totalSets += setsForEntry;
+
+                    // Count reps for this entry
+                    int repsForEntry = countTotalReps(cursor);
+                    totalReps += repsForEntry;
+
+                    // Aggregate weight by day (keep max weight for each day)
+                    float weight = Float.parseFloat(exerciseWeight);
+                    if (!isKgUnit) {
+                        weight = (float) WeightUtils.kgToLbs(weight);
+                    }
+                    if (!weightByDay.containsKey(day) || weight > weightByDay.get(day)) {
+                        weightByDay.put(day, weight);
+                    }
+
+                    // Track weight sum and count for average calculation
+                    weightSum += weight;
+                    weightCount++;
+
+                    // Aggregate sets by day (sum sets for each day)
+                    setsByDay.put(day, setsByDay.getOrDefault(day, 0) + setsForEntry);
+
+                    // Aggregate reps by day (sum reps for each day)
+                    repsByDay.put(day, repsByDay.getOrDefault(day, 0) + repsForEntry);
+
+                    // Track max weight
+                    if (maxWeight == null || weight > maxWeight) {
+                        maxWeight = weight;
+                    }
+
+                    // Track max sets
+                    if (maxSets == null || setsForEntry > maxSets) {
+                        maxSets = setsForEntry;
+                    }
+
+                    // Track max reps
+                    if (maxReps == null || repsForEntry > maxReps) {
+                        maxReps = repsForEntry;
+                    }
+                } while (cursor.moveToNext());
+            }
+
+            // Create entries from aggregated data
+            if (selectedMetricMode == MetricMode.WEIGHT) {
+                for (Map.Entry<Integer, Float> entry : weightByDay.entrySet()) {
+                    lineEntries.add(new Entry(entry.getKey(), entry.getValue()));
+                }
+            } else if (selectedMetricMode == MetricMode.SETS) {
+                for (Map.Entry<Integer, Integer> entry : setsByDay.entrySet()) {
+                    lineEntries.add(new Entry(entry.getKey(), entry.getValue()));
+                }
+            } else {
+                for (Map.Entry<Integer, Integer> entry : repsByDay.entrySet()) {
+                    lineEntries.add(new Entry(entry.getKey(), entry.getValue()));
+                }
+            }
+
+            dbManager.close();
+
+            if (lineEntries.isEmpty()) {
+                chart.setNoDataText("No progress data available for this exercise");
+                applyNoDataTextColor();
+                chart.invalidate();
+                updateStats(null, 0);
+                return;
+            }
+        } catch (Exception e) {
+            Log.e("ShowProgressActivity", "Error refreshing chart: " + e.getMessage(), e);
+            chart.setNoDataText("Error loading progress data");
+            applyNoDataTextColor();
+            chart.invalidate();
+            updateStats(null, 0);
+            try {
+                dbManager.close();
+            } catch (Exception ignored) {
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+
+        // Main line dataset
+        String label = selectedMetricMode == MetricMode.WEIGHT ? "Weight" : 
+                      selectedMetricMode == MetricMode.SETS ? "Sets" : "Reps";
+        LineDataSet main = new LineDataSet(lineEntries, label);
+        main.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        main.setCubicIntensity(0.2f);
+        
+        // Enable circles for single points or when there are few points
+        if (lineEntries.size() == 1) {
+            main.setDrawCircles(true);
+            main.setCircleRadius(8f);
+            main.setCircleHoleRadius(4f);
+        } else {
+            main.setDrawCircles(false);
+        }
+        
+        main.setDrawValues(false);
+        main.setLineWidth(2.5f);
+
+        SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
+        boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
+        int mainColor = darkModeEnabled ? Color.parseColor("#98D8C8") : Color.parseColor("#7F9DBC");
+
+        main.setColor(mainColor);
+        main.setCircleColor(mainColor);
+        main.setFillColor(mainColor);
+        main.setDrawFilled(true);
+        main.setFillAlpha(30);
+
+        List<ILineDataSet> dataSets = new ArrayList<>();
+        dataSets.add(main);
+
+        chart.setData(new LineData(dataSets));
+
+        // Y axis label formatter
+        YAxis leftAxis = chart.getAxisLeft();
+        if (selectedMetricMode == MetricMode.WEIGHT) {
+            leftAxis.setValueFormatter(new WeightAxisValueFormatter(isKgUnit));
+        } else {
+            leftAxis.setValueFormatter(new ValueFormatter() {
+                @Override
+                public String getFormattedValue(float value) {
+                    return String.format("%.0f", value);
+                }
+            });
+        }
+
+        // Axis ranges
+        setChartRanges(lineEntries);
+
+        // Dark mode text colors
+        int labelColor = darkModeEnabled ? Color.parseColor("#E2E2E2") : Color.parseColor("#3E4E56");
+        chart.getXAxis().setTextColor(labelColor);
+        leftAxis.setTextColor(labelColor);
+
+        chart.notifyDataSetChanged();
+        chart.invalidate();
+
+        if (selectedMetricMode == MetricMode.WEIGHT) {
+            float avgWeight = weightCount > 0 ? weightSum / weightCount : 0;
+            updateStatsForWeight(maxWeight, avgWeight, totalSets);
+        } else if (selectedMetricMode == MetricMode.SETS) {
+            updateStatsForSets(maxSets, totalSets);
+        } else {
+            updateStatsForReps(maxReps, totalReps);
+        }
+    }
+
+    private void applyNoDataTextColor() {
+        SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
+        boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
+        int noDataTextColor = darkModeEnabled ? Color.parseColor("#ADADAD") : Color.parseColor("#5F7380");
+        chart.setNoDataTextColor(noDataTextColor);
+    }
+
+    private void updateStatsForWeight(@Nullable Float maxWeight, float avgWeight, int totalSets) {
+        boolean isKgUnit = WeightUnitManager.isKgUnit(this);
+        TextView txtTotalLabel = findViewById(R.id.txt_total_label);
+        if (txtMaxLabel != null) {
+            txtMaxLabel.setText("Max Weight");
+        }
+        if (txtMaxWeight != null) {
+            if (maxWeight == null) txtMaxWeight.setText("—");
+            else txtMaxWeight.setText(String.format("%.1f %s", maxWeight, isKgUnit ? "kg" : "lbs"));
+        }
+        if (txtTotalLabel != null) {
+            txtTotalLabel.setText("Avg Weight");
+        }
+        if (txtTotalSets != null) {
+            if (avgWeight == 0) txtTotalSets.setText("—");
+            else txtTotalSets.setText(String.format("%.1f %s", avgWeight, isKgUnit ? "kg" : "lbs"));
+        }
+    }
+
+    private void updateStats(@Nullable Float maxWeight, int totalSets) {
+        boolean isKgUnit = WeightUnitManager.isKgUnit(this);
+        if (txtMaxLabel != null) {
+            txtMaxLabel.setText("Max Weight");
+        }
+        if (txtMaxWeight != null) {
+            if (maxWeight == null) txtMaxWeight.setText("—");
+            else txtMaxWeight.setText(String.format("%.1f %s", maxWeight, isKgUnit ? "kg" : "lbs"));
+        }
+        if (txtTotalSets != null) {
+            txtTotalSets.setText(String.valueOf(totalSets));
+        }
+    }
+
+    private void updateStatsForSets(@Nullable Integer maxSets, int totalSets) {
+        TextView txtTotalLabel = findViewById(R.id.txt_total_label);
+        if (txtMaxLabel != null) {
+            txtMaxLabel.setText("Max Sets");
+        }
+        if (txtMaxWeight != null) {
+            if (maxSets == null) txtMaxWeight.setText("—");
+            else txtMaxWeight.setText(String.valueOf(maxSets));
+        }
+        if (txtTotalLabel != null) {
+            txtTotalLabel.setText("Total Sets");
+        }
+        if (txtTotalSets != null) {
+            txtTotalSets.setText(String.valueOf(totalSets));
+        }
+    }
+
+    private void updateStatsForReps(@Nullable Integer maxReps, int totalReps) {
+        TextView txtTotalLabel = findViewById(R.id.txt_total_label);
+        if (txtMaxLabel != null) {
+            txtMaxLabel.setText("Max Reps");
+        }
+        if (txtMaxWeight != null) {
+            if (maxReps == null) txtMaxWeight.setText("—");
+            else txtMaxWeight.setText(String.valueOf(maxReps));
+        }
+        if (txtTotalLabel != null) {
+            txtTotalLabel.setText("Total Reps");
+        }
+        if (txtTotalSets != null) {
+            txtTotalSets.setText(String.valueOf(totalReps));
+        }
+    }
+
+    private int countCompletedSets(Cursor cursor) {
+        int count = 0;
+        count += isSetCompleted(cursor, DatabaseHelper.SET1) ? 1 : 0;
+        count += isSetCompleted(cursor, DatabaseHelper.SET2) ? 1 : 0;
+        count += isSetCompleted(cursor, DatabaseHelper.SET3) ? 1 : 0;
+        count += isSetCompleted(cursor, DatabaseHelper.SET4) ? 1 : 0;
+        count += isSetCompleted(cursor, DatabaseHelper.SET5) ? 1 : 0;
+        return count;
+    }
+
+    private int countTotalReps(Cursor cursor) {
+        int total = 0;
+        total += getSetRepCount(cursor, DatabaseHelper.SET1);
+        total += getSetRepCount(cursor, DatabaseHelper.SET2);
+        total += getSetRepCount(cursor, DatabaseHelper.SET3);
+        total += getSetRepCount(cursor, DatabaseHelper.SET4);
+        total += getSetRepCount(cursor, DatabaseHelper.SET5);
+        return total;
+    }
+
+    private int getSetRepCount(Cursor cursor, String columnName) {
+        int idx = cursor.getColumnIndex(columnName);
+        if (idx == -1) return 0;
+        if (cursor.isNull(idx)) return 0;
+        try {
+            return cursor.getInt(idx);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    private boolean isSetCompleted(Cursor cursor, String columnName) {
+        int idx = cursor.getColumnIndex(columnName);
+        if (idx == -1) return false;
+        if (cursor.isNull(idx)) return false;
+        try {
+            int value = cursor.getInt(idx);
+            return value > 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private long parseDateMillis(String yyyyMmDd) {
+        try {
+            // yyyy-MM-dd -> Calendar millis
+            int year = Integer.parseInt(yyyyMmDd.substring(0, 4));
+            int month = Integer.parseInt(yyyyMmDd.substring(5, 7)) - 1;
+            int day = Integer.parseInt(yyyyMmDd.substring(8, 10));
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.YEAR, year);
+            cal.set(Calendar.MONTH, month);
+            cal.set(Calendar.DAY_OF_MONTH, day);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            return cal.getTimeInMillis();
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    private long getCutoffMillis(DateFilter filter) {
+        if (filter == DateFilter.ALL_TIME) return -1;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        switch (filter) {
+            case DAYS_7:
+                cal.add(Calendar.DAY_OF_YEAR, -7);
+                break;
+            case DAYS_30:
+                cal.add(Calendar.DAY_OF_YEAR, -30);
+                break;
+            case MONTHS_3:
+                cal.add(Calendar.MONTH, -3);
+                break;
+            default:
+                return -1;
+        }
+        return cal.getTimeInMillis();
+    }
+
+    private void setChartRanges(ArrayList<Entry> entries) {
+        if (entries.isEmpty()) return;
+
+        float minWeight = Float.MAX_VALUE;
+        float maxWeight = Float.MIN_VALUE;
+        float minDay = Float.MAX_VALUE;
+        float maxDay = Float.MIN_VALUE;
+
+        for (Entry entry : entries) {
+            minWeight = Math.min(minWeight, entry.getY());
+            maxWeight = Math.max(maxWeight, entry.getY());
+            minDay = Math.min(minDay, entry.getX());
+            maxDay = Math.max(maxDay, entry.getX());
+        }
+
+        YAxis leftAxis = chart.getAxisLeft();
+        leftAxis.setAxisMinimum(Math.max(0, minWeight - 5));
+        leftAxis.setAxisMaximum(maxWeight + 5);
+
+        XAxis xAxis = chart.getXAxis();
+        xAxis.setAxisMinimum(minDay - 1);
+        xAxis.setAxisMaximum(maxDay + 1);
+
+        // Keep the chart readable: show at least ~7 days, and cap zoom-out to ~60 days.
+        chart.setVisibleXRangeMinimum(7f);
+        chart.setVisibleXRangeMaximum(60f);
+        chart.moveViewToX(maxDay + 1);
+    }
+
     private void initToolbar() {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         assert actionBar != null;
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeButtonEnabled(true);
         actionBar.setTitle("");
 
         Chronometer simpleChronometer = findViewById(R.id.simpleChronometer);
@@ -217,252 +760,46 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
     }
 
     private void initNavigationMenu() {
-        NavigationView nav_view = findViewById(R.id.nav_view);
-        final DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-            }
-        };
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-
-        nav_view.setNavigationItemSelectedListener(item -> {
-            String itemCLicked = Objects.requireNonNull(item.getTitle()).toString();
-            Intent intent;
-
-            switch (itemCLicked) {
-                case "Exercises":
-                    intent = new Intent(getApplicationContext(), MainActivityExerciseList.class);
-                    startActivity(intent);
-                    break;
-                case "Archived Exercises":
-                    intent = new Intent(getApplicationContext(), ArchivedExerciseList.class);
-                    startActivity(intent);
-                    break;
-                case "Progress":
-                    intent = new Intent(getApplicationContext(), ShowProgressActivity.class);
-                    startActivity(intent);
-                    break;
-                case "Calendar":
-                    intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
-                    startActivity(intent);
-                    break;
-                case "Settings":
-                    intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
-                    startActivity(intent);
-                    break;
-            }
-
-            drawer.closeDrawers();
-            return true;
-        });
-    }
-
-
-    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-        try {
-            chart.clear();
-            dbManager.open();
-
-            String selectedExerciseName = parent.getItemAtPosition(pos).toString();
-            Log.d("Selected Exercise", "Name: " + selectedExerciseName);
-
-            // Find the exercise ID for the selected exercise name instead of getting all exercise IDs
-            String selectedExerciseId = null;
-            for (Map.Entry<String, String> entry : exerciseIdMap.entrySet()) {
-                if (entry.getValue().equals(selectedExerciseName)) {
-                    selectedExerciseId = entry.getKey();
-                    break;
-                }
-            }
-
-            if (selectedExerciseId == null) {
-                Log.w("ShowProgressActivity", "Could not find ID for selected exercise: " + selectedExerciseName);
-                chart.setNoDataText("No exercise data available");
-                SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
-                boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
-                int noDataTextColor = darkModeEnabled ? Color.WHITE : Color.GRAY;
-                chart.setNoDataTextColor(noDataTextColor);
-                chart.invalidate();
-                return;
-            }
-
-            Log.d("Selected Exercise", "ID: " + selectedExerciseId);
-
-            // Create a list with just the selected exercise ID
-            List<String> selectedExerciseIds = new ArrayList<>();
-            selectedExerciseIds.add(selectedExerciseId);
-
-            // Check if we have valid exercise IDs
-
-            Cursor cursor = dbManager.getExerciseLogProgress(selectedExerciseIds);
-            ArrayList<BarEntry> values = new ArrayList<>();
-
-            // Get user's weight unit preference
-            boolean isKgUnit = WeightUnitManager.isKgUnit(this);
-
-            // Log cursor data for debugging before processing it
-            logCursor(cursor);
-
-            // Iterate through the cursor to retrieve log data
-            if (cursor != null && cursor.moveToFirst()) {
-                do {
-                    int weightColumnIndex = cursor.getColumnIndex("weight");
-                    int dateColumnIndex = cursor.getColumnIndex("date");
-
-                    if (weightColumnIndex != -1 && dateColumnIndex != -1) {
-                        String exerciseWeight = cursor.getString(weightColumnIndex);
-                        String exerciseDate = cursor.getString(dateColumnIndex);
-
-                        // Skip if either value is null
-                        if (exerciseWeight == null || exerciseDate == null) {
-                            Log.w("ShowProgressActivity", "Skipping null data: weight=" + exerciseWeight + ", date=" + exerciseDate);
-                            continue;
-                        }
-
-                        String dayOfTheYear = convertDate(exerciseDate);
-
-                        try {
-                            // Check that converted values are not null before parsing
-                            if (dayOfTheYear != null && !dayOfTheYear.isEmpty()) {
-                                // Parse the weight value
-                                float weight = Float.parseFloat(exerciseWeight);
-
-                                // Convert weight to lbs if needed based on user preference
-                                if (!isKgUnit) {
-                                    weight = (float) WeightUtils.kgToLbs(weight);
-                                }
-
-                                int day = Integer.parseInt(dayOfTheYear);
-                                values.add(new BarEntry(day, weight));
-                                Log.d("ShowProgressActivity", "Added data point: day=" + day + ", weight=" + weight);
-                            } else {
-                                Log.w("ShowProgressActivity", "Invalid date conversion: " + exerciseDate + " -> " + dayOfTheYear);
-                            }
-                        } catch (NumberFormatException e) {
-                            Log.e("ShowProgressActivity", "Error parsing data: " + e.getMessage());
-                        }
+        com.google.android.material.bottomnavigation.BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        if (bottomNavigationView != null) {
+            bottomNavigationView.setSelectedItemId(R.id.nav_progress);
+            bottomNavigationView.setOnItemSelectedListener(item -> {
+                int itemId = item.getItemId();
+                Intent intent = null;
+                if (itemId == R.id.nav_home) {
+                    intent = new Intent(this, HomeDashboardActivity.class);
+                } else if (itemId == R.id.nav_exercises) {
+                    intent = new Intent(this, MainActivityExerciseList.class);
+                } else if (itemId == R.id.nav_workout) {
+                    // Check if there's an ongoing workout to resume
+                    if (StartWorkoutActivity.isWorkoutOngoing) {
+                        intent = new Intent(this, StartWorkoutActivity.class);
+                        intent.putExtra("ongoing_workout", true);
+                        // Pass workout data from WorkoutService
+                        intent.putExtra("id", WorkoutService.getWorkoutId());
+                        intent.putExtra("title", WorkoutService.getWorkoutTitle());
+                        intent.putStringArrayListExtra("selected_exercise_ids", WorkoutService.getWorkoutExerciseIds());
+                    } else {
+                        // No ongoing workout, tell user to select exercises first
+                        android.widget.Toast.makeText(this, "Please select exercises to start", android.widget.Toast.LENGTH_SHORT).show();
+                        return true;
                     }
-                } while (cursor.moveToNext());
-
-                cursor.close(); // Close the cursor after processing
-            }
-
-            dbManager.close();
-
-            // If no data was found, add a placeholder or test data
-            if (values.isEmpty()) {
-                Log.i("ShowProgressActivity", "No data available for the selected exercise");
-
-                // Add some test data to verify chart is working
-                Log.d("ShowProgressActivity", "Adding test data to verify chart functionality");
-                // Use positive day values for 2025 dates
-                values.add(new BarEntry(0, 50));   // 2025-01-01
-                values.add(new BarEntry(30, 52));  // 2025-01-31
-                values.add(new BarEntry(60, 51));  // 2025-03-01
-                values.add(new BarEntry(90, 53));  // 2025-04-01
-                values.add(new BarEntry(120, 54)); // 2025-05-01
-
-                chart.setNoDataText("No progress data available for this exercise");
-                SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
-                boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
-                int noDataTextColor = darkModeEnabled ? Color.WHITE : Color.GRAY;
-                chart.setNoDataTextColor(noDataTextColor);
-            }
-
-            Log.d("ShowProgressActivity", "Found " + values.size() + " data points for chart");
-
-            BarDataSet set1 = new BarDataSet(values, "Data Set");
-
-            // Set additional configurations for the BarDataSet
-            set1.setColors(ColorTemplate.PASTEL_COLORS);
-            set1.setDrawValues(false);
-            set1.setValueTextSize(12f);
-            SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
-            boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
-            int valueTextColor = darkModeEnabled ? Color.WHITE : Color.BLACK;
-            set1.setValueTextColor(valueTextColor);
-            set1.setDrawValues(true);
-            set1.setValueTextSize(10f);
-            set1.setHighLightColor(Color.RED);
-
-            // Create a BarData object and add the BarDataSet to it
-            BarData data = new BarData(set1);
-            data.setBarWidth(0.8f); // Set bar width
-
-            // Set the data to your chart
-            chart.setData(data);
-
-            // Force the chart to redraw
-            chart.notifyDataSetChanged();
-            Log.d("ShowProgressActivity", "Chart data set successfully");
-
-            // Update y-axis label based on current weight unit preference
-            YAxis leftAxis = chart.getAxisLeft();
-            leftAxis.setValueFormatter(new WeightAxisValueFormatter(isKgUnit));
-
-            // Update text colors for dark mode
-            sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
-            darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
-            int labelColor = darkModeEnabled ? Color.WHITE : Color.BLACK;
-            leftAxis.setTextColor(labelColor);
-            chart.getXAxis().setTextColor(labelColor);
-
-            // Set minimum and maximum values for better display
-            if (!values.isEmpty()) {
-                float minWeight = Float.MAX_VALUE;
-                float maxWeight = Float.MIN_VALUE;
-                float minDay = Float.MAX_VALUE;
-                float maxDay = Float.MIN_VALUE;
-
-                for (BarEntry entry : values) {
-                    minWeight = Math.min(minWeight, entry.getY());
-                    maxWeight = Math.max(maxWeight, entry.getY());
-                    minDay = Math.min(minDay, entry.getX());
-                    maxDay = Math.max(maxDay, entry.getX());
+                } else if (itemId == R.id.nav_progress) {
+                    intent = new Intent(this, ShowProgressActivity.class);
+                } else if (itemId == R.id.nav_settings) {
+                    intent = new Intent(this, SettingsActivity.class);
+                } else if (itemId == R.id.nav_archived) {
+                    intent = new Intent(this, ArchivedExerciseList.class);
                 }
 
-                // Set axis ranges with some padding
-                leftAxis.setAxisMinimum(Math.max(0, minWeight - 5));
-                leftAxis.setAxisMaximum(maxWeight + 5);
-
-                XAxis xAxis = chart.getXAxis();
-                xAxis.setAxisMinimum(minDay - 1);
-                xAxis.setAxisMaximum(maxDay + 1);
-
-                // Set visible range to show 7 days by default
-                if (maxDay - minDay >= 6) {
-                    // If we have more than 7 data points, show the last 7
-                    float visibleMin = maxDay - 6;
-                    float visibleMax = maxDay + 1;
-                    chart.setVisibleXRange(7, 60);
-                    chart.moveViewToX(visibleMax);
-                } else {
-                    // If we have 7 or fewer data points, show all of them
-                    chart.setVisibleXRange(maxDay - minDay + 2, maxDay - minDay + 2);
+                if (intent != null) {
+                    startActivity(intent);
+                    overridePendingTransition(0, 0);
                 }
-
-                Log.d("ShowProgressActivity", "Chart axis ranges: X[" + minDay + "-" + maxDay + "], Y[" + minWeight + "-" + maxWeight + "]");
-            }
-
-            // Refresh the chart to reflect the changes
-            chart.invalidate();
-            chart.requestLayout();
-            Log.d("ShowProgressActivity", "Chart invalidated and layout requested");
-        } catch (Exception e) {
-            Log.e("ShowProgressActivity", "Error in onItemSelected: " + e.getMessage());
-            e.printStackTrace();
-            chart.setNoDataText("Error loading progress data");
-            SharedPreferences sharedPreferences = getSharedPreferences("my_prefs", MODE_PRIVATE);
-            boolean darkModeEnabled = sharedPreferences.getBoolean("dark_mode", false);
-            int noDataTextColor = darkModeEnabled ? Color.WHITE : Color.GRAY;
-            chart.setNoDataTextColor(noDataTextColor);
-            chart.invalidate();
+                return true;
+            });
         }
     }
-
-
     private void logCursor(Cursor cursor) {
         if (cursor == null || cursor.isClosed()) {
             Log.d("Cursor Data", "Cursor is null or closed");
@@ -513,28 +850,39 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
             int monthNumber = Integer.parseInt(strMonth);
             int dayNumber = Integer.parseInt(strDay);
 
-            // Convert to days since 2025-01-01 (base date for the formatter)
-            LocalDate baseDate;
-            LocalDate targetDate;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                baseDate = LocalDate.of(2025, 1, 1);
-                targetDate = LocalDate.of(year, monthNumber, dayNumber);
-
-                // Calculate days between base date and target date
-                long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(baseDate, targetDate);
-                return String.valueOf(daysBetween);
+            // Calculate days since epoch using a timezone-neutral formula
+            // This avoids timezone offset issues
+            int[] daysInMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+            
+            // Check for leap year
+            boolean isLeapYear = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+            if (isLeapYear) {
+                daysInMonth[1] = 29;
             }
-
-            return null;
+            
+            // Calculate days from 1970-01-01 to the target date
+            long totalDays = 0;
+            
+            // Add days for complete years
+            for (int y = 1970; y < year; y++) {
+                boolean yIsLeap = (y % 4 == 0 && y % 100 != 0) || (y % 400 == 0);
+                totalDays += yIsLeap ? 366 : 365;
+            }
+            
+            // Add days for complete months in the target year
+            for (int m = 0; m < monthNumber - 1; m++) {
+                totalDays += daysInMonth[m];
+            }
+            
+            // Add days in the target month
+            totalDays += dayNumber - 1; // -1 because we count from 0
+            
+            Log.d("ShowProgressActivity", "Date: " + dateToConvert + ", daysBetween: " + totalDays);
+            return String.valueOf(totalDays);
         } catch (Exception e) {
             Log.e("ShowProgressActivity", "Error converting date: " + e.getMessage());
             return null;
         }
-    }
-
-
-    public void onNothingSelected(AdapterView<?> parent) {
-        // Another interface callback
     }
 
     @Override
@@ -556,17 +904,16 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
             adView.resume();
         }
 
+        // Reload exercise list to include newly added exercises
+        loadExerciseList();
+
         // Check if weight unit preference has changed and refresh chart if needed
         if (chart != null && chart.getData() != null) {
             boolean isKgUnit = WeightUnitManager.isKgUnit(this);
             YAxis leftAxis = chart.getAxisLeft();
             leftAxis.setValueFormatter(new WeightAxisValueFormatter(isKgUnit));
 
-            // If we have a spinner with a selected position, trigger onItemSelected again
-            Spinner spinner = findViewById(R.id.progress_spinner);
-            if (spinner != null && spinner.getSelectedItemPosition() >= 0) {
-                onItemSelected(spinner, null, spinner.getSelectedItemPosition(), spinner.getSelectedItemId());
-            }
+            refreshChart();
         }
     }
 
@@ -595,14 +942,8 @@ public class ShowProgressActivity extends AppCompatActivity implements AdapterVi
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                // Check if drawer is open and close it first
-                DrawerLayout drawer = findViewById(R.id.drawer_layout);
-                if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
-                    drawer.closeDrawer(GravityCompat.START);
-                } else {
-                    // Finish the activity
-                    finish();
-                }
+                // Finish the activity
+                finish();
             }
         };
         getOnBackPressedDispatcher().addCallback(this, callback);

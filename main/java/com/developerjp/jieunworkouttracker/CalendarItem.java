@@ -3,6 +3,7 @@ package com.developerjp.jieunworkouttracker;
 public class CalendarItem {
     private String workoutId;
     private String title;
+    private String subtitle;
     private String date;
     private String logId;
     private String duration;
@@ -26,6 +27,14 @@ public class CalendarItem {
     // Setter method to set the title of the calendar item.
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getSubtitle() {
+        return subtitle;
+    }
+
+    public void setSubtitle(String subtitle) {
+        this.subtitle = subtitle;
     }
 
     // Getter method to retrieve the date of the calendar item.

@@ -46,6 +46,15 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarRe
         Log.d("CalendarAdapter", "Item at position " + position + ": " + "title=" + myList.getTitle() + ", id=" + myList.getWorkoutId() + ", date=" + myList.getDate());
 
         holder.textViewHead.setText(myList.getTitle());
+        if (holder.textViewSub != null) {
+            String subtitle = myList.getSubtitle();
+            if (subtitle == null || subtitle.trim().isEmpty()) {
+                holder.textViewSub.setVisibility(View.GONE);
+            } else {
+                holder.textViewSub.setVisibility(View.VISIBLE);
+                holder.textViewSub.setText(subtitle);
+            }
+        }
         final String currentId = myList.getLogId();
         final String currentTitle = myList.getTitle();
         final String date = myList.getDate();
@@ -88,10 +97,12 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarRe
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public final TextView textViewHead;
+        public final TextView textViewSub;
 
         public ViewHolder(View itemView) {
             super(itemView);
             textViewHead = itemView.findViewById(R.id.textViewHead);
+            textViewSub = itemView.findViewById(R.id.textViewSub);
         }
     }
 }

@@ -2,6 +2,7 @@ package com.developerjp.jieunworkouttracker;
 
 public class ExerciseItem {
     private String id;
+    private String exerciseId;
     private String title;
     private String button1;
     private int button1colour;
@@ -42,6 +43,14 @@ public class ExerciseItem {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getExerciseId() {
+        return exerciseId;
+    }
+
+    public void setExerciseId(String exerciseId) {
+        this.exerciseId = exerciseId;
     }
 
     public String getTitle() {

@@ -23,13 +23,63 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <!-- Rest Timer (Hidden by default) -->
+    <LinearLayout
+        android:id="@+id/lyt_rest_timer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/appBarLayout"
+        android:background="@color/white"
+        android:elevation="4dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rest Timer"
+            android:textColor="@color/textSecondaryColor"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tv_rest_timer_countdown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="01:30"
+            android:textColor="?attr/colorPrimaryDark"
+            android:textSize="36sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btn_skip_rest"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Skip Rest" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/hint_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/lyt_rest_timer"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="8dp"
+        android:text="Short press: +1 • Long press: -1"
+        android:textColor="@color/textSecondaryColor"
+        android:textSize="12sp"
+        android:gravity="center" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/appBarLayout"
+        android:layout_below="@id/hint_text"
         android:layout_alignParentStart="true"
-        android:layout_marginBottom="70dp"
+        android:layout_above="@+id/bottom_action_container"
         android:clickable="true"
         android:dividerHeight="1dp"
         android:focusable="true"
@@ -54,67 +104,6 @@
         android:text="@string/empty_exercise_list_text"
         android:visibility="invisible" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="vertical">
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="4dp"
-            android:background="@drawable/bg_gradient_soft" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:padding="@dimen/spacing_medium">
-
-                <ImageButton
-                    android:layout_width="?attr/actionBarSize"
-                    android:layout_height="?attr/actionBarSize"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Home"
-                    android:onClick="bottomNavigationHomeClick"
-                    app:srcCompat="@drawable/ic_home_round"
-                    app:tint="@color/colorPrimaryLight" />
-
-            </LinearLayout>
-
-            <View
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:background="@color/overlay_dark_30" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:padding="@dimen/spacing_medium">
-
-                <ImageButton
-                    android:layout_width="?attr/actionBarSize"
-                    android:layout_height="?attr/actionBarSize"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Calendar"
-                    android:onClick="bottomNavigationCalendarClick"
-                    app:srcCompat="@drawable/ic_calendar_round"
-                    app:tint="@color/colorPrimaryLight" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </LinearLayout>
-
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/viewSnack"
         android:layout_width="match_parent"
@@ -122,133 +111,40 @@
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="50dp" />
 
-
+    <!-- Bottom Action Container -->
     <LinearLayout
+        android:id="@+id/bottom_action_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
+        android:background="@color/white"
+        android:elevation="8dp"
+        android:orientation="horizontal"
+        android:padding="16dp">
 
-        <LinearLayout
-            android:id="@+id/lyt_pause_workout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+        <Button
+            android:id="@+id/btn_pause_workout"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_weight="1"
+            android:background="@drawable/button_shape_default"
+            android:text="PAUSE"
+            android:textColor="?attr/colorPrimaryDark"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginEnd="8dp" />
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cv_pause_workout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_margin="@dimen/spacing_middle"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                app:contentPadding="@dimen/spacing_medium">
-
-                <TextView
-                    android:id="@+id/txt_pause_workout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:text="Pause Workout"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                    android:textColor="@color/colorWarning"
-                    android:textSize="20sp" />
-
-            </androidx.cardview.widget.CardView>
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/fab_pause_workout"
-                android:layout_width="wrap_content"
-                android:layout_height="76dp"
-                android:layout_marginLeft="@dimen/spacing_middle"
-                android:layout_marginTop="@dimen/spacing_middle"
-                android:layout_marginRight="@dimen/spacing_middle"
-                android:layout_marginBottom="@dimen/spacing_middle"
-                android:clickable="true"
-                android:contentDescription="Pause Workout"
-                android:focusable="true"
-                android:tint="@color/white"
-                app:fabSize="normal"
-                app:rippleColor="@android:color/black"
-                app:srcCompat="@drawable/fab_pause_workout" />
-
-            <View
-                android:layout_width="@dimen/spacing_xmedium"
-                android:layout_height="0dp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/lyt_finish_workout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cv_finish_workout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|end|right"
-                android:layout_margin="@dimen/spacing_middle"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                app:contentPadding="@dimen/spacing_medium">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:text="Finish Workout"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                    android:textColor="@color/colorWarning"
-                    android:textSize="20sp" />
-
-            </androidx.cardview.widget.CardView>
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/fab_finish_workout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/spacing_middle"
-                android:layout_marginTop="@dimen/spacing_middle"
-                android:layout_marginRight="@dimen/spacing_middle"
-                android:layout_marginBottom="@dimen/spacing_middle"
-                android:clickable="true"
-                android:contentDescription="Finish Workout"
-                android:focusable="true"
-                android:tint="@color/white"
-                app:fabSize="normal"
-                app:rippleColor="@android:color/black"
-                app:srcCompat="@drawable/fab_start_workout" />
-
-            <View
-                android:layout_width="@dimen/spacing_xmedium"
-                android:layout_height="0dp" />
-
-        </LinearLayout>
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_add"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/spacing_smlarge"
-            android:layout_marginTop="@dimen/spacing_middle"
-            android:layout_marginRight="@dimen/spacing_smlarge"
-            android:layout_marginBottom="@dimen/spacing_mlarge"
-            android:clickable="true"
-            android:contentDescription="Add"
-            android:focusable="true"
-            app:backgroundTint="@color/colorAccent"
-            app:fabSize="normal"
-            app:rippleColor="@android:color/white"
-            app:srcCompat="@drawable/fab_add_icon" />
-
+        <Button
+            android:id="@+id/btn_finish_workout"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_gradient_button"
+            android:text="FINISH"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="@null" />
     </LinearLayout>
-
 
 </RelativeLayout>

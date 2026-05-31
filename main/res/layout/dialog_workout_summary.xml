@@ -106,7 +106,7 @@
             style="@style/RippleStyleWhite"
             android:layout_width="match_parent"
             android:layout_height="@dimen/spacing_xxlarge"
-            android:background="@color/colorPrimary">
+            android:background="@color/pastelSkyBlue">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -114,8 +114,7 @@
                 android:layout_gravity="center"
                 android:text="OK"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Subhead"
-                android:textColor="@android:color/white"
-                app:fontFamily="sans-serif-medium" />
+                android:textColor="@color/textOnPastel" />
 
         </com.balysv.materialripple.MaterialRippleLayout>
 

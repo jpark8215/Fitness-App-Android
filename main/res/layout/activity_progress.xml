@@ -3,52 +3,279 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/colorBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingTop="20dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="16dp">
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="Select an Exercise" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Select an exercise to view your progress"
+            android:textColor="@color/textSecondaryColor"
+            android:textSize="14sp" />
 
         <Spinner
-            android:id="@+id/progress_spinner"
+            android:id="@+id/exercise_spinner"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:contentDescription="@string/progress_spinner_description"
-            android:gravity="center" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_card_rounded"
+            android:padding="12dp" />
+
+        <HorizontalScrollView
+            android:id="@+id/date_filter_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:overScrollMode="never"
+            android:scrollbars="none"
+            android:gravity="center">
+
+            <RadioGroup
+                android:id="@+id/date_filter_radio_group"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center">
+
+                <RadioButton
+                    android:id="@+id/btn_filter_7d"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="7D"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:button="@null"
+                    android:background="@drawable/chip_selector_light" />
+
+                <RadioButton
+                    android:id="@+id/btn_filter_30d"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="30D"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:button="@null"
+                    android:background="@drawable/chip_selector_light" />
+
+                <RadioButton
+                    android:id="@+id/btn_filter_3m"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="3M"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:button="@null"
+                    android:background="@drawable/chip_selector_light" />
+
+                <RadioButton
+                    android:id="@+id/btn_filter_all"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="All-Time"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:button="@null"
+                    android:background="@drawable/chip_selector_light" />
+
+            </RadioGroup>
+
+        </HorizontalScrollView>
+
+        <RadioGroup
+            android:id="@+id/metric_toggle_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <RadioButton
+                android:id="@+id/btn_metric_weight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Weight"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:layout_marginEnd="8dp"
+                android:button="@null"
+                android:background="@drawable/chip_selector_light"
+                android:checked="true" />
+
+            <RadioButton
+                android:id="@+id/btn_metric_sets"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sets"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:layout_marginEnd="8dp"
+                android:button="@null"
+                android:background="@drawable/chip_selector_light" />
+
+            <RadioButton
+                android:id="@+id/btn_metric_reps"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Reps"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:button="@null"
+                android:background="@drawable/chip_selector_light" />
+
+        </RadioGroup>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/stats_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="@color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txt_max_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Avg Weight"
+                        android:textColor="@color/textSecondaryColor"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txt_max_weight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="—"
+                        android:textColor="@color/textPrimaryColor"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/pastelSkyBlue"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txt_total_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Total Sets"
+                        android:textColor="@color/textSecondaryColor"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txt_total_sets"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="—"
+                        android:textColor="@color/textPrimaryColor"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
 
     </LinearLayout>
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:background="@drawable/bg_gradient_soft" />
+        android:layout_height="2dp"
+        android:background="@color/pastelSkyBlue" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:background="@android:color/transparent">
+        android:padding="16dp">
 
-        <com.github.mikephil.charting.charts.BarChart
-            android:id="@+id/chart1"
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="8dp"
-            android:background="@android:color/transparent"
-            android:minHeight="200dp">
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/white">
 
-        </com.github.mikephil.charting.charts.BarChart>
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/chart1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="12dp"
+                android:background="@android:color/transparent"
+                android:minHeight="250dp" />
+
+        </androidx.cardview.widget.CardView>
 
     </LinearLayout>
 
@@ -59,8 +286,8 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="5dp"
-            android:background="@drawable/bg_gradient_soft" />
+            android:layout_height="2dp"
+            android:background="@color/pastelSkyBlue" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -75,61 +302,6 @@
                 android:layout_gravity="center"
                 app:adSize="BANNER"
                 app:adUnitId="ca-app-pub-2201141547916408/6715184560" />
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="5dp"
-            android:background="@drawable/bg_gradient_soft" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_gravity="bottom"
-            android:background="@drawable/bg_gradient_soft"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:padding="@dimen/spacing_medium">
-
-                <ImageButton
-                    android:layout_width="?attr/actionBarSize"
-                    android:layout_height="?attr/actionBarSize"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Home"
-                    android:onClick="bottomNavigationHomeClick"
-                    app:srcCompat="@drawable/ic_home_round"
-                    app:tint="@color/colorPrimaryLight" />
-
-            </LinearLayout>
-
-            <View
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:background="@color/overlay_dark_30" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:padding="@dimen/spacing_medium">
-
-                <ImageButton
-                    android:layout_width="?attr/actionBarSize"
-                    android:layout_height="?attr/actionBarSize"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Calendar"
-                    android:onClick="bottomNavigationCalendarClick"
-                    app:srcCompat="@drawable/ic_calendar_round"
-                    app:tint="@color/colorPrimaryLight" />
-
-            </LinearLayout>
 
         </LinearLayout>
 

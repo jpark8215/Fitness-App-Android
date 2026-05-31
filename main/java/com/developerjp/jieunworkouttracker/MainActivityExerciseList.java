@@ -22,19 +22,15 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.navigation.NavigationView;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -46,15 +42,12 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
 
     // Item List
     private final List<ExerciseItem> exerciseItems = new ArrayList<>();
+    private final List<ExerciseItem> displayExerciseItems = new ArrayList<>();
     private final NumberFormat nf = new DecimalFormat("##.#");
     private DBManager dbManager;
     private RecyclerView recyclerView;
     // Custom Recycler View Adaptor
     private ExerciseRecyclerViewAdapter adapter;
-    private View back_drop;
-    private boolean rotate = false;
-    private View lyt_add_exercise;
-    private View lyt_start_selected_exercises;
     private FloatingActionButton fab_add;
     private Parcelable recyclerViewState;
     private Toolbar toolbar;
@@ -127,75 +120,49 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
 
         // Initialize UI components
         View parent_view = findViewById(android.R.id.content);
-        back_drop = findViewById(R.id.back_drop);
-        lyt_add_exercise = findViewById(R.id.lyt_add_exercise);
-        lyt_start_selected_exercises = findViewById(R.id.lyt_start_selected_exercises);
 
-        // Make sure the back_drop is initially hidden
-        if (back_drop != null) {
-            back_drop.setVisibility(View.GONE);
-        }
-
-        // Initialize the add button layouts initially to GONE
-        if (lyt_add_exercise != null) {
-            lyt_add_exercise.setVisibility(View.GONE);
-        }
-
-        if (lyt_start_selected_exercises != null) {
-            lyt_start_selected_exercises.setVisibility(View.GONE);
-        }
 
         // Initialize the database
         dbManager = new DBManager(this);
         dbManager.open();
+
+        EditText searchBar = findViewById(R.id.search_bar);
+        if (searchBar != null) {
+            searchBar.addTextChangedListener(new android.text.TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    filterExerciseList(s.toString());
+                }
+
+                @Override
+                public void afterTextChanged(android.text.Editable s) {}
+            });
+        }
 
         // Initialize the RecyclerView
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Initialize CardViews and FABs
+        // Initialize FAB
         fab_add = findViewById(R.id.fab_add);
-        CardView cv_add_exercise = findViewById(R.id.cv_add_exercise);
-        FloatingActionButton fab_add_exercise = findViewById(R.id.fab_add_exercise);
-        CardView cv_start_selected = findViewById(R.id.cv_start_selected);
-        FloatingActionButton fab_start_selected = findViewById(R.id.fab_start_selected);
 
         // Display instructions for selecting exercises
         TextView empty = findViewById(R.id.empty);
         if (empty != null) {
-            empty.setText("Tap on exercises to select them, then use the 'Start Selected Exercises' button to begin your workout.");
+            empty.setText("Tap on exercises to select them, then use the 'Workout' tab button to begin your workout.");
         }
 
-        // Make sure animations are properly initialized
-        if (lyt_add_exercise != null) {
-            ViewAnimation.initShowOut(lyt_add_exercise);
-        }
-
-        if (lyt_start_selected_exercises != null) {
-            ViewAnimation.initShowOut(lyt_start_selected_exercises);
-        }
-
-        // Set up click listeners
+        // Set up click listener
         if (fab_add != null) {
-            fab_add.setOnClickListener(v -> toggleFabMenu());
-        }
-
-        if (cv_add_exercise != null) {
-            cv_add_exercise.setOnClickListener(v -> showCustomAddDialog());
-        }
-        if (fab_add_exercise != null) {
-            fab_add_exercise.setOnClickListener(v -> showCustomAddDialog());
-        }
-        if (cv_start_selected != null) {
-            cv_start_selected.setOnClickListener(this::startSelectedExercises);
-        }
-        if (fab_start_selected != null) {
-            fab_start_selected.setOnClickListener(this::startSelectedExercises);
+            fab_add.setOnClickListener(v -> showCustomAddDialog());
         }
 
         // Load exercises
-        adapter = new ExerciseRecyclerViewAdapter(exerciseItems, this, this, this);
+        adapter = new ExerciseRecyclerViewAdapter(displayExerciseItems, this, this, this);
         recyclerView.setAdapter(adapter);
         loadExerciseData();
     }
@@ -205,8 +172,6 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         assert actionBar != null;
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeButtonEnabled(true);
         actionBar.setTitle("");
 
         TextView txtTitle = findViewById(R.id.txtTitle);
@@ -218,56 +183,60 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
     }
 
     private void initNavigationMenu() {
-        NavigationView nav_view = findViewById(R.id.nav_view);
-        final DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-            }
-        };
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
+        com.google.android.material.bottomnavigation.BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        if (bottomNavigationView != null) {
+            bottomNavigationView.setSelectedItemId(R.id.nav_exercises);
+            bottomNavigationView.setOnItemSelectedListener(item -> {
+                int itemId = item.getItemId();
+                Intent intent = null;
+                if (itemId == R.id.nav_home) {
+                    intent = new Intent(this, HomeDashboardActivity.class);
+                } else if (itemId == R.id.nav_exercises) {
+                    intent = new Intent(this, MainActivityExerciseList.class);
+                } else if (itemId == R.id.nav_workout) {
+                    // Check if there's an ongoing workout to resume
+                    if (StartWorkoutActivity.isWorkoutOngoing) {
+                        intent = new Intent(this, StartWorkoutActivity.class);
+                        intent.putExtra("ongoing_workout", true);
+                        // Pass workout data from WorkoutService
+                        intent.putExtra("id", WorkoutService.getWorkoutId());
+                        intent.putExtra("title", WorkoutService.getWorkoutTitle());
+                        intent.putStringArrayListExtra("selected_exercise_ids", WorkoutService.getWorkoutExerciseIds());
+                    } else {
+                        // No ongoing workout, check if exercises are selected
+                        List<String> selectedExerciseIds = adapter.getSelectedExerciseIds();
+                        if (selectedExerciseIds.isEmpty()) {
+                            // No exercises selected, tell user to select exercises first
+                            Toast.makeText(this, "Please select exercises to start", Toast.LENGTH_SHORT).show();
+                            return true;
+                        } else {
+                            // Start the selected exercises
+                            if (dbManager != null) {
+                                dbManager.startSelectedExercises(selectedExerciseIds);
+                            }
+                            intent = new Intent(this, StartWorkoutActivity.class);
+                            intent.putStringArrayListExtra("selected_exercise_ids", new ArrayList<>(selectedExerciseIds));
+                            // Clear selections after starting
+                            if (adapter != null) {
+                                adapter.clearSelections();
+                            }
+                        }
+                    }
+                } else if (itemId == R.id.nav_progress) {
+                    intent = new Intent(this, ShowProgressActivity.class);
+                } else if (itemId == R.id.nav_settings) {
+                    intent = new Intent(this, SettingsActivity.class);
+                } else if (itemId == R.id.nav_archived) {
+                    intent = new Intent(this, ArchivedExerciseList.class);
+                }
 
-        // open drawer at start
-        //drawer.openDrawer(GravityCompat.START);
-
-        //Handles side navigation menu clicks
-        nav_view.setNavigationItemSelectedListener(item -> {
-            String itemCLicked = Objects.requireNonNull(item.getTitle()).toString();
-            Intent intent;
-
-            switch (itemCLicked) {
-                case "Exercises":
-                    Log.d("menu item clicked", "Exercises");
-                    //We're already in the exercises view
-                    drawer.closeDrawers();
-                    break;
-                case "Archived Exercises":
-                    Log.d("menu item clicked", "Archived Exercises");
-                    intent = new Intent(getApplicationContext(), ArchivedExerciseList.class);
+                if (intent != null) {
                     startActivity(intent);
-                    break;
-                case "Progress":
-                    Log.d("menu item clicked", "Progress");
-                    intent = new Intent(getApplicationContext(), ShowProgressActivity.class);
-                    startActivity(intent);
-                    break;
-                case "Calendar":
-                    Log.d("menu item clicked", "Calendar");
-                    //Starts the Calendar activity
-                    intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
-                    startActivity(intent);
-                    break;
-                case "Settings":
-                    Log.d("menu item clicked", "Settings");
-                    intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
-                    startActivity(intent);
-                    break;
-            }
-
-            drawer.closeDrawers();
-            return true;
-        });
+                    overridePendingTransition(0, 0);
+                }
+                return true;
+            });
+        }
     }
 
     @Override
@@ -390,10 +359,9 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         }
         // Always close cursor when done
 
-        // Notify adapter of data changes if it exists
-        if (adapter != null) {
-            adapter.notifyDataSetChanged();
-        }
+        EditText searchBar = findViewById(R.id.search_bar);
+        String currentQuery = searchBar != null ? searchBar.getText().toString() : "";
+        filterExerciseList(currentQuery);
 
         // Update the display based on current weight unit settings
         updateWeightDisplay();
@@ -402,28 +370,34 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         // We'll close it in onDestroy
     }
 
-    private void startSelectedExercises(View v) {
-        // Get selected exercises
-        List<String> selectedExerciseIds = adapter.getSelectedExerciseIds();
-
-        if (selectedExerciseIds.isEmpty()) {
-            Toast.makeText(this, "Please select at least\none exercise to start", Toast.LENGTH_SHORT).show();
-            return;
+    private void filterExerciseList(String query) {
+        displayExerciseItems.clear();
+        if (TextUtils.isEmpty(query)) {
+            displayExerciseItems.addAll(exerciseItems);
+        } else {
+            String lowerCaseQuery = query.toLowerCase();
+            for (ExerciseItem item : exerciseItems) {
+                if (item.getTitle().toLowerCase().contains(lowerCaseQuery)) {
+                    displayExerciseItems.add(item);
+                }
+            }
         }
 
-        // Start the selected exercises
-        if (dbManager != null) {
-            dbManager.startSelectedExercises(selectedExerciseIds);
-        }
-
-        // Navigate to StartWorkoutActivity with the selected exercises
-        Intent intent = new Intent(getApplicationContext(), StartWorkoutActivity.class);
-        intent.putStringArrayListExtra("selected_exercise_ids", new ArrayList<>(selectedExerciseIds));
-        startActivity(intent);
-
-        // Clear selections after starting
         if (adapter != null) {
-            adapter.clearSelections();
+            adapter.notifyDataSetChanged();
+        }
+        
+        TextView empty = findViewById(R.id.empty);
+        if (empty != null) {
+            if (displayExerciseItems.isEmpty() && exerciseItems.isEmpty()) {
+                empty.setVisibility(View.VISIBLE);
+                empty.setText(R.string.empty_exercise_list_text);
+            } else if (displayExerciseItems.isEmpty()) {
+                empty.setVisibility(View.VISIBLE);
+                empty.setText("No exercises found matching '" + query + "'");
+            } else {
+                empty.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -673,51 +647,6 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         dialog.getWindow().setAttributes(lp);
     }
 
-    private void toggleFabMenu() {
-        rotate = !rotate;
-
-        // If we're showing the menu, make sure the backdrop is visible
-        if (rotate) {
-            if (back_drop != null) {
-                back_drop.setVisibility(View.VISIBLE);
-            }
-
-            // Show the option layouts with animation
-            if (lyt_add_exercise != null) {
-                ViewAnimation.showIn(lyt_add_exercise);
-            }
-            if (lyt_start_selected_exercises != null) {
-                ViewAnimation.showIn(lyt_start_selected_exercises);
-            }
-
-            // Rotate the FAB button
-            ViewAnimation.rotateForward(fab_add);
-        } else {
-            // Hide the option layouts with animation
-            if (lyt_add_exercise != null) {
-                ViewAnimation.showOut(lyt_add_exercise);
-            }
-            if (lyt_start_selected_exercises != null) {
-                ViewAnimation.showOut(lyt_start_selected_exercises);
-            }
-
-            // Rotate the FAB button back
-            ViewAnimation.rotateBackward(fab_add);
-
-            // Hide the backdrop after a delay
-            new Handler().postDelayed(() -> {
-                if (back_drop != null) {
-                    back_drop.setVisibility(View.GONE);
-                }
-            }, 300);
-        }
-
-        // Make the menu items clickable
-        if (back_drop != null) {
-            back_drop.setOnClickListener(v -> toggleFabMenu());
-        }
-    }
-
     private void updateWeightDisplay() {
         if (exerciseItems != null && adapter != null) {
             boolean isKgUnit = WeightUnitManager.isKgUnit(this);
@@ -745,14 +674,7 @@ public class MainActivityExerciseList extends AppCompatActivity implements Exerc
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                // Check if drawer is open and close it first
-                DrawerLayout drawer = findViewById(R.id.drawer_layout);
-                if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
-                    drawer.closeDrawer(GravityCompat.START);
-                } else {
-                    // If no drawer or drawer is closed, finish the activity
-                    finish();
-                }
+                finish();
             }
         };
         getOnBackPressedDispatcher().addCallback(this, callback);

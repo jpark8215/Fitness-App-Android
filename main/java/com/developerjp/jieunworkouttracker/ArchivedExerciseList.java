@@ -21,15 +21,13 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.navigation.NavigationView;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -96,8 +94,6 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeButtonEnabled(true);
             actionBar.setTitle("");
         }
 
@@ -114,55 +110,43 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
     }
 
     private void initNavigationMenu() {
-        NavigationView nav_view = findViewById(R.id.nav_view);
-        final DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-            }
-        };
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        if (bottomNavigationView != null) {
+            bottomNavigationView.setOnItemSelectedListener(item -> {
+                int itemId = item.getItemId();
+                Intent intent = null;
+                if (itemId == R.id.nav_home) {
+                    intent = new Intent(this, HomeDashboardActivity.class);
+                } else if (itemId == R.id.nav_exercises) {
+                    intent = new Intent(this, MainActivityExerciseList.class);
+                } else if (itemId == R.id.nav_workout) {
+                    // Check if there's an ongoing workout to resume
+                    if (StartWorkoutActivity.isWorkoutOngoing) {
+                        intent = new Intent(this, StartWorkoutActivity.class);
+                        intent.putExtra("ongoing_workout", true);
+                        intent.putExtra("id", WorkoutService.getWorkoutId());
+                        intent.putExtra("title", WorkoutService.getWorkoutTitle());
+                        intent.putStringArrayListExtra("selected_exercise_ids", WorkoutService.getWorkoutExerciseIds());
+                    } else {
+                        // No ongoing workout, tell user to select exercises first
+                        android.widget.Toast.makeText(this, "Please select exercises to start", android.widget.Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+                } else if (itemId == R.id.nav_progress) {
+                    intent = new Intent(this, ShowProgressActivity.class);
+                } else if (itemId == R.id.nav_settings) {
+                    intent = new Intent(this, SettingsActivity.class);
+                } else if (itemId == R.id.nav_archived) {
+                    intent = new Intent(this, ArchivedExerciseList.class);
+                }
 
-        // open drawer at start
-        //drawer.openDrawer(GravityCompat.START);
-
-        //Handles side navigation menu clicks
-        nav_view.setNavigationItemSelectedListener(item -> {
-            String itemCLicked = Objects.requireNonNull(item.getTitle()).toString();
-            Intent intent;
-
-            switch (itemCLicked) {
-                case "Exercises":
-                    Log.d("menu item clicked", "Exercises");
-                    //Navigate to the main exercise list
-                    intent = new Intent(getApplicationContext(), MainActivityExerciseList.class);
+                if (intent != null) {
                     startActivity(intent);
-                    break;
-                case "Archived Exercises":
-                    Log.d("menu item clicked", "Archived Exercises");
-                    break;
-                case "Progress":
-                    Log.d("menu item clicked", "Progress");
-                    intent = new Intent(getApplicationContext(), ShowProgressActivity.class);
-                    startActivity(intent);
-                    break;
-                case "Calendar":
-                    Log.d("menu item clicked", "Calendar");
-                    //Starts the Calendar activity
-                    intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
-                    startActivity(intent);
-                    break;
-                case "Settings":
-                    Log.d("menu item clicked", "Settings");
-                    intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
-                    startActivity(intent);
-                    break;
-            }
-
-            drawer.closeDrawers();
-            return true;
-        });
+                    overridePendingTransition(0, 0);
+                }
+                return true;
+            });
+        }
     }
 
     public void loadExerciseData() {
@@ -338,16 +322,6 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         if (recyclerViewState != null && recyclerView != null && recyclerView.getLayoutManager() != null) {
             recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
         }
-    }
-
-    public void bottomNavigationHomeClick(View view) {
-        Intent intent = new Intent(getApplicationContext(), MainActivityExerciseList.class);
-        startActivity(intent);
-    }
-
-    public void bottomNavigationCalendarClick(View view) {
-        Intent intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
-        startActivity(intent);
     }
 
     private void restoreExercise(View v) {
@@ -620,26 +594,40 @@ public class ArchivedExerciseList extends AppCompatActivity implements ExerciseR
         });
 
         btnDelete.setOnClickListener(v -> {
-            long _id = Long.parseLong(itemId);
+            // Confirm deletion
+            AlertDialog.Builder builder = new AlertDialog.Builder(this,
+                    ThemeManager.isDarkModeEnabled(this) ? R.style.ModernAlertDialogDark : R.style.ModernAlertDialog);
+            builder.setTitle("Delete Exercise");
+            builder.setMessage("Are you sure you want to delete this exercise?");
+            builder.setPositiveButton("Yes", (dialog1, which) -> {
+                long _id = Long.parseLong(itemId);
 
-            //Deletes the selected exercise
-            dbManager.deleteExercise(_id);
+                //Deletes the selected exercise
+                dbManager.deleteExercise(_id);
 
-            //Remembers the position of the recycler view when modify exercise or delete exercise is called
-            final Parcelable recyclerViewState;
-            recyclerViewState = Objects.requireNonNull(recyclerView.getLayoutManager()).onSaveInstanceState();
+                //Remembers the position of the recycler view when modify exercise or delete exercise is called
+                final Parcelable recyclerViewState;
+                recyclerViewState = Objects.requireNonNull(recyclerView.getLayoutManager()).onSaveInstanceState();
 
-            //Shows the update made by clearing the recyclerview and re-adding all the items
-            //Works better this way as we don't have to re-create the entire activity
-            ExerciseItem.clear();
-            loadExerciseData();
-            adapter.notifyDataSetChanged();
+                //Shows the update made by clearing the recyclerview and re-adding all the items
+                //Works better this way as we don't have to re-create the entire activity
+                ExerciseItem.clear();
+                loadExerciseData();
+                adapter.notifyDataSetChanged();
 
-            //places the user back at the same position in the recycler view rather than scrolling all the way back up to the top
-            recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
+                //places the user back at the same position in the recycler view rather than scrolling all the way back up to the top
+                recyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
 
-            //Closes the dialog
-            dialog.dismiss();
+                //Closes the dialog
+                dialog.dismiss();
+                Toast.makeText(getApplicationContext(), "Exercise deleted", Toast.LENGTH_SHORT).show();
+            });
+            builder.setNegativeButton("No", (dialog1, which) -> {
+                // Do nothing
+            });
+
+            // Create and show the AlertDialog
+            builder.create().show();
         });
 
         (dialog.findViewById(R.id.bt_close)).setOnClickListener(v -> dialog.dismiss());

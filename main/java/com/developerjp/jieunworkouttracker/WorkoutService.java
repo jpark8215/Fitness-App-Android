@@ -33,6 +33,11 @@ public class WorkoutService extends Service {
     private final IBinder mBinder = new MyBinder();
     //Chronometer is used for the counter timer
     private Chronometer chronometer;
+    
+    // Store workout data for resuming
+    private static String workoutId;
+    private static String workoutTitle;
+    private static ArrayList<String> workoutExerciseIds;
 
     @Override
     public void onCreate() {
@@ -68,6 +73,7 @@ public class WorkoutService extends Service {
         // Handle notification dismissal
         if (intent != null && "STOP_WORKOUT".equals(intent.getAction())) {
             Log.d(LOG_TAG, "Notification dismissed, stopping service");
+            clearWorkoutData();
             stopSelf();
             return START_NOT_STICKY;
         }
@@ -75,8 +81,16 @@ public class WorkoutService extends Service {
         // Only start foreground service if we have workout data
         if (intent != null) {
             ArrayList<String> selectedExerciseIds = intent.getStringArrayListExtra("selected_exercise_ids");
+            String id = intent.getStringExtra("id");
+            String title = intent.getStringExtra("title");
+            
             if (selectedExerciseIds != null && !selectedExerciseIds.isEmpty()) {
-                Log.d(LOG_TAG, "Starting foreground service for workout");
+                // Store workout data for resuming
+                workoutId = id;
+                workoutTitle = title;
+                workoutExerciseIds = selectedExerciseIds;
+                
+                Log.d(LOG_TAG, "Starting foreground service for workout with ID: " + id);
                 startForegroundService();
                 return START_STICKY; // Restart service if killed
             }
@@ -103,6 +117,28 @@ public class WorkoutService extends Service {
             notificationManager.cancelAll(); // Cancel all notifications from this app
             Log.d(LOG_TAG, "Cleared all notifications");
         }
+        
+        // Clear workout data
+        clearWorkoutData();
+    }
+    
+    private void clearWorkoutData() {
+        workoutId = null;
+        workoutTitle = null;
+        workoutExerciseIds = null;
+    }
+
+    // Static getter methods for workout data
+    public static String getWorkoutId() {
+        return workoutId;
+    }
+
+    public static String getWorkoutTitle() {
+        return workoutTitle;
+    }
+
+    public static ArrayList<String> getWorkoutExerciseIds() {
+        return workoutExerciseIds;
     }
 
     @Override
@@ -122,11 +158,26 @@ public class WorkoutService extends Service {
     public long getTime() {
         return chronometer.getBase();
     }
+
+    // Reset the chronometer for a new workout
+    public void resetChronometer() {
+        chronometer.setBase(SystemClock.elapsedRealtime());
+        Log.d(LOG_TAG, "Chronometer reset for new workout");
+    }
     
     // Method to update notification content
     public void updateNotification(String title, String text) {
         Intent notificationIntent = new Intent(this, StartWorkoutActivity.class);
         notificationIntent.putExtra("ongoing_workout", true);
+        if (workoutId != null) {
+            notificationIntent.putExtra("id", workoutId);
+        }
+        if (workoutTitle != null) {
+            notificationIntent.putExtra("title", workoutTitle);
+        }
+        if (workoutExerciseIds != null && !workoutExerciseIds.isEmpty()) {
+            notificationIntent.putStringArrayListExtra("selected_exercise_ids", workoutExerciseIds);
+        }
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
         
         Notification notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
@@ -152,9 +203,18 @@ public class WorkoutService extends Service {
         // Creates the notification channel
         createNotificationChannel();
 
-        // Creates the notification intent
+        // Creates the notification intent with workout data for resuming
         Intent notificationIntent = new Intent(this, StartWorkoutActivity.class);
         notificationIntent.putExtra("ongoing_workout", true);
+        if (workoutId != null) {
+            notificationIntent.putExtra("id", workoutId);
+        }
+        if (workoutTitle != null) {
+            notificationIntent.putExtra("title", workoutTitle);
+        }
+        if (workoutExerciseIds != null && !workoutExerciseIds.isEmpty()) {
+            notificationIntent.putStringArrayListExtra("selected_exercise_ids", workoutExerciseIds);
+        }
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
@@ -194,12 +254,7 @@ public class WorkoutService extends Service {
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            
-            // Delete existing channel if it exists to ensure clean recreation
-            if (notificationManager != null) {
-                notificationManager.deleteNotificationChannel(NOTIFICATION_CHANNEL_ID);
-            }
-            
+
             CharSequence name = "Workout Progress";
             String description = "Shows ongoing workout progress";
             int importance = NotificationManager.IMPORTANCE_LOW; // Use LOW importance for dismissible notifications
@@ -209,11 +264,13 @@ public class WorkoutService extends Service {
             channel.enableLights(false);
             channel.enableVibration(false);
             channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-            
+
             // Register the channel with the system
+            // Note: Cannot delete channel while foreground service is running
+            // The channel will be updated if it already exists
             if (notificationManager != null) {
                 notificationManager.createNotificationChannel(channel);
-                Log.d(LOG_TAG, "Created notification channel: " + NOTIFICATION_CHANNEL_ID);
+                Log.d(LOG_TAG, "Created/updated notification channel: " + NOTIFICATION_CHANNEL_ID);
             }
         }
     }

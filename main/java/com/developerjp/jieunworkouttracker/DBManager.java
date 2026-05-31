@@ -64,7 +64,10 @@ public class DBManager {
     public Cursor getExerciseLogProgress(List<String> ids) {
         if (ids == null || ids.isEmpty()) {
             // Return an empty cursor if no IDs are provided
-            return database.rawQuery("SELECT weight, date FROM " + DatabaseHelper.TABLE_NAME_LOGS + " WHERE 0", null);
+            return database.rawQuery(
+                    "SELECT weight, date, set1, set2, set3, set4, set5 FROM " + DatabaseHelper.TABLE_NAME_LOGS + " WHERE 0",
+                    null
+            );
         }
 
         StringBuilder selectionBuilder = new StringBuilder(DatabaseHelper.EXERCISE_ID + " IN (");
@@ -79,8 +82,16 @@ public class DBManager {
 
         String[] selectionArgs = ids.toArray(new String[0]);
 
-        // Fix: Specify columns as separate strings in the array, not as a single string
-        String[] columns = new String[]{DatabaseHelper.WEIGHT, DatabaseHelper.DATE};
+        // Include sets so Progress can compute summary stats.
+        String[] columns = new String[]{
+                DatabaseHelper.WEIGHT,
+                DatabaseHelper.DATE,
+                DatabaseHelper.SET1,
+                DatabaseHelper.SET2,
+                DatabaseHelper.SET3,
+                DatabaseHelper.SET4,
+                DatabaseHelper.SET5
+        };
 
         try {
             return database.query(
@@ -95,7 +106,10 @@ public class DBManager {
         } catch (Exception e) {
             Log.e("DBManager", "Error in getExerciseLogProgress: " + e.getMessage());
             // Return an empty cursor in case of error
-            return database.rawQuery("SELECT weight, date FROM " + DatabaseHelper.TABLE_NAME_LOGS + " WHERE 0", null);
+            return database.rawQuery(
+                    "SELECT weight, date, set1, set2, set3, set4, set5 FROM " + DatabaseHelper.TABLE_NAME_LOGS + " WHERE 0",
+                    null
+            );
         }
     }
 
@@ -107,6 +121,20 @@ public class DBManager {
                 " ORDER BY " + DatabaseHelper.DATE + " DESC";
 
         Log.d("DBManager", "Fetching calendar events with query: " + query);
+        return database.rawQuery(query, null);
+    }
+
+    /**
+     * Returns workout activity per day (for calendar dot indicators).
+     * Counts log rows that have a recorded duration.
+     */
+    public Cursor fetchWorkoutDayCountsForCalendar() {
+        String query = "SELECT " + DatabaseHelper.DATE + ", COUNT(*) AS cnt" +
+                " FROM " + DatabaseHelper.TABLE_NAME_LOGS +
+                " WHERE " + DatabaseHelper.DURATION + " IS NOT NULL" +
+                " GROUP BY " + DatabaseHelper.DATE +
+                " ORDER BY " + DatabaseHelper.DATE + " DESC";
+        Log.d("DBManager", "Fetching calendar day counts with query: " + query);
         return database.rawQuery(query, null);
     }
 
@@ -269,8 +297,9 @@ public class DBManager {
 
                         Log.d("DBManager", "Attempting to find most recent log for exercise_id: " + exerciseId);
 
-                        // Get today's date
-                        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+                        // Get today's date in local timezone
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                        String todayDate = sdf.format(new Date());
 
                         // Query for the most recent log for this exercise today
                         Cursor recentCursor = database.rawQuery(
@@ -443,18 +472,12 @@ public class DBManager {
 
         // Only proceed if we found exercise IDs
         if (!exerciseIds.isEmpty()) {
-            // Create the confirmation dialog
-            AlertDialog.Builder builder = getBuilder(exerciseIds);
-            builder.setNegativeButton("No", (dialog1, which) -> {
-                // Do nothing
-            });
-
-            // Create the AlertDialog
-            AlertDialog confirmationDialog = builder.create();
-            // Set the custom background
-            confirmationDialog.setOnShowListener(dialogInterface -> Objects.requireNonNull(confirmationDialog.getWindow()).setBackgroundDrawableResource(R.drawable.modern_dialog_background));
-            // Show the dialog
-            confirmationDialog.show();
+            // Delete logs associated with each exercise ID
+            for (String exerciseId : exerciseIds) {
+                Log.d("DBManager", "Deleting exercise ID: " + exerciseId);
+                database.delete(DatabaseHelper.TABLE_NAME_LOGS, DatabaseHelper.EXERCISE_ID + "=?", new String[]{exerciseId});
+                database.delete(DatabaseHelper.TABLE_NAME_EXERCISES, DatabaseHelper.EXERCISE_ID + "=?", new String[]{exerciseId});
+            }
         } else {
             // No exercise IDs found - show an error
             Toast.makeText(context, "Could not find exercise to delete", Toast.LENGTH_SHORT).show();
@@ -570,15 +593,15 @@ public class DBManager {
         contentValue.put(DatabaseHelper.EXERCISE, exerciseName);
         long exerciseId = database.insert(DatabaseHelper.TABLE_NAME_EXERCISES, null, contentValue);
 
-        // Insert initial log entry
+        // Insert initial log entry with null set values and current weight
         ContentValues contentValues2 = new ContentValues();
         contentValues2.put(DatabaseHelper.EXERCISE_ID, exerciseId);
         contentValues2.put(DatabaseHelper.WORKOUT_ID, dummyWorkoutId);
-        contentValues2.put(DatabaseHelper.SET1, 5);
-        contentValues2.put(DatabaseHelper.SET2, 5);
-        contentValues2.put(DatabaseHelper.SET3, 5);
-        contentValues2.put(DatabaseHelper.SET4, 5);
-        contentValues2.put(DatabaseHelper.SET5, 5);
+        contentValues2.put(DatabaseHelper.SET1, (Integer) null);
+        contentValues2.put(DatabaseHelper.SET2, (Integer) null);
+        contentValues2.put(DatabaseHelper.SET3, (Integer) null);
+        contentValues2.put(DatabaseHelper.SET4, (Integer) null);
+        contentValues2.put(DatabaseHelper.SET5, (Integer) null);
         contentValues2.put(DatabaseHelper.WEIGHT, exerciseWeight);
 
         //Is used to put the current datetime into the LOGS table datetime field
@@ -587,6 +610,7 @@ public class DBManager {
 
         //Is used to put the current date into the LOGS table date field
         //We had to record the date by itself separate from the datetime to make querying the database easier for some of the calendar queries
+        //Use local timezone to ensure date matches user's current day
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String date = sdf.format(new Date());
         contentValues2.put(DatabaseHelper.DATE, date);
@@ -603,11 +627,11 @@ public class DBManager {
         for (String exerciseId : exerciseIds) {
             contentValues.put(DatabaseHelper.EXERCISE_ID, exerciseId);
             contentValues.put(DatabaseHelper.WORKOUT_ID, dummyWorkoutId);
-            contentValues.put(DatabaseHelper.SET1, 5);
-            contentValues.put(DatabaseHelper.SET2, 5);
-            contentValues.put(DatabaseHelper.SET3, 5);
-            contentValues.put(DatabaseHelper.SET4, 5);
-            contentValues.put(DatabaseHelper.SET5, 5);
+            contentValues.put(DatabaseHelper.SET1, (Integer) null);
+            contentValues.put(DatabaseHelper.SET2, (Integer) null);
+            contentValues.put(DatabaseHelper.SET3, (Integer) null);
+            contentValues.put(DatabaseHelper.SET4, (Integer) null);
+            contentValues.put(DatabaseHelper.SET5, (Integer) null);
 
             // Get the most recent weight for this exercise
             Cursor cursor = database.rawQuery(
@@ -633,6 +657,7 @@ public class DBManager {
             contentValues.put(DatabaseHelper.DATETIME, datetime.toString());
 
             //Is used to put the current date into the LOGS table date field
+            //Use local timezone to ensure date matches user's current day
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String date = sdf.format(new Date());
             contentValues.put(DatabaseHelper.DATE, date);
@@ -642,7 +667,8 @@ public class DBManager {
     }
 
     public Cursor getExerciseDetails(String exerciseId) {
-        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String todayDate = sdf.format(new Date());
 
         String query = "SELECT e." + DatabaseHelper.EXERCISE_ID + ", e." + DatabaseHelper.EXERCISE +
                 ", l." + DatabaseHelper.WEIGHT + ", l." + DatabaseHelper.LOG_ID +
@@ -737,7 +763,7 @@ public class DBManager {
      */
     public Cursor fetchArchivedExercises() {
         try {
-            // Use the ARCHIVE column in the EXERCISES table directly
+            // This query uses a subquery to get the latest log entry (highest log_id) for each exercise
             String query = "SELECT " +
                     "e." + DatabaseHelper.EXERCISE_ID + " AS " + DatabaseHelper.EXERCISE_ID + ", " +
                     "e." + DatabaseHelper.EXERCISE + " AS " + DatabaseHelper.EXERCISE + ", " +
@@ -931,6 +957,109 @@ public class DBManager {
 
         Log.d("DBManager", "Executing query: " + query + " with params: " + Arrays.toString(params));
         return database.rawQuery(query, params);
+    }
+
+    /**
+     * Gets the total number of completed workouts (unique dates with duration)
+     *
+     * @return Total workout count
+     */
+    public int getTotalWorkouts() {
+        String query = "SELECT COUNT(DISTINCT " + DatabaseHelper.DATE + ") as count " +
+                "FROM " + DatabaseHelper.TABLE_NAME_LOGS +
+                " WHERE " + DatabaseHelper.DURATION + " IS NOT NULL";
+        
+        Cursor cursor = database.rawQuery(query, null);
+        int count = 0;
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+        }
+        cursor.close();
+        return count;
+    }
+
+    /**
+     * Gets the total volume lifted (weight * total reps)
+     *
+     * @return Total volume in kg
+     */
+    public double getTotalVolume() {
+        String query = "SELECT SUM(" + DatabaseHelper.WEIGHT + " * (" +
+                DatabaseHelper.SET1 + " + " + DatabaseHelper.SET2 + " + " +
+                DatabaseHelper.SET3 + " + " + DatabaseHelper.SET4 + " + " + DatabaseHelper.SET5 + ")) as volume " +
+                "FROM " + DatabaseHelper.TABLE_NAME_LOGS +
+                " WHERE " + DatabaseHelper.DURATION + " IS NOT NULL";
+        
+        Cursor cursor = database.rawQuery(query, null);
+        double volume = 0.0;
+        if (cursor.moveToFirst()) {
+            volume = cursor.getDouble(0);
+        }
+        cursor.close();
+        return volume;
+    }
+
+    /**
+     * Gets the current workout streak (consecutive days with workouts)
+     *
+     * @return Current streak in days
+     */
+    public int getCurrentStreak() {
+        String query = "SELECT DISTINCT " + DatabaseHelper.DATE + " " +
+                "FROM " + DatabaseHelper.TABLE_NAME_LOGS +
+                " WHERE " + DatabaseHelper.DURATION + " IS NOT NULL " +
+                "ORDER BY " + DatabaseHelper.DATE + " DESC";
+        
+        Cursor cursor = database.rawQuery(query, null);
+        int streak = 0;
+        
+        if (cursor.moveToFirst()) {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+            java.util.Calendar calendar = java.util.Calendar.getInstance();
+            java.util.Date today = calendar.getTime();
+            
+            int index = 0;
+            do {
+                String dateStr = cursor.getString(0);
+                try {
+                    java.util.Date workoutDate = sdf.parse(dateStr);
+                    calendar.setTime(workoutDate);
+                    
+                    long diffInMillis = today.getTime() - workoutDate.getTime();
+                    long diffInDays = diffInMillis / (1000 * 60 * 60 * 24);
+                    
+                    if (diffInDays == index) {
+                        streak++;
+                        index++;
+                    } else {
+                        break;
+                    }
+                } catch (Exception e) {
+                    Log.e("DBManager", "Error parsing date for streak: " + e.getMessage());
+                }
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return streak;
+    }
+
+    /**
+     * Gets recent workout activities for the home dashboard
+     *
+     * @param limit Maximum number of recent activities to return
+     * @return Cursor with recent workout data
+     */
+    public Cursor getRecentActivities(int limit) {
+        String query = "SELECT l." + DatabaseHelper.DATE + ", " +
+                "l." + DatabaseHelper.DURATION + ", " +
+                "COUNT(DISTINCT l." + DatabaseHelper.EXERCISE_ID + ") as exercise_count " +
+                "FROM " + DatabaseHelper.TABLE_NAME_LOGS + " l " +
+                "WHERE l." + DatabaseHelper.DURATION + " IS NOT NULL " +
+                "GROUP BY l." + DatabaseHelper.DATE + " " +
+                "ORDER BY l." + DatabaseHelper.DATE + " DESC " +
+                "LIMIT " + limit;
+        
+        return database.rawQuery(query, null);
     }
 
 }

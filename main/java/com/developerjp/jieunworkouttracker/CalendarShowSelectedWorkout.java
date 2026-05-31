@@ -14,17 +14,14 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.navigation.NavigationView;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -69,7 +66,7 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
 
         //Use view stubs to programmatically change the include view at runtime
         ViewStub stub = findViewById(R.id.main_view_stub);
-        stub.setLayoutResource(R.layout.activity_exercise_list);
+        stub.setLayoutResource(R.layout.activity_main_exercise_list);
         stub.inflate();
 
         //Gets the values of the intent sent in the previous activity
@@ -83,25 +80,13 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
         initToolbar();
         initNavigationMenu();
 
-        View parent_view = findViewById(android.R.id.content);
-        View back_drop = findViewById(R.id.back_drop);
-        View lyt_add_exercise = findViewById(R.id.lyt_add_exercise);
-        View lyt_start_workout = findViewById(R.id.lyt_start_workout);
-
         //Loads the Exercise logs data using recyclerview and the custom adapter
         loadExerciseData();
 
         FloatingActionButton fab_add = findViewById(R.id.fab_add);
-        fab_add.hide();
-
-        FloatingActionButton fab_add_exercise = findViewById(R.id.fab_add_exercise);
-        FloatingActionButton fab_start_workout = findViewById(R.id.fab_start_workout);
-        CardView cv_add_exercise = findViewById(R.id.cv_add_exercise);
-        CardView cv_start_workout = findViewById(R.id.cv_start_workout);
-
-        back_drop.setVisibility(View.GONE);
-        ViewAnimation.initShowOut(lyt_add_exercise);
-        ViewAnimation.initShowOut(lyt_start_workout);
+        if (fab_add != null) {
+            fab_add.hide();
+        }
     }
 
     private void initToolbar() {
@@ -109,8 +94,6 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         assert actionBar != null;
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeButtonEnabled(true);
         actionBar.setTitle("");
 
         TextView txtTitle = findViewById(R.id.txtTitle);
@@ -122,58 +105,40 @@ public class CalendarShowSelectedWorkout extends AppCompatActivity {
     }
 
     private void initNavigationMenu() {
-        NavigationView nav_view = findViewById(R.id.nav_view);
-        final DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-            }
-        };
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
+        com.google.android.material.bottomnavigation.BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        if (bottomNavigationView != null) {
+            bottomNavigationView.setOnItemSelectedListener(item -> {
+                int itemId = item.getItemId();
+                Intent intent = null;
+                if (itemId == R.id.nav_home) {
+                    intent = new Intent(this, HomeDashboardActivity.class);
+                } else if (itemId == R.id.nav_exercises) {
+                    intent = new Intent(this, MainActivityExerciseList.class);
+                } else if (itemId == R.id.nav_workout) {
+                    // Check if there's an ongoing workout to resume
+                    if (StartWorkoutActivity.isWorkoutOngoing) {
+                        intent = new Intent(this, StartWorkoutActivity.class);
+                        intent.putExtra("ongoing_workout", true);
+                    } else {
+                        // No ongoing workout, tell user to select exercises first
+                        android.widget.Toast.makeText(this, "Please select exercises to start", android.widget.Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+                } else if (itemId == R.id.nav_progress) {
+                    intent = new Intent(this, ShowProgressActivity.class);
+                } else if (itemId == R.id.nav_settings) {
+                    intent = new Intent(this, SettingsActivity.class);
+                } else if (itemId == R.id.nav_archived) {
+                    intent = new Intent(this, ArchivedExerciseList.class);
+                }
 
-        // open drawer at start
-        //drawer.openDrawer(GravityCompat.START);
-
-        //Handles side navigation menu clicks
-        nav_view.setNavigationItemSelectedListener(item -> {
-            String itemCLicked = Objects.requireNonNull(item.getTitle()).toString();
-            Intent intent;
-
-            switch (itemCLicked) {
-
-                case "Exercises":
-                    Log.d("menu item clicked", "Exercises");
-                    //Starts the MainActivityExerciseList activity
-                    intent = new Intent(getApplicationContext(), MainActivityExerciseList.class);
+                if (intent != null) {
                     startActivity(intent);
-                    break;
-                case "Archived Exercises":
-                    Log.d("menu item clicked", "Archived Exercises");
-                    intent = new Intent(getApplicationContext(), ArchivedExerciseList.class);
-                    startActivity(intent);
-                    break;
-                case "Progress":
-                    Log.d("menu item clicked", "Progress");
-                    intent = new Intent(getApplicationContext(), ShowProgressActivity.class);
-                    startActivity(intent);
-                    break;
-                case "Calendar":
-                    Log.d("menu item clicked", "Calendar");
-                    //Starts the Calendar activity
-                    intent = new Intent(getApplicationContext(), ShowCalendarActivity.class);
-                    startActivity(intent);
-                    break;
-                case "Settings":
-                    Log.d("menu item clicked", "Settings");
-                    intent = new Intent(getApplicationContext(), ColorSchemeActivity.class);
-                    startActivity(intent);
-                    break;
-            }
-
-            drawer.closeDrawers();
-            return true;
-        });
+                    overridePendingTransition(0, 0);
+                }
+                return true;
+            });
+        }
     }
 
 
