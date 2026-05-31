@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Override background color for dark mode -->
+    <color name="colorBackground">@color/colorBackgroundDark</color>
+    
+    <!-- Override card background for dark mode -->
+    <color name="white">@color/colorSurfaceDark</color>
+    
+    <!-- Override text colors for dark mode -->
+    <color name="textOnPastel">@color/textPrimaryDarkColor</color>
+    <color name="textLightOnPastel">@color/textSecondaryDarkColor</color>
+    <color name="textPrimaryColor">@color/textPrimaryDarkColor</color>
+    <color name="textSecondaryColor">@color/textSecondaryDarkColor</color>
+</resources>
